@@ -24,8 +24,11 @@
 
 /** \class MParManager
 \ingroup lib_base
+
 Parameters Manager class. Stores and dumps all parameters used by the framework.
+
 It's a singleton class of which object can be obtained using instance() method.
+
 Paramaters mamager must be initializatied before
 MDetectorManager::initParameterContainers() is called since it checks whether
 the requested parameter containers exists.
@@ -116,11 +119,11 @@ void simplify(std::string & s)
  * \param str string
  * \return is float
  */
-bool isFloat(const string & str)
+bool isFloat(const std::string & str)
 {
     std::istringstream iss(str);
     float f;
-    iss >> noskipws >> f;
+    iss >> std::noskipws >> f;
     return iss.eof() && !iss.fail();
 }
 
@@ -164,7 +167,7 @@ MParManager::~MParManager()
  */
 bool MParManager::parseSource()
 {
-    ifstream ifs(source);
+    std::ifstream ifs(source);
     size_t length = 0;
     if (ifs)
     {
