@@ -8,7 +8,7 @@
 #include <MParContainer.h>
 #include <MParManager.h>
 #include <MParManager.cc>
-
+#include "MFTGeomPar.h"
 
 // Header file for the classes stored in the TTree if any.
 using  namespace std;
@@ -16,13 +16,13 @@ int main(int argc, char **argv) {
     TApplication theApp("App", &argc, argv);
 
 
-MParManager* a = MParManager::instance();
+	MParManager* a = MParManager::instance();
 
-a->setParamSource("parms.txt");
+	a->setParamSource("parms.txt");
 
-// a->addParameterContainer("dummy");
- a->parseSource();
-a->print();  
+	// a->addParameterContainer("dummy");
+	a->parseSource();
+//a->print();  
     cout<<"Run Finished"<<endl;
     theApp.Run();
     return 0;
