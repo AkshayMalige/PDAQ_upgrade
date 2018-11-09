@@ -17,12 +17,19 @@ int main(int argc, char **argv) {
 
 
 	MParManager* a = MParManager::instance();
+	MFTGeomPar* b;
+	MParContainer* c;
+	MPar * d;
+	a->setParamSource("params.txt");
+	//pm()->addParameterContainer("MFibersStackGeomPar",  new MFTGeomPar());
+	pm()->getParameterContainer("MFibersStackGeomPar");
 
-	a->setParamSource("parms.txt");
-
-	// a->addParameterContainer("dummy");
+	//b->getParams();
+	//c->MParContainer();
 	a->parseSource();
-//a->print();  
+
+	//a->getParameterContainer("MFibersStackGeomPar");
+	a->print();  
     cout<<"Run Finished"<<endl;
     theApp.Run();
     return 0;
