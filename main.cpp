@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 	MParManager* a = MParManager::instance();
 	MFTGeomPar* ftGeomPar = new MFTGeomPar();
 	MPar * d;
-	
+
 	a->setParamSource("ftparams.txt");
 	a->parseSource();
 	pm()->addParameterContainer("MFTPar", ftGeomPar);
@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
 	//a->getParameterContainer("MFibersStackGeomPar");
 	a->print(); 
 
-	printf("Get Modules : %d\n",ftGeomPar->getModules()); 
-
+	printf("\n\nGet Modules : %d\n",ftGeomPar->getModules()); 
+	//ftGeomPar->print();
 	//printf("AAAA:\n");
 
 	//b->print();

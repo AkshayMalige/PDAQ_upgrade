@@ -15,6 +15,7 @@
 #include "FTdef.h"
 #include <TArrayI.h>
 #include <TArrayF.h>
+#include "TArrayD.h"
 #include "TMatrixF.h"
 #include "MPar.h"
 
@@ -26,7 +27,7 @@ protected:
     struct SingleModule             ///< single module configuration
     {
         Int_t nLayers;               ///< numbre of layers
-        TArrayI nStraws; 
+        Int_t nStraws; 
         Int_t    nShortOffset;      // offset of a short straw
         Int_t    nShortWidth; 
 
@@ -55,7 +56,7 @@ public:
     /// \return number of modules
     Int_t getModules() const;
     Int_t getLayers(Int_t m) const;
-    Int_t getStraws(Int_t m, Int_t l) const;
+    Int_t getStraws(Int_t m) const;
     Int_t getShortOffset(Int_t m) const;
     Int_t getShortWidth(Int_t m) const;
     Float_t getStrawRadius(Int_t m) const;
