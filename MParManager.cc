@@ -15,7 +15,7 @@
 #include <iostream>
 #include <locale>
 #include <sstream>
-
+#include <vector>
 #include "MPar.h"
 
 #include "MParManager.h"
@@ -41,6 +41,7 @@ the requested parameter containers exists.
  *
  * \param s string
  */
+    
 static inline void ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
         return !std::isspace(ch);
@@ -185,7 +186,7 @@ bool MParManager::parseSource()
     std::string type_name;
     std::vector<std::string> values;
 
-    while(!ifs.eof())
+    while(ifs.good())
     {
         ifs.getline(cbuff, length);
 
@@ -207,7 +208,7 @@ bool MParManager::parseSource()
             {
                 pos = str.find_first_of(']', 1);
                 cont_name = str.substr(1, pos-1);
-//                 printf("Found container %s\n", cont_name.c_str());
+                printf("Found container %s\n", cont_name.c_str());
 
                 containers.insert(std::pair<std::string, MParContainer *>(cont_name, new MParContainer(cont_name)));
 

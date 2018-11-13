@@ -8,7 +8,9 @@
 #include <MParContainer.h>
 #include <MParManager.h>
 #include <MParManager.cc>
-#include "MFTGeomPar.h"
+//#include "MFTGeomPar.h"
+//#include "pFTGeomPar.h"
+#include "FTGeo.h"
 
 // Header file for the classes stored in the TTree if any.
 using  namespace std;
@@ -17,19 +19,30 @@ int main(int argc, char **argv) {
 
 
 	MParManager* a = MParManager::instance();
-	MFTGeomPar* b;
-	MParContainer* c;
+	MFTGeomPar* ftGeomPar = new MFTGeomPar();
 	MPar * d;
-	a->setParamSource("params.txt");
-	//pm()->addParameterContainer("MFibersStackGeomPar",  new MFTGeomPar());
-	pm()->getParameterContainer("MFibersStackGeomPar");
-
-	//b->getParams();
-	//c->MParContainer();
+	
+	a->setParamSource("ftparams.txt");
 	a->parseSource();
+	pm()->addParameterContainer("MFTPar", ftGeomPar);
+	d = pm()->getParameterContainer("MFTPar");
 
+	if (!ftGeomPar)
+    {
+        std::cerr << "Parameter container 'PFTGeomPar' was not obtained!" << std::endl;
+        //exit(EXIT_FAILURE);
+    }
+    else{ 
+	printf("D: %d\n", ftGeomPar);
+	}
 	//a->getParameterContainer("MFibersStackGeomPar");
-	a->print();  
+	a->print(); 
+
+	//printf("Get Modules : %d\n",ftGeomPar->getLayers(0)); 
+
+	//printf("AAAA:\n");
+
+	//b->print();
     cout<<"Run Finished"<<endl;
     theApp.Run();
     return 0;

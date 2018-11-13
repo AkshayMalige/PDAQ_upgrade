@@ -20,7 +20,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 #---Create a shared library with geneated dictionary
 #add_library(re_tab re_tab.cpp re_tab_main.cpp)
 #add_library(ntuple SHARED ntuple.cpp H2E.cpp )
-add_library(PDAQ SHARED MParManager.cc MPar.cc MParContainer.cc MFTGeomPar.cc)
+add_library(PDAQ SHARED MParManager.cc MPar.cc MParContainer.cc FTGeo.cc)
 target_link_libraries(PDAQ ${ROOT_LIBRARIES})
 
 #---Create  a main program using the library
