@@ -71,6 +71,97 @@ void MFTGeomPar::clear()
  * \param parcont pointer to container object
  * \return success
  */
+
+Int_t MFTGeomPar::getModules() const
+{
+    // return number of layers in single detector
+    return nModules;
+}
+
+Int_t MFTGeomPar::getLayers(Int_t m) const
+{
+    // return number of layers in module 'm'
+    // m -- module number
+    if (m < getModules())
+        return sm_mods[m].nLayers;
+    else
+        return -1;
+}
+
+
+bool MFTGeomPar::putParams(MParContainer* parcont) const
+{
+     if (!parcont) return 0;
+
+      Int_t total_layers = 0;
+
+    // first find total number of layers
+    for (Int_t i = 0; i < nModules; ++i)
+    {
+        total_layers += getLayers(i);
+    }  
+
+    TArrayI par_layers(nModules);
+    TArrayI par_straws(nModules);
+    TArrayI par_shorto(nModules);
+    TArrayI par_shortw(nModules);
+
+    TArrayF par_offsetX(total_layers * FWDET_STRAW_MAX_PLANES);
+    TArrayF par_offsetZ(total_layers * FWDET_STRAW_MAX_PLANES);
+
+    TArrayF par_strawR(nModules);
+    TArrayF par_strawP(nModules);
+
+    TArrayF par_layerRotation(total_layers);
+
+    Int_t cnt_layers = 0; 
+
+    for (Int_t i = 0; i < nModules; ++i)
+    {
+        // get number of layers
+        Int_t layers = getLayers(i);
+
+        // set number of layers
+        par_layers.SetAt(layers, i);
+
+        par_strawR.SetAt(getStrawRadius(i), i);
+        par_strawP.SetAt(getStrawPitch(i), i);
+
+        // iterate over layers
+        for (Int_t l = 0; l < layers; ++l)
+        {
+            for (Int_t s = 0; s < FWDET_STRAW_MAX_PLANES; ++s)
+            {
+                par_offsetZ.SetAt(getOffsetZ(i, l, s), 2*(cnt_layers+l) + s);
+                par_offsetX.SetAt(getOffsetX(i, l, s), 2*(cnt_layers+l) + s);
+            }
+
+            par_layerRotation.SetAt(getLayerRotation(i, l), cnt_layers + l);
+        }
+
+        // set number of straws in each block
+        par_straws.SetAt(getStraws(i), i);
+        // set short straws values
+        par_shorto.SetAt(getShortOffset(i), i);
+        par_shortw.SetAt(getShortWidth(i), i);
+
+        cnt_layers += layers;
+    }
+
+    l->add("nModules",       nModules);
+    l->add("nLayers",        par_layers);
+    l->add("nStraws",        par_straws);
+    l->add("nShortOffset",   par_shorto);
+    l->add("nShortWidth",    par_shortw);
+    l->add("fOffsetZ",       par_offsetZ);
+    l->add("fOffsetX",       par_offsetX);
+    l->add("fStrawRadius",   par_strawR);
+    l->add("fStrawPitch",    par_strawP);
+    l->add("fLayerRotation", par_layerRotation);
+
+}
+
+
 bool MFTGeomPar::getParams(MParContainer* parcont)
 {
 // gets the parameters from the list (read from input)
@@ -80,9 +171,12 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
     if (!parcont->fill("nModules", par_modules))
         return false;
 
-    // TArrayI par_layers(par_modules);
-    // if (!parcont->fill("nLayers", &par_layers))
-    //     return false;
+    if (mods) delete [] mods;
+    mods = new SingleModule[nModules];
+
+    TArrayI par_layers(par_modules);
+    if (!parcont->fill("nLayers", par_layers))
+        return false;
 
     // if (par_layers.GetSize() != par_modules)
     // {
@@ -235,9 +329,7 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
  * \param parcont pointer to container object
  * \return success
  */
-bool MFTGeomPar::putParams(MParContainer* parcont) const
-{
-}
+
 
 /** Print parameters
  */

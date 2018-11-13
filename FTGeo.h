@@ -53,7 +53,7 @@ public:
 
     /// Get number of modules
     /// \return number of modules
-    Int_t getModules() const { return nModules; }
+    Int_t getModules() const;
     Int_t getLayers(Int_t m) const;
     Int_t getStraws(Int_t m, Int_t l) const;
     Int_t getShortOffset(Int_t m) const;
@@ -74,7 +74,7 @@ public:
     void setOffsetZ(Int_t m, Int_t l, Int_t p, Float_t z);
     void setOffsetX(Int_t m, Int_t l, Int_t p, Float_t x);
     void setLayerRotation(Int_t m, Int_t l, Float_t r);
-    
+
 };
 
 #endif // MFIBERSSTACKGEOMPAR_H
