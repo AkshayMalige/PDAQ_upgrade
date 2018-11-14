@@ -43,6 +43,22 @@ int main(int argc, char **argv) {
 	//printf("AAAA:\n");
 
 	ftGeomPar->print();
+
+
+	// for (int i =0; i<2 ; i++)
+	// {
+	// 	for (int j =0; j<4; j++)
+	// 	{
+
+	// 		for (int k =0; k<2; k++)
+	// 		{
+	// 			cout<<"offset x : "<<ftGeomPar->getOffsetX(i,j,k)<<endl;
+
+	// 			cout<<"offset z : "<<ftGeomPar->getOffsetZ(i,j,k)<<endl;
+	// 		}
+	// 	}
+	// }
+	
     cout<<"Run Finished"<<endl;
     theApp.Run();
     return 0;

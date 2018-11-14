@@ -84,7 +84,8 @@ Int_t MFTGeomPar::getLayers(Int_t m) const
     // return number of layers in module 'm'
     // m -- module number
     if (m < getModules())
-        return sm_mods[m].nLayers;
+        //{cout<<"first layer "<<sm_mods[m].nLayers<<endl;
+        return sm_mods[m].nLayers;//}
     else
         return -1;
 }
@@ -138,7 +139,8 @@ Float_t MFTGeomPar::getOffsetX(Int_t m, Int_t l, Int_t p) const
     // l -- layer number
     // s -- sublayer number
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
-        return sm_mods[m].fOffsetX[l][p];
+        {cout<<"first offX "<< sm_mods[m].fOffsetX[l][p]<<endl;
+        return sm_mods[m].fOffsetX[l][p];}
     else
         return -1;
 }
@@ -171,7 +173,8 @@ Float_t MFTGeomPar::getOffsetZ(Int_t m, Int_t l, Int_t p) const
     // l -- layer number
     // s -- sublayer number
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
-        return sm_mods[m].fOffsetZ[l][p];
+        //{cout<<"first offset z "<<sm_mods[m].fOffsetZ[l][p]<<endl;
+        return sm_mods[m].fOffsetZ[l][p];//}
     else
         return -1;
 }
@@ -258,6 +261,8 @@ void MFTGeomPar::setOffsetZ(Int_t m, Int_t l, Int_t p, Float_t z)
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
     {
         sm_mods[m].fOffsetZ[l][p] = z;
+
+        //cout<<"check z "<<z<<endl;
     }
 }
 
@@ -541,15 +546,21 @@ void MFTGeomPar::print() const
         printf(" Straws:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             printf(" %2d", sm_mods[m].nStraws);
+
         printf("\n layrot:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             printf(" %2.0f", sm_mods[m].fLayerRotation[l]);
+
         printf("\n  off x:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].fOffsetX[l]);
+            {for (int p=0; p< FWDET_STRAW_MAX_PLANES; ++p)
+            {printf(" %2.0f", sm_mods[m].fOffsetX[l][p]);}}
+
         printf("\n  off Z:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].fOffsetZ[l]);
+            {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
+                {printf(" %2.0f", sm_mods[m].fOffsetZ[l][p]);}}
+
         printf("\n  short offset:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             printf(" %2.0f", sm_mods[m].nShortOffset);
