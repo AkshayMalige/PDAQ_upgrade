@@ -36,13 +36,13 @@ int main(int argc, char **argv) {
 	printf("D: %d\n", ftGeomPar);
 	}
 	//a->getParameterContainer("MFibersStackGeomPar");
-	a->print(); 
+	//a->print(); 
 
-	printf("\n\nGet Modules : %d\n",ftGeomPar->getLayers(0)); 
+	//printf("\n\n Layers from ->getLayers() : %d\n",ftGeomPar->getStraws(1)); 
 	//ftGeomPar->print();
 	//printf("AAAA:\n");
 
-	//b->print();
+	ftGeomPar->print();
     cout<<"Run Finished"<<endl;
     theApp.Run();
     return 0;
