@@ -563,10 +563,11 @@ void MFTGeomPar::print() const
 
         printf("\n  short offset:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].nShortOffset);
+            printf(" %2d", sm_mods[m].nShortOffset);
         printf("\n  short width:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].nShortWidth);
+            printf(" %2d", sm_mods[m].nShortWidth);
+
         printf("\n  radius:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             printf(" %2.0f", sm_mods[m].fStrawRadius);
