@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 	//a->getParameterContainer("MFibersStackGeomPar");
 	a->print(); 
 
-	printf("\n\nGet Modules : %d\n",ftGeomPar->getModules()); 
+	printf("\n\nGet Modules : %d\n",ftGeomPar->getLayers(0)); 
 	//ftGeomPar->print();
 	//printf("AAAA:\n");
 

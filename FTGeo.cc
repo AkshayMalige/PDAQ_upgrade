@@ -184,6 +184,16 @@ void MFTGeomPar::setModules(int m)
 }
 
 
+void MFTGeomPar::setLayers(Int_t m, Int_t l)
+{
+    // set number of layers, this function automatically
+    // resizes all depending arrays
+    sm_mods[m].nLayers = l;
+    sm_mods[m].fLayerRotation.Set(l);
+    sm_mods[m].fOffsetZ.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
+    sm_mods[m].fOffsetX.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
+}
+
 bool MFTGeomPar::putParams(MParContainer* parcont) const
 {
      if (!parcont) return 0;
@@ -281,6 +291,7 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
 
 
     Int_t total_layers = 0;
+    
     for (Int_t d = 0; d < par_modules; ++d)
     {
         total_layers += par_layers[d];
@@ -385,13 +396,13 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
 
      setModules(par_modules);
 
-    // for (Int_t i = 0; i < par_modules; ++i)
-    // {
+    for (Int_t i = 0; i < par_modules; ++i)
+    {
     //     // get number of layers
-    //     Int_t layers = par_layers[i];
+        Int_t layers = par_layers[i];
 
-    //     // set number of layers
-    //     setLayers(i, layers);
+        // set number of layers
+        setLayers(i, layers);
 
     //     setStrawRadius(i, par_strawRadius[i]);
     //     setStrawPitch(i, par_strawPitch[i]);
@@ -413,8 +424,8 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
     //     setShortOffset(i, par_shorto[i]);
     //     setShortWidth(i, par_shortw[i]);
 
-    //     cnt_layers += layers;
-    // }
+        cnt_layers += layers;
+    }
 
     return true;
 }

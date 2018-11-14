@@ -38,7 +38,6 @@ protected:
         TMatrixF fOffsetX;     ///< offset of the layers
 
         TArrayF fLayerRotation;     ///< layer rotation around the axis
-        TArrayF fibers_pitch;       ///< fibers pitch in a layer
     }sm_mods[FWDET_STRAW_MAX_MODULES];
 
     SingleModule * mods;            ///< params for each module
