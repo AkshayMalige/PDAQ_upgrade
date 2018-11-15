@@ -139,8 +139,7 @@ Float_t MFTGeomPar::getOffsetX(Int_t m, Int_t l, Int_t p) const
     // l -- layer number
     // s -- sublayer number
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
-        {cout<<"first offX "<< sm_mods[m].fOffsetX[l][p]<<endl;
-        return sm_mods[m].fOffsetX[l][p];}
+        return sm_mods[m].fOffsetX[l][p];
     else
         return -1;
 }
@@ -261,8 +260,6 @@ void MFTGeomPar::setOffsetZ(Int_t m, Int_t l, Int_t p, Float_t z)
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
     {
         sm_mods[m].fOffsetZ[l][p] = z;
-
-        //cout<<"check z "<<z<<endl;
     }
 }
 
@@ -500,7 +497,6 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
 
         // set number of layers
         setLayers(i, layers);
-
         setStrawRadius(i, par_strawRadius[i]);
         setStrawPitch(i, par_strawPitch[i]);
 
@@ -549,17 +545,17 @@ void MFTGeomPar::print() const
 
         printf("\n layrot:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].fLayerRotation[l]);
+            printf(" %2.f", sm_mods[m].fLayerRotation[l]);
 
         printf("\n  off x:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             {for (int p=0; p< FWDET_STRAW_MAX_PLANES; ++p)
-            {printf(" %2.0f", sm_mods[m].fOffsetX[l][p]);}}
+            {printf(" %2f", sm_mods[m].fOffsetX[l][p]);}}
 
         printf("\n  off Z:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
-                {printf(" %2.0f", sm_mods[m].fOffsetZ[l][p]);}}
+                {printf(" %2f", sm_mods[m].fOffsetZ[l][p]);}}
 
         printf("\n  short offset:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
@@ -570,10 +566,10 @@ void MFTGeomPar::print() const
 
         printf("\n  radius:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].fStrawRadius);
+            printf(" %2f", sm_mods[m].fStrawRadius);
         printf("\n  pitch:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.0f", sm_mods[m].fStrawPitch);
+            printf(" %2f", sm_mods[m].fStrawPitch);
         putchar('\n');
     }
 }
