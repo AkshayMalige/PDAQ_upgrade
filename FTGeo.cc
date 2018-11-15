@@ -550,12 +550,12 @@ void MFTGeomPar::print() const
         printf("\n  off x:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             {for (int p=0; p< FWDET_STRAW_MAX_PLANES; ++p)
-            {printf(" %2f", sm_mods[m].fOffsetX[l][p]);}}
+            {printf(" %2.3f", sm_mods[m].fOffsetX[l][p]);}}
 
         printf("\n  off Z:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
-                {printf(" %2f", sm_mods[m].fOffsetZ[l][p]);}}
+                {printf(" %2.3f", sm_mods[m].fOffsetZ[l][p]);}}
 
         printf("\n  short offset:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
@@ -566,10 +566,10 @@ void MFTGeomPar::print() const
 
         printf("\n  radius:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2f", sm_mods[m].fStrawRadius);
+            printf(" %2.2f", sm_mods[m].fStrawRadius);
         printf("\n  pitch:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2f", sm_mods[m].fStrawPitch);
+            printf(" %2.2f", sm_mods[m].fStrawPitch);
         putchar('\n');
     }
 }

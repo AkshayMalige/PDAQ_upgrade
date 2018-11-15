@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
         //exit(EXIT_FAILURE);
     }
     else{ 
-	printf("D: %d\n", ftGeomPar);
+	printf("*ftGeomPar:%d\n", ftGeomPar);
 	}
 	//a->getParameterContainer("MFibersStackGeomPar");
 	//a->print(); 
