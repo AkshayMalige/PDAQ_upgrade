@@ -8,9 +8,12 @@
 #include <MParContainer.h>
 #include <MParManager.h>
 #include <MParManager.cc>
-//#include "MFTGeomPar.h"
-//#include "pFTGeomPar.h"
 #include "FTGeo.h"
+
+
+///////////
+#include "PDAQ_RawDecoder_EMC_STT.h"
+
 
 // Header file for the classes stored in the TTree if any.
 using  namespace std;
@@ -21,6 +24,8 @@ int main(int argc, char **argv) {
 	MParManager* a = MParManager::instance();
 	MFTGeomPar* ftGeomPar = new MFTGeomPar();
 	MPar * d;
+	
+//Unpacker * u = new Unpacker();
 
 	a->setParamSource("ftparams.txt");
 	a->parseSource();
@@ -33,7 +38,7 @@ int main(int argc, char **argv) {
         //exit(EXIT_FAILURE);
     }
     else{ 
-	printf("*ftGeomPar:%d\n", ftGeomPar);
+	printf("*ftGeomPar:%i\n", ftGeomPar);
 	}
 	//a->getParameterContainer("MFibersStackGeomPar");
 	//a->print(); 
@@ -44,6 +49,7 @@ int main(int argc, char **argv) {
 
 	ftGeomPar->print();
 
+u->PDAQ_RawDecoder_EMC_STT("./20180201_run1.txt","PDAQ_Stt.root");
 
 	for (int i =0; i<2 ; i++)
 	{
