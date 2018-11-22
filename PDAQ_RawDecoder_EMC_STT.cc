@@ -1,63 +1,4 @@
-#include <fstream>
-#include <TH1F.h>
-#include <TF1.h>
-#include "TH2F.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TMath.h"
-#include <string>
-#include <cmath>
-#include <iostream>
-#include <cstdlib>
-
-#include <TBranch.h>
-#include <TBranchElement.h>
-
-#include <iostream>
-#include "TApplication.h"
-
-#include <cctype>
-#include <fstream>
-#include <sstream>
-#include <MPar.h>
-#include <MParContainer.h>
-#include <MParManager.h>
-#include <MParManager.cc>
-#include "FTGeo.h"
-
-#include "SttEvent.h"
-#include "EmcEvent.h"
-
-#include "SttDetector.h"
-
-#include "panda_subsystem.h"
-#include "panda_subsystem_stt.h"
-#include "panda_subsystem_sb.h"
-#include "panda_subsystem_emc.h"
-
-using  namespace std;
-
-
-#ifdef __MAKECINT__
-
-#pragma link C++ class vector<UInt_t>+;
-#pragma link C++ class vector<Int_t>+;
-#pragma link C++ class vector<UShort_t>+;
-#pragma link C++ class vector<UChar_t>+;
-
-#pragma link C++ class SttHit+;
-#pragma link C++ class SttEvent+;
-#pragma link C++ class SttRawHit+;
-
-#pragma link C++ class EmcHit+;
-#pragma link C++ class EmcEvent+;
-
-
-#pragma link C++ class PandaSubsystem+;
-#pragma link C++ class PandaSubsystemSTT+;
-#pragma link C++ class PandaSubsystemSB+;
-#pragma link C++ class PandaSubsystemEMC+;
-#endif
+#include "PDAQ_RawDecoder_EMC_STT.h"
 
 //===================================================================
 // Histograms
@@ -113,9 +54,6 @@ SttDetector stt_det;
 PandaSubsystemSB* sb = new PandaSubsystemSB();
 PandaSubsystemSTT* stt = new PandaSubsystemSTT();
 PandaSubsystemEMC* emc = new PandaSubsystemEMC();
-
-
-
 
 //===================================================================
 // Zero event
@@ -248,6 +186,7 @@ void PDAQ_RawDecoder_EMC_STT(char *in_file_name,char *out_file_name=0){
     }
     //---------------------------------------------------------------
 
+    cout << "In File: "<<"\t"<<in_file_name<<"\t"<<"Out File: "<<"\t"<<out_file_name<<endl;
 
 	SttEvent* stt_event = &(stt->stt_raw);
 
@@ -268,7 +207,10 @@ void PDAQ_RawDecoder_EMC_STT(char *in_file_name,char *out_file_name=0){
 	tree->Branch("SB", "PandaSubsystemSB", &sb, 64000, 2);
 	tree->Branch("STT", "PandaSubsystemSTT", &stt, 64000, 99);
 	tree->Branch("EMC", "PandaSubsystemEMC", &emc, 64000, 99);
+    } else {
+      abort();
     }
+
     //---------------------------------------------------------------
     UInt_t data4;
     Int_t Data_size;
@@ -302,6 +244,7 @@ double emc_pulser_time = 0;
 //cout<<endl;
     UInt_t N_events=0;
     while(!in_file.eof()){
+
 	n_bytes = 0;	
 	//
 	// Word 1
@@ -357,12 +300,8 @@ double emc_pulser_time = 0;
 		// Rounding off previous event
 		pd_Event_Processor();
 		if(use_tree_output) {
-
 			sb->SB_number = Event_SB_number;
-
-
 			tree->Fill();
-
 			stt_event->Clear();
 			emc_event->Clear();
 
@@ -594,6 +533,7 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 
 							for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++)
 							{
+							  //cout<<"totalNTDCHits "<<stt_event->totalNTDCHits<<"\t"<<endl;
 								if ( ((SttRawHit*)stt_event->tdc_hits->ConstructedAt(ui))->channel == channel_nr + stt_channel_offsets[tdc_id]) {
 									if ( ((SttRawHit*)stt_event->tdc_hits->ConstructedAt(ui))->leadTime == lastRise) {
 										//cout<<"Double hit :"<<endl;
@@ -617,7 +557,7 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 
 									detLoc l = stt_det.GetDetectorLocFromTDCChannel(channel_nr + stt_channel_offsets[tdc_id]);
 
-									//cout<<"CHECK  : "<<a->leadTime<<"\t"<<a->trailTime<<<<endl;
+									//cout<<"CHECK  : "<<a->leadTime<<"\t"<<a->trailTime<<"\t"<<a->channel<<endl;
 
 								}
 							}
@@ -662,23 +602,20 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 
     in_file.close();
     if(use_tree_output){ printf("writing file\n");
+        
 	tree->Write();
 	ofile->Close();
     }
     std::cout << "Total number of processed events: " << N_events << std::endl;
 }
 
-int main(int argc, char **argv) {
-    TApplication theApp("App", &argc, argv);
-
-
-	MParManager* a = MParManager::instance();
+int main(int argc, char ** argv) {
+  
+  	MParManager* a = MParManager::instance();
 	MFTGeomPar* ftGeomPar = new MFTGeomPar();
 	MPar * d;
 	
-//Unpacker * u = new Unpacker();
-
-	a->setParamSource("ftparams.txt");
+		a->setParamSource("ftparams.txt");
 	a->parseSource();
 	pm()->addParameterContainer("MFTPar", ftGeomPar);
 	d = pm()->getParameterContainer("MFTPar");
@@ -686,24 +623,16 @@ int main(int argc, char **argv) {
 	if (!ftGeomPar)
     {
         std::cerr << "Parameter container 'PFTGeomPar' was not obtained!" << std::endl;
-        //exit(EXIT_FAILURE);
     }
     else{ 
 	printf("*ftGeomPar:%i\n", ftGeomPar);
 	}
-	//a->getParameterContainer("MFibersStackGeomPar");
-	//a->print(); 
-
-	//printf("\n\n Layers from ->getLayers() : %d\n",ftGeomPar->getStraws(1)); 
-	//ftGeomPar->print();
-	//printf("AAAA:\n");
 
 	ftGeomPar->print();
+	
+	if (argc >= 3)
+		PDAQ_RawDecoder_EMC_STT(argv[1],argv[2]);
+	else return 1;
 
-	PDAQ_RawDecoder_EMC_STT("./20180201_run1.txt","PDAQ_Stt.root");
-
-    cout<<"Run Finished"<<endl;
-    theApp.Run();
-    return 0;
+	return 0;
 }
-
