@@ -23,14 +23,7 @@
 #include "EmcEvent.h"
 #include "EmcHit.h"
 
-#include <cctype>
-#include <fstream>
-#include <sstream>
-#include <MPar.h>
-#include <MParContainer.h>
-#include <MParManager.h>
-#include <MParManager.cc>
-#include "FTGeo.h"
+
 
 #include "SttDetector.h"
 

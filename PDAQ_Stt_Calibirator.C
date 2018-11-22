@@ -1,7 +1,34 @@
 #include "PDAQ_Stt_Calibirator.h"
-
+#include <MLookup.h>
+#include <MLookupContainer.h>
+#include <MLookupManager.h>
+#include <MLookupManager.cc>
                            
 using namespace std;
+
+class TestChannel : public MLookupChannel
+{
+public:
+    uint sta, lay, str, sub;
+
+    void setAddress(const char * address) {
+        sscanf(address, "%*s %*s %d %d %d %d\n", &sta, &lay, &str, &sub);
+    }
+
+    void print(const char * prefix) {
+        printf("%s %d  %d  %d  %d\n", prefix, sta, lay, str, sub);
+    }
+};
+
+class TestLookupTable : public MLookupTable {
+public:
+    TestLookupTable(const std::string & container, UInt_t addr_min, UInt_t addr_max, UInt_t channels) :
+        MLookupTable(container, addr_min, addr_max, channels) {}
+
+    MLookupChannel * initial() { return new TestChannel(); }
+};
+
+
 
 bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
 {
@@ -11,6 +38,32 @@ bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
 int PDAQ_Stt_Calibirator(void)
 {
 
+    MLookupManager* lm = MLookupManager::instance();
+    lm->setSource("lookup.txt");
+    lm->parseSource();
+    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0xe100, 0xe202, 49);
+    t->print();
+ 
+      	MParManager* a = MParManager::instance();
+	MFTGeomPar* ftGeomPar = new MFTGeomPar();
+	MPar * d;
+	
+		a->setParamSource("ftparams.txt");
+	a->parseSource();
+	pm()->addParameterContainer("MFTPar", ftGeomPar);
+	d = pm()->getParameterContainer("MFTPar");
+
+	if (!ftGeomPar)
+	{
+	    std::cerr << "Parameter container 'PFTGeomPar' was not obtained!" << std::endl;
+	}
+	else
+	{ 
+	    printf("*ftGeomPar:%i\n", ftGeomPar);
+	}
+
+	ftGeomPar->print();
+  
 PandaSubsystemSTT* STT = 0;
 //PandaSubsystemSTT* raw_stt = new PandaSubsystemSTT();
 //PandaSubsystemSTT* stt = new PandaSubsystemSTT();
@@ -134,7 +187,7 @@ SttDetector stt_det;
         {
             SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit
          
-         cout<<"^^^^^^^^^Check 2 : "<<hit->channel<<"\t"<<hit->leadTime<<"\t"<<hit->trailTime<<"\t"<<hit->tot<<"\t"<<hit->isRef<<endl;
+        // cout<<"^^^^^^^^^Check 2 : "<<hit->channel<<"\t"<<hit->leadTime<<"\t"<<hit->trailTime<<"\t"<<hit->tot<<"\t"<<hit->isRef<<endl;
    
             SttHit* cal_hit = stt_event->AddCalHit(hit->channel);
             
@@ -392,6 +445,8 @@ if (hit->tot > 0)
 
 return 0;
 }
+
+
 
 // int main(int argc, char **argv) {
 //     TApplication theApp("App", &argc, argv);

@@ -1,34 +1,6 @@
 #include "PDAQ_RawDecoder_EMC_STT.h"
 
 
-#include <MLookup.h>
-#include <MLookupContainer.h>
-#include <MLookupManager.h>
-#include <MLookupManager.cc>
-
-
-class TestChannel : public MLookupChannel
-{
-public:
-    uint sta, lay, str, sub;
-
-    void setAddress(const char * address) {
-        sscanf(address, "%*s %*s %d %d %d %d\n", &sta, &lay, &str, &sub);
-    }
-
-    void print(const char * prefix) {
-        printf("%s %d  %d  %d  %d\n", prefix, sta, lay, str, sub);
-    }
-};
-
-class TestLookupTable : public MLookupTable {
-public:
-    TestLookupTable(const std::string & container, UInt_t addr_min, UInt_t addr_max, UInt_t channels) :
-        MLookupTable(container, addr_min, addr_max, channels) {}
-
-    MLookupChannel * initial() { return new TestChannel(); }
-};
-
 //===================================================================
 // Histograms
 TH1F *h_EMC_ADC_channels_hits;
@@ -514,7 +486,6 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 				lastRise = 0;
 			}
 			else if (find_hits == false) {
-
 				if (stt_channel_offsets.find(tdc_id) != stt_channel_offsets.end()) { // decode only registered TDCs
 
 					if (((sub[i] >> 28) & 0xf) == 0x8) {  // hit marker
@@ -531,10 +502,11 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 
 						if (channel_nr == 0) { // ref time
 							refTime = time;
-
+//cout<<"check 1"<<stt_channel_offsets[tdc_id]<<endl;
 
 							SttRawHit* a = stt_event->AddHit(channel_nr + stt_channel_offsets[tdc_id]);
 							//SttHit* a = stt->stt_raw.AddHit(channel_nr + stt_channel_offsets[tdc_id]);
+							a->tdcid = tdc_id;
 							a->leadTime = time;
 							a->trailTime = 0;
 							a->isRef = true;
@@ -579,6 +551,7 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 				if (doubleHit == false) 
 				{
 									SttRawHit* a = stt_event->AddHit(channel_nr + stt_channel_offsets[tdc_id]);
+									a->tdcid = tdc_id;
 									a->leadTime = lastRise;
 									a->trailTime = (refTime - time);
 									a->tot = (a->leadTime - a->trailTime);
@@ -640,32 +613,7 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 
 int main(int argc, char ** argv) {
   
-  	MParManager* a = MParManager::instance();
-	MFTGeomPar* ftGeomPar = new MFTGeomPar();
-	MPar * d;
-	
-		a->setParamSource("ftparams.txt");
-	a->parseSource();
-	pm()->addParameterContainer("MFTPar", ftGeomPar);
-	d = pm()->getParameterContainer("MFTPar");
 
-	if (!ftGeomPar)
-	{
-	    std::cerr << "Parameter container 'PFTGeomPar' was not obtained!" << std::endl;
-	}
-	else
-	{ 
-	    printf("*ftGeomPar:%i\n", ftGeomPar);
-	}
-
-	ftGeomPar->print();
-	
-    MLookupManager* lm = MLookupManager::instance();
-    lm->setSource("lookup.txt");
-    lm->parseSource();
-
-    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0x6400, 0x64ff, 49);
-    t->print();
 	
 	
 	if (argc >= 3)

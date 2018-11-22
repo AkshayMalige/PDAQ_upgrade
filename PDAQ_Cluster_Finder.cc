@@ -237,7 +237,7 @@ Stt_Track_Event* stt_event = &(STT_TRACKS->stt_track_can);
             SttHit* cal_hit  = (SttHit*)STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt(n); // retrieve particular hit
 
 
-            int tdc_num = cal_hit->channel / 49;
+//             int tdc_num = cal_hit->channel / 49;
             // hit on reference channel
             if (cal_hit->isRef == true)
             {
@@ -540,7 +540,7 @@ for (Int_t xa=0; xa<vec_Cl_L1->size(); xa++)
 
                 vec_P0.push_back(p0);
                 vec_P1.push_back(p1);
-                Double_t extrpX = ((65 - p0) / p1);
+                //Double_t extrpX = ((65 - p0) / p1);
 
     
                 TGraph* chiY = new TGraph(vec_ClustersY.size(), clusterArrayY, clusterArrayZy);
@@ -552,8 +552,8 @@ for (Int_t xa=0; xa<vec_Cl_L1->size(); xa++)
 
                 vec_PP0.push_back(pp0);
                 vec_PP1.push_back(pp1);
-                Double_t extrpY = ((65 - pp0) / pp1);
-                Double_t sumChi = (chi_valueX + chi_valueY);
+                //Double_t extrpY = ((65 - pp0) / pp1);
+                //Double_t sumChi = (chi_valueX + chi_valueY);
 
                 //cout<<"X CHI :"<<chi_valueX<<"\t"<<"Y CHI"<<chi_valueY<<endl;
 

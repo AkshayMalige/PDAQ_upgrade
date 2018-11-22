@@ -33,6 +33,14 @@
 #include "SttEvent.h"
 #include "Stt_Cal_Event.h"
 
+#include <cctype>
+#include <fstream>
+#include <sstream>
+#include <MPar.h>
+#include <MParContainer.h>
+#include <MParManager.h>
+//#include <MParManager.cc>
+#include "FTGeo.h"
                            
 using namespace std;
 
