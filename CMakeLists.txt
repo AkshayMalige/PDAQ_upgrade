@@ -22,9 +22,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 #add_library(re_tab re_tab.cpp re_tab_main.cpp)
 #add_library(ntuple SHARED ntuple.cpp H2E.cpp )
 
-set(HDRS MParManager.h MPar.h MParContainer.h FTGeo.h SttRawHit.h SttEvent.h EmcEvent.h SttDetector.h panda_subsystem.h panda_subsystem_sb.h panda_subsystem_emc.h panda_subsystem_stt.h EmcHit.h SttHit.h panda_stt_cal.h Stt_Cal_Event.h)
+set(HDRS MParManager.h MPar.h MParContainer.h FTGeo.h SttRawHit.h SttEvent.h EmcEvent.h SttDetector.h panda_subsystem.h panda_subsystem_sb.h panda_subsystem_emc.h panda_subsystem_stt.h EmcHit.h SttHit.h panda_stt_cal.h Stt_Cal_Event.h SttTrackHit.h SttTrackEvent.h panda_stt_track.h)
 
-set(SRCS MParManager.cc MPar.cc MParContainer.cc FTGeo.cc  SttRawHit.cc SttEvent.cc EmcEvent.cc SttDetector.cc panda_subsystem.cc panda_subsystem_sb.cc panda_subsystem_emc.cc panda_subsystem_stt.cc EmcHit.cc SttHit.cc  panda_stt_cal.cc Stt_Cal_Event.cc)
+set(SRCS MParManager.cc MPar.cc MParContainer.cc FTGeo.cc  SttRawHit.cc SttEvent.cc EmcEvent.cc SttDetector.cc panda_subsystem.cc panda_subsystem_sb.cc panda_subsystem_emc.cc panda_subsystem_stt.cc EmcHit.cc SttHit.cc  panda_stt_cal.cc Stt_Cal_Event.cc
+SttTrackHit.cc SttTrackEvent.cc panda_stt_track.cc)
 
 set(CMAKE_INSTALL_LIBDIR "lib")
 ROOT_GENERATE_DICTIONARY(G__PDAQ_cc
@@ -52,3 +53,5 @@ target_link_libraries(pdaq_unpacker PDAQ ${ROOT_LIBRARIES})
 add_executable(pdaq_calibrater pdaq_calibirator.cc PDAQ_Stt_Calibirator.C)
 target_link_libraries(pdaq_calibrater PDAQ ${ROOT_LIBRARIES})
 
+add_executable(pdaq_cluster_finder PDAQ_Cluster_Finder.cc)
+target_link_libraries(pdaq_cluster_finder PDAQ ${ROOT_LIBRARIES})
