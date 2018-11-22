@@ -36,7 +36,8 @@
 //#include "MMAPTManager.h"
 
 class MParContainer;
-class MPar;
+class MPar;	
+
 
 class MParManager
 {
