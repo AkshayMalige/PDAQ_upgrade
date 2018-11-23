@@ -586,7 +586,6 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 			}
 		}
 
-
 	} else { // skip data
 	    while(n_bytes < Data_size){
 	        // Header, w1
@@ -594,8 +593,6 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 	        n_bytes += 4;
 	    }
 	}
-
-
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
@@ -611,10 +608,7 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
     std::cout << "Total number of processed events: " << N_events << std::endl;
 }
 
-int main(int argc, char ** argv) {
-  
-
-	
+int main(int argc, char ** argv) {	
 	
 	if (argc >= 3)
 		PDAQ_RawDecoder_EMC_STT(argv[1],argv[2]);

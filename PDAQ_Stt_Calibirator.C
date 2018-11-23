@@ -42,7 +42,7 @@ int PDAQ_Stt_Calibirator(void)
     lm->setSource("lookup.txt");
     lm->parseSource();
     MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0xe100, 0xe202, 49);
-    t->print();
+    //t->print();
  
       	MParManager* a = MParManager::instance();
 	MFTGeomPar* ftGeomPar = new MFTGeomPar();
@@ -188,7 +188,6 @@ SttDetector stt_det;
             SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit
          
         // cout<<"^^^^^^^^^Check 2 : "<<hit->channel<<"\t"<<hit->leadTime<<"\t"<<hit->trailTime<<"\t"<<hit->tot<<"\t"<<hit->isRef<<endl;
-   
             SttHit* cal_hit = stt_event->AddCalHit(hit->channel);
             
             
@@ -215,9 +214,7 @@ if (hit->tot > 0)
 
             int tdc_num = hit->channel / 49;
             // hit on reference channel
-            if (cal_hit->isRef == true)
-            {
-            }
+            if (cal_hit->isRef == true){}
             else
             {
                 h_STT_channelsWithoutRef->Fill(cal_hit->channel);
@@ -305,8 +302,8 @@ if (hit->tot > 0)
                 if ((vec_leadTime[je+1]->leadTime) == (vec_leadTime[je]->leadTime) && (vec_leadTime[je+1]->channel == vec_leadTime[je]->channel))
                 {
                     repeat++;
-                    printf("{ LT,l,m,c,cf=%d,%d,%2d,%2d}{ LT1,l1,m1,c1,cf1=%d,%d,%2d,%2d}", vec_leadTime[je]->layer,vec_leadTime[je]->module,vec_leadTime[je]->fee,vec_leadTime[je]->fee_channel,vec_leadTime[je+1]->layer,vec_leadTime[je+1]->module,vec_leadTime[je+1]->fee,vec_leadTime[je+1]->fee_channel);
-                    cout<<vec_leadTime[je]->leadTime<<" "<<vec_leadTime[je]->tot<<"\t"<<vec_leadTime[je+1]->leadTime<<" "<<vec_leadTime[je]->tot<<endl;    
+                    //printf("{ LT,l,m,c,cf=%d,%d,%2d,%2d}{ LT1,l1,m1,c1,cf1=%d,%d,%2d,%2d}", vec_leadTime[je]->layer,vec_leadTime[je]->module,vec_leadTime[je]->fee,vec_leadTime[je]->fee_channel,vec_leadTime[je+1]->layer,vec_leadTime[je+1]->module,vec_leadTime[je+1]->fee,vec_leadTime[je+1]->fee_channel);
+                    //cout<<vec_leadTime[je]->leadTime<<" "<<vec_leadTime[je]->tot<<"\t"<<vec_leadTime[je+1]->leadTime<<" "<<vec_leadTime[je]->tot<<endl;    
                  }
                  All_repeat++;
              }
@@ -367,7 +364,7 @@ if (hit->tot > 0)
                     a->fee_channel = vec_filterLeadTime[h]->fee_channel;
                     a->cell = vec_filterLeadTime[h]->cell;
 
-                    cout<<a->leadTime<<"\t"<<a->trailTime<<"\t"<<a->tot<<"\t"<<a->layer<<"\t"<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<a->cell<<endl;
+                    //cout<<a->leadTime<<"\t"<<a->trailTime<<"\t"<<a->tot<<"\t"<<a->layer<<"\t"<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<a->cell<<endl;
 
                     if (vec_filterLeadTime[h]->layer ==1){
                      a->x = x_offset + (((vec_filterLeadTime[h]->module)-1) * mod_width) + ((vec_filterLeadTime[h]->fee) * mod_width) - ((vec_filterLeadTime[h]->fee_channel)*ss);

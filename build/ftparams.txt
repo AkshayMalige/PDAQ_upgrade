@@ -1,0 +1,48 @@
+##############################################################################
+# Class:   HFwDetStrawGeomPar
+# Context: FwDetStrawGeometry
+##############################################################################
+[MFTPar]
+nModules:  Int_t  2
+nLayers:  Int_t \
+  2 2
+nStraws:  Int_t \
+  64 64
+nShortOffset:  Int_t \
+  0 0
+nShortWidth:  Int_t \
+  0 0
+fStrawRadius:  Float_t \
+  5.05 
+fStrawPitch:  Float_t \
+  10.14 
+fOffsetZ:  Float_t \
+  3153.048  \
+  3211.898  \
+  3390.748  \
+  3449.598  \
+  4987.688  \
+  5046.538  \
+  5225.388  \
+  5284.238 
+fOffsetX:  Float_t \
+  -403.065  \
+  -403.065 \
+  -403.065  \
+  -403.065  \
+  -563.075  \
+  -563.075  \
+  -563.075  \
+  -563.075 
+fOffsetY:  Float_t \
+  -3.065  \
+  -3.065 \
+  -3.065  \
+  -3.065  \
+  -3.075  \
+  -3.075  \
+  -3.075  \
+  -3.075 
+fLayerRotation:  Float_t \
+  0.0 90.0  \
+  0.0 90.0 

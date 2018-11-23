@@ -36,6 +36,7 @@ protected:
 
         TMatrixF fOffsetZ;     ///< offset of the first fiber in the layer
         TMatrixF fOffsetX;     ///< offset of the layers
+        TMatrixF fOffsetY;     ///< offset of the layers
 
         TArrayF fLayerRotation;     ///< layer rotation around the axis
     }sm_mods[FWDET_STRAW_MAX_MODULES];
@@ -61,6 +62,7 @@ public:
     Float_t getStrawRadius(Int_t m) const;
     Float_t getStrawPitch(Int_t m) const;
     Float_t getOffsetZ(Int_t m, Int_t l, Int_t p) const;
+    Float_t getOffsetY(Int_t m, Int_t l, Int_t p) const;
     Float_t getOffsetX(Int_t m, Int_t l, Int_t p) const;
     Float_t getLayerRotation(Int_t m, Int_t l) const;
 
@@ -72,6 +74,7 @@ public:
     void setStrawRadius(Int_t m, Float_t r);
     void setStrawPitch(Int_t m, Float_t p);
     void setOffsetZ(Int_t m, Int_t l, Int_t p, Float_t z);
+    void setOffsetY(Int_t m, Int_t l, Int_t p, Float_t x);
     void setOffsetX(Int_t m, Int_t l, Int_t p, Float_t x);
     void setLayerRotation(Int_t m, Int_t l, Float_t r);
 

@@ -57,6 +57,7 @@ void MFTGeomPar::clear()
         sm_mods[i].fStrawPitch = 0.0;
         sm_mods[i].fOffsetZ = 0.0;
         sm_mods[i].fOffsetX = 0.0;
+	sm_mods[i].fOffsetY = 0.0;
         sm_mods[i].fLayerRotation = 0;
     }
 }
@@ -179,6 +180,19 @@ Float_t MFTGeomPar::getOffsetZ(Int_t m, Int_t l, Int_t p) const
 }
 
 
+Float_t MFTGeomPar::getOffsetY(Int_t m, Int_t l, Int_t p) const
+{
+    // return Z-coordinate of the beginning of the sublayer 's' in layer 'l'
+    // m --module number
+    // l -- layer number
+    // s -- sublayer number
+    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
+        //{cout<<"first offset z "<<sm_mods[m].fOffsetZ[l][p]<<endl;
+        return sm_mods[m].fOffsetY[l][p];//}
+    else
+        return -1;
+}
+
 void MFTGeomPar::setModules(int m)
 {
     if (m <= FWDET_STRAW_MAX_MODULES)
@@ -194,6 +208,8 @@ void MFTGeomPar::setLayers(Int_t m, Int_t l)
     sm_mods[m].fLayerRotation.Set(l);
     sm_mods[m].fOffsetZ.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
     sm_mods[m].fOffsetX.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
+    sm_mods[m].fOffsetY.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
+
 }
 
 void MFTGeomPar::setStraws(Int_t m, Int_t s)
@@ -275,6 +291,17 @@ void MFTGeomPar::setOffsetX(Int_t m, Int_t l, Int_t p, Float_t x)
     }
 }
 
+void MFTGeomPar::setOffsetY(Int_t m, Int_t l, Int_t p, Float_t y)
+{
+    // set Y-coordinate of the begining of 's' sublayer in layer 'l'
+    // l -- layer number
+    // s -- sublater number
+    // y -- y-coordinate
+    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
+    {
+        sm_mods[m].fOffsetY[l][p] = y;
+    }
+}
 void MFTGeomPar::setLayerRotation(Int_t m, Int_t l, Float_t r)
 {
     // set lab transform for later 'l'
@@ -306,6 +333,7 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
 
     TArrayF par_offsetX(total_layers * FWDET_STRAW_MAX_PLANES);
     TArrayF par_offsetZ(total_layers * FWDET_STRAW_MAX_PLANES);
+    TArrayF par_offsetY(total_layers * FWDET_STRAW_MAX_PLANES);
 
     TArrayF par_strawR(nModules);
     TArrayF par_strawP(nModules);
@@ -332,6 +360,8 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
             {
                 par_offsetZ.SetAt(getOffsetZ(i, l, s), 2*(cnt_layers+l) + s);
                 par_offsetX.SetAt(getOffsetX(i, l, s), 2*(cnt_layers+l) + s);
+		par_offsetY.SetAt(getOffsetY(i, l, s), 2*(cnt_layers+l) + s);
+
             }
 
             par_layerRotation.SetAt(getLayerRotation(i, l), cnt_layers + l);
@@ -352,6 +382,7 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
     parcont->add("nShortOffset",   par_shorto);
     parcont->add("nShortWidth",    par_shortw);
     parcont->add("fOffsetZ",       par_offsetZ);
+    parcont->add("fOffsetY",       par_offsetY);
     parcont->add("fOffsetX",       par_offsetX);
     parcont->add("fStrawRadius",   par_strawR);
     parcont->add("fStrawPitch",    par_strawP);
@@ -474,6 +505,17 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
               "Array size of planeX=%d does not fit to number of planes=%d", par_offsetX.GetSize(), cnt_planes);
         return false;
     }
+    
+    TArrayF par_offsetY(cnt_planes);
+    if (!parcont->fill("fOffsetY", par_offsetY))
+        return false;
+
+    if (par_offsetY.GetSize() != cnt_planes)
+    {
+        Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
+              "Array size of planeY=%d does not fit to number of planes=%d", par_offsetY.GetSize(), cnt_planes);
+        return false;
+    }
 
     TArrayF par_layerRotation(total_layers);
     if (!parcont->fill("fLayerRotation", par_layerRotation))
@@ -507,6 +549,8 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
             {
                 setOffsetZ(i, l, s, par_offsetZ[2*(cnt_layers + l) + s]);
                 setOffsetX(i, l, s, par_offsetX[2*(cnt_layers + l) + s]);
+		setOffsetY(i, l, s, par_offsetY[2*(cnt_layers + l) + s]);
+
             }
             setLayerRotation(i, l, par_layerRotation[cnt_layers + l]);
         }
@@ -556,6 +600,11 @@ void MFTGeomPar::print() const
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
                 {printf(" %2.3f", sm_mods[m].fOffsetZ[l][p]);}}
+                
+        printf("\n  off Y:");
+        for (int l = 0; l < sm_mods[m].nLayers; ++l)
+            {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
+                {printf(" %2.3f", sm_mods[m].fOffsetY[l][p]);}}
 
         printf("\n  short offset:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)

@@ -1,5 +1,5 @@
 [MFTPar]
-nModules: Int_t 1
+nStations: Int_t 1
 nLayers: Int_t 60
 nFibers: Int_t \
  15 15 15 15 15 15 15 15 \
