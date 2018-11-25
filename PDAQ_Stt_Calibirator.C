@@ -9,15 +9,16 @@ using namespace std;
 class TestChannel : public MLookupChannel
 {
 public:
-    uint sta, lay, str, sub;
+    uint mod, lay, cell, str;
 
     void setAddress(const char * address) {
-        sscanf(address, "%*s %*s %d %d %d %d\n", &sta, &lay, &str, &sub);
+        sscanf(address, "%*s %*s %d %d %d\n", &mod, &lay, &cell, &str);
     }
 
     void print(const char * prefix) {
-        printf("%s %d  %d  %d  %d\n", prefix, sta, lay, str, sub);
+        printf("%s %d  %d  %d\n", prefix, mod, lay, cell, str);
     }
+
 };
 
 class TestLookupTable : public MLookupTable {
@@ -35,48 +36,67 @@ bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
     return (a->leadTime < b->leadTime);
 }
 
-int PDAQ_Stt_Calibirator(void)
+int get_mod(Int_t a)
 {
 
+  int b =0;
+  if ((a)%32 ==0){b = (floor((a)/32));}
+  else {b = (floor((a)/32)+1);}
+  return b;
+
+}
+
+int get_fee(Int_t a)
+{
+  int b =0;
+  int c=0;
+  if (a % 49 ==0){ c =0;}
+  else
+  {
+    if ((a)%16 ==0){b = (floor((a)/16));}
+    else {b = (floor((a)/16)+1);}
+      
+    if (b%2 == 0) {c =2;}
+    else {c = 1;}
+  }
+    return c;
+
+}
+
+int PDAQ_Stt_Calibirator(void)
+{
+  
     MLookupManager* lm = MLookupManager::instance();
     lm->setSource("lookup.txt");
-    lm->parseSource();
+    lm->parseSource();        
     MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0xe100, 0xe202, 49);
-    //t->print();
  
-      	MParManager* a = MParManager::instance();
-	MFTGeomPar* ftGeomPar = new MFTGeomPar();
-	MPar * d;
+    MParManager* a = MParManager::instance();
+    MFTGeomPar* ftGeomPar = new MFTGeomPar();
+    MPar * d;
 	
-		a->setParamSource("ftparams.txt");
-	a->parseSource();
-	pm()->addParameterContainer("MFTPar", ftGeomPar);
-	d = pm()->getParameterContainer("MFTPar");
+    a->setParamSource("ftparams.txt");
+    a->parseSource();
+    pm()->addParameterContainer("MFTPar", ftGeomPar);
+    d = pm()->getParameterContainer("MFTPar");
 
-	if (!ftGeomPar)
-	{
-	    std::cerr << "Parameter container 'PFTGeomPar' was not obtained!" << std::endl;
-	}
-	else
-	{ 
-	    printf("*ftGeomPar:%i\n", ftGeomPar);
-	}
+    if (!ftGeomPar)
+    {
+	std::cerr << "Parameter container 'PFTGeomPar' was not obtained!" << std::endl;
+    }
+    else
+    { 
+	printf("*ftGeomPar:%i\n", ftGeomPar);
+    }
 
-	ftGeomPar->print();
+    ftGeomPar->print();
+    
+    cout<<ftGeomPar->getStrawRadius(1)<<endl;
   
-PandaSubsystemSTT* STT = 0;
-//PandaSubsystemSTT* raw_stt = new PandaSubsystemSTT();
-//PandaSubsystemSTT* stt = new PandaSubsystemSTT();
-
-
-PandaSttCal* CAL = new PandaSttCal();
-
-Stt_Cal_Event* stt_event = &(CAL->stt_cal);
-//SttEvent* raw_event = &(stt->stt_raw);
-
-
-
-SttDetector stt_det;
+    PandaSubsystemSTT* STT = 0;
+    PandaSttCal* CAL = new PandaSttCal();
+    Stt_Cal_Event* stt_event = &(CAL->stt_cal);
+    SttDetector stt_det;
 
 
     TFile file("PDAQ_SttRAW.root", "READ");
@@ -131,8 +151,6 @@ SttDetector stt_det;
         double ss = 0.505;
 
 
-   //  TFile* Ttree = new TFile("Drift_Radius_test.root", "RECREATE");
-   //  TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
 
      TFile* Ttree = new TFile("PDAQ_Stt_CAL.root", "RECREATE");
      TTree* PDAQ_EMC_STT_cluster_analysis = new TTree("PDAQ_EMC_STT_cluster_analysis", "PDAQ_EMC_STT_cluster_analysis");
@@ -145,19 +163,8 @@ SttDetector stt_det;
      for (Long_t e = 0; e < nentries; e++)
     {
     	tree->GetEntry(e);
-
-    	//cout<<STT->stt_raw.totalNTDCHits<<endl;
-
-    	// for (int i = 0; i < STT->stt_raw.totalNTDCHits; i++) {
-    	// 	SttHit* hit = (SttHit*)STT->stt_raw.tdc_hits->ConstructedAt(i);
-		//cout<<hit->channel<<endl;
-
         int hitsInEvent = 0;
-
-        //bool emcCosmic = false;
-        bool sttCosmic = false;
         std::vector<SttHit*> vec_filterLeadTime;
-
         std::vector<SttHit*> vec_L1;
         std::vector<SttHit*> vec_L2;
         std::vector<SttHit*> vec_L3;
@@ -179,40 +186,65 @@ SttDetector stt_det;
         }
             PDAQ_EMC_STT_cluster_analysis->Fill();
             stt_event->CalClear();
-            //raw_event->clear();
         
         //cout<<"^^^^^^^^^Check 1 : "<<STT->stt_raw.totalNTDCHits<<endl<<endl;
 
         for (int i = 0; i < STT->stt_raw.totalNTDCHits; i++)
         {
-            SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit
-         
-        // cout<<"^^^^^^^^^Check 2 : "<<hit->channel<<"\t"<<hit->leadTime<<"\t"<<hit->trailTime<<"\t"<<hit->tot<<"\t"<<hit->isRef<<endl;
-            SttHit* cal_hit = stt_event->AddCalHit(hit->channel);
-            
-            
-            cal_hit->channel = hit->channel;
+	  
+            SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
+	    TestChannel *tc = (TestChannel*)t->getAddress(hit->tdcid, hit->new_channel);       
+	    detLoc l = stt_det.GetDetectorLocFromTDCChannel(hit->channel);
+	    
+	    int a = get_mod(tc->cell);
+	    int b = get_fee(tc->cell);
+	    
+// 	    int fe = 0;
+// 	    if (a <=16){fe =1;}
+// 	    else if (a >16 && a<33){fe=2;}
+// 	    else if (a>32 && a<49){fe=1;}
+// 	    else if (a>48 && a<65){fe=2;}
+// 	    else {fe=0;}
+	    
+	    
+	    int str =0;
+	    
+	    if ( tc->cell%49 ==0) {str =0;}
+	    else {
+	      str = (16- (tc->cell - ((32*(a -1))+(16*(b-1)))))+1;
+	    }
+    
+/*	    if (hit->channel%49){
+	    printf("New : Layer %i, Module %i, Cell %i |||| Old : Layer %i, Module %i, Cell %i\n",
+	    tc->lay,tc->mod,tc->cell,la.layer,la.module,(32 * (la.module -1)) + (16 * (la.fee -1)) + (16-(la.channel_no-1)));}	*/    
+            SttHit* cal_hit = stt_event->AddCalHit(hit->new_channel);            
             cal_hit->leadTime = hit->leadTime;
             cal_hit->trailTime = hit->trailTime;
             cal_hit->tot = hit->tot;
-            cal_hit->isRef = hit->isRef;
+            cal_hit->isRef = hit->isRef;       
+            cal_hit->layer = tc->lay;
+            cal_hit->module = get_mod(tc->cell);
+            cal_hit->fee = get_fee(tc->cell);
+            cal_hit->fee_channel = str;
+            cal_hit->cell = tc->cell;
 
-if (hit->tot > 0)
-{
- good_counter++;
- }
+// 	    cal_hit->layer = l.layer;
+//             cal_hit->module = l.module;
+//             cal_hit->fee = l.fee;
+//             cal_hit->fee_channel = l.channel_no;
+//             cal_hit->cell = (32 * (l.module -1)) + (16 * (l.fee -1)) + (16-(l.channel_no-1));
 
-            detLoc l = stt_det.GetDetectorLocFromTDCChannel(hit->channel);
-       
-            cal_hit->layer = l.layer;
-            cal_hit->module = l.module;
-            cal_hit->fee = l.fee;
-            cal_hit->fee_channel = l.channel_no;
-            cal_hit->cell = (32 * (l.module -1)) + (16 * (l.fee -1)) + (16-(l.channel_no-1));
-            
-            //cout<<"^^^^^^^^^Check 3"<<endl;
+// 	      if (hit->channel%49){
+// 	     printf("old fee : {%i, %i, %i %i}  new fee : {%i, %i, %i %i %i}\n",l.layer, l.module, l.fee, l.channel_no, tc->lay, get_mod(tc->cell), get_fee(tc->cell),str,str2 );
+// 		//cout<<l.module<<"\t"<<get_mod(tc->cell)<<"\t"<<l.fee<<"\t"<<get_fee(tc->cell)<<endl;
+// 	    }
+	    
+	    
+	    if (hit->tot > 0)
+	    {
+	    good_counter++;
+	    }
 
-            int tdc_num = hit->channel / 49;
             // hit on reference channel
             if (cal_hit->isRef == true){}
             else
@@ -349,33 +381,61 @@ if (hit->tot > 0)
             if (vec_filterLeadTime.size() > 4)
              {
 
-                sttCosmic = true;
-
                 for (Int_t h =0; h< vec_filterLeadTime.size(); h++)
                 {
                     SttHit* a = stt_event->AddCalHit(vec_filterLeadTime[h]->channel);
                     a->leadTime = vec_filterLeadTime[h]->leadTime;
                     a->trailTime = vec_filterLeadTime[h]->trailTime;
                     a->tot = vec_filterLeadTime[h]->tot;
-                   
+		    a->tdcid = vec_filterLeadTime[h]->tdcid;
                     a->layer = vec_filterLeadTime[h]->layer;
                     a->module = vec_filterLeadTime[h]->module;
                     a->fee = vec_filterLeadTime[h]->fee;
                     a->fee_channel = vec_filterLeadTime[h]->fee_channel;
                     a->cell = vec_filterLeadTime[h]->cell;
+		    
+		   // TestChannel *tx = (TestChannel*)t->getAddress(a->tdcid, a->fee_channel);     
+		    
+		    int plane =0;
+		    int stn =0;
+		    int str_act =0;
+		    
+		    if ((vec_filterLeadTime[h]->fee_channel)%2==0)
+		    {plane =1;}		
+		      else {plane =2;}
+		    if (a->layer <=2){stn =1;}
+		    else {stn =2;}
+	    
+		    if ( a->cell%49 ==0) {str_act =0;}
+		    else {
+		      str_act = (16- (a->cell - ((32*(a->module -1))+(16*(a->fee-1)))))+1;
+		    }	     
+
+  double pit =ftGeomPar->getStrawPitch(stn);
+  double rad =ftGeomPar->getStrawRadius(1);
+  double offX = ftGeomPar->getOffsetX(stn,a->layer,plane);
+  double offY =ftGeomPar->getOffsetY(stn,a->layer,plane);
+  double offZ =ftGeomPar->getOffsetZ(stn,a->layer,plane);
+//cout<<str_act<<"\t"<<rad<<endl;
 
                     //cout<<a->leadTime<<"\t"<<a->trailTime<<"\t"<<a->tot<<"\t"<<a->layer<<"\t"<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<a->cell<<endl;
 
-                    if (vec_filterLeadTime[h]->layer ==1){
-                     a->x = x_offset + (((vec_filterLeadTime[h]->module)-1) * mod_width) + ((vec_filterLeadTime[h]->fee) * mod_width) - ((vec_filterLeadTime[h]->fee_channel)*ss);
-                     a->y = 0;
+                    if (a->layer ==1){
+//                      a->x = x_offset + (((vec_filterLeadTime[h]->module)-1) * mod_width) + ((vec_filterLeadTime[h]->fee) * mod_width) - ((vec_filterLeadTime[h]->fee_channel)*ss);
+		      a->x =offX + (str_act*rad*2);
+		      a->y = 0;
 
-                         if ((vec_filterLeadTime[h]->fee_channel)%2==0){
+                         if ((a->fee_channel)%2==0){
                              a->z = 1.01;
+			     cout<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<str_act<<"\t"<<a->cell<<"\t"<<plane<<endl;
+			     printf("Old : {X %0.3f, Y %0.3f, Z %0.3f }  ||| New : {offX %0.3f, offY %0.3f, offZ %0.3f}\n",a->x,a->y,a->z,offX,offY,offZ);
+
                          }
 
                          else {
                                a->z = 0;
+			      //printf("Old : {X %0.3f, Y %0.3f, Z %0.3f }  ||| New : {offX %0.3f, offY %0.3f, offZ %0.3f}\n",a->x,a->y,a->z,offX,offY,offZ);
+
                          }
 
                     }
@@ -387,10 +447,16 @@ if (hit->tot > 0)
 
                      if ((vec_filterLeadTime[h]->fee_channel)%2==0){
                          a->z = 12.0;
+			cout<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<str_act<<"\t"<<a->cell<<"\t"<<plane<<endl;
+
+			printf("Old : {X %0.3f, Y %0.3f, Z %0.3f }  ||| New : {offX %0.3f, offY %0.3f, offZ %0.3f}\n",a->x,a->y,a->z,offX,offY,offZ);
+
                      }
 
                      else {
                            a->z = 13.01;
+			   			      printf("Old : {X %0.3f, Y %0.3f, Z %0.3f }  ||| New : {offX %0.3f, offY %0.3f, offZ %0.3f}\n",a->x,a->y,a->z,offX,offY,offZ);
+
                      }
 
                     }

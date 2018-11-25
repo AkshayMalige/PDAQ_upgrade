@@ -2,6 +2,8 @@
 #define PDAQ_RAWDECODER_EMC_STT_H
 
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <TH1F.h>
 #include <TF1.h>
 #include "TH2F.h"

@@ -1,6 +1,15 @@
 #include "PDAQ_RawDecoder_EMC_STT.h"
 
-
+template< typename T >
+std::string int_to_hex( T i )
+{
+  std::stringstream stream;
+  stream << "0x" 
+         << std::setfill ('0') << std::setw(sizeof(T)*2) 
+         << std::hex << i;
+  return stream.str();
+}
+//std::stringstream sstream;
 //===================================================================
 // Histograms
 TH1F *h_EMC_ADC_channels_hits;
@@ -506,10 +515,13 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 
 							SttRawHit* a = stt_event->AddHit(channel_nr + stt_channel_offsets[tdc_id]);
 							//SttHit* a = stt->stt_raw.AddHit(channel_nr + stt_channel_offsets[tdc_id]);
+							a->new_channel=channel_nr;
 							a->tdcid = tdc_id;
 							a->leadTime = time;
 							a->trailTime = 0;
 							a->isRef = true;
+							
+							//printf("channel_nr %i  stt_offset %i tdcid %x old_ch %i\n",channel_nr,stt_channel_offsets[tdc_id],tdc_id,(channel_nr + stt_channel_offsets[tdc_id]));
 
 							//printf("Ref R: %f on channel %d\n", a->leadTime, channel_nr + stt_channel_offsets[tdc_id]);
 						}	
@@ -551,13 +563,14 @@ if (N_events % 10000 == 0) printf("%d\n", N_events);
 				if (doubleHit == false) 
 				{
 									SttRawHit* a = stt_event->AddHit(channel_nr + stt_channel_offsets[tdc_id]);
+									a->new_channel=channel_nr;
 									a->tdcid = tdc_id;
 									a->leadTime = lastRise;
 									a->trailTime = (refTime - time);
 									a->tot = (a->leadTime - a->trailTime);
 									a->isRef = false;
+							//printf("channel_nr %i  stt_offset %i tdcid %x old_ch %i\n",channel_nr,stt_channel_offsets[tdc_id],tdc_id,(channel_nr + stt_channel_offsets[tdc_id]));
 
-									detLoc l = stt_det.GetDetectorLocFromTDCChannel(channel_nr + stt_channel_offsets[tdc_id]);
 
 									//cout<<"CHECK  : "<<a->leadTime<<"\t"<<a->trailTime<<"\t"<<a->channel<<endl;
 
