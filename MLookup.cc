@@ -35,12 +35,12 @@ parameters in the container and write to param file.
 
 void MLookupChannel::setAddress(const char* address)
 {
-    sscanf(address, "%*s %*s %d %d %d\n", &m, &l, &s);
+    sscanf(address, "%*s %*s %d %d %d %d\n", &m, &l, &s, &st);
 }
 
 void MLookupChannel::print(const char * prefix)
 {
-    printf("%s %d %d %d\n", prefix, m, l, s);
+    printf("%s %d %d %d\n", prefix, m, l, s, st);
 }
 
 MLookupBoard::MLookupBoard(UInt_t addr, UInt_t nchan) :

@@ -20,7 +20,7 @@ class MLookupTable;
 class MLookupChannel
 {
 public:
-    UInt_t m, l, s;
+    UInt_t m, l, s, st;
     virtual void setAddress(const char * address);
     virtual void print(const char * prefix = 0);
 };

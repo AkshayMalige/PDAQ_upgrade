@@ -615,10 +615,10 @@ void MFTGeomPar::print() const
 
         printf("\n  radius:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.2f", sm_mods[m].fStrawRadius);
+            printf(" %2.3f", sm_mods[m].fStrawRadius);
         printf("\n  pitch:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            printf(" %2.2f", sm_mods[m].fStrawPitch);
+            printf(" %2.3f", sm_mods[m].fStrawPitch);
         putchar('\n');
     }
 }

@@ -14,11 +14,13 @@ public:
 	// double tot;
 	double drifttime;
 	double DriftRadius;
-
+	
+	short station;
+	short plane;
 	short layer;
-	short module;
-	short fee;
-	short fee_channel;
+	//short module;
+	//short fee;
+	//short fee_channel;
 	short cell;
 
 	double x;

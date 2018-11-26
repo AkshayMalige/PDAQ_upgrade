@@ -12,13 +12,14 @@ SttHit::SttHit() {
 			// trailTime = 0;
 			// tot = 0;
 
-
+			station =0;
+			plane =0;
 			drifttime =0;
 			DriftRadius =0;
 			layer = 0;
-			module = 0;
-			fee = 0;
-			fee_channel = 0;
+			//module = 0;
+			//fee = 0;
+			//fee_channel = 0;
 			cell = 0;
 	
 			//cell2 = 0;

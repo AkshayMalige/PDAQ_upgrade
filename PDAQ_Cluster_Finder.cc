@@ -248,7 +248,7 @@ Stt_Track_Event* stt_event = &(STT_TRACKS->stt_track_can);
 
                 if (cal_hit->layer == 0)
                 {
-                    printf("ERROR: cal_hit->layer %d %d %d\n", cal_hit->layer, cal_hit->channel, cal_hit->fee);
+                    printf("ERROR: cal_hit->layer %d %d %d\n", cal_hit->layer, cal_hit->channel, cal_hit->cell);
                     continue;
                 }
 
@@ -297,7 +297,7 @@ Stt_Track_Event* stt_event = &(STT_TRACKS->stt_track_can);
             {
 
 
-                cout << "All entries  :  "<<vec_leadTime[je]->isRef<<"\t"<<" Lead Time : "<< vec_leadTime[je]->leadTime<<"\t" << " layer : "<< vec_leadTime[je]->layer<<"\t"<< "module : "<< vec_leadTime[je]->module<<"\t"<< " fee : "<< vec_leadTime[je]->fee<<"\t" << "FEE_Ch : "<< vec_leadTime[je]->fee_channel<<"\t"<<"Cell : "<<vec_leadTime[je]->cell<<endl;
+                //cout << "All entries  :  "<<vec_leadTime[je]->isRef<<"\t"<<" Lead Time : "<< vec_leadTime[je]->leadTime<<"\t" << " layer : "<< vec_leadTime[je]->layer<<"\t"<< "module : "<< vec_leadTime[je]->module<<"\t"<< " fee : "<< vec_leadTime[je]->fee<<"\t" << "FEE_Ch : "<< vec_leadTime[je]->fee_channel<<"\t"<<"Cell : "<<vec_leadTime[je]->cell<<endl;
                 if ((vec_leadTime[je+1]->leadTime) == (vec_leadTime[je]->leadTime) && (vec_leadTime[je+1]->channel == vec_leadTime[je]->channel))
                 {
                     repeat++;
@@ -356,7 +356,7 @@ Stt_Track_Event* stt_event = &(STT_TRACKS->stt_track_can);
 
                 for (int w = 0; w < vec_stthits.size(); w++)
                 {
-                    cout<<"["<<w<<"]"<<" L, M, C, F, Ch, T {"<<vec_stthits[w]->layer<<", "<<vec_stthits[w]->module<<", "<<vec_stthits[w]->cell<<", "<<vec_stthits[w]->fee<<", "<<vec_stthits[w]->fee_channel<<", "<<vec_stthits[w]->channel<<"}  "<<" X , Y , Z :{"<<vec_stthits[w]->x<<", "<<vec_stthits[w]->y<<", "<<vec_stthits[w]->z<<"}   "<<" LT DT  {"<<vec_stthits[w]->leadTime<<",  "<<vec_stthits[w]->drifttime<<"}"<<endl;
+                   // cout<<"["<<w<<"]"<<" L, M, C, F, Ch, T {"<<vec_stthits[w]->layer<<", "<<vec_stthits[w]->module<<", "<<vec_stthits[w]->cell<<", "<<vec_stthits[w]->fee<<", "<<vec_stthits[w]->fee_channel<<", "<<vec_stthits[w]->channel<<"}  "<<" X , Y , Z :{"<<vec_stthits[w]->x<<", "<<vec_stthits[w]->y<<", "<<vec_stthits[w]->z<<"}   "<<" LT DT  {"<<vec_stthits[w]->leadTime<<",  "<<vec_stthits[w]->drifttime<<"}"<<endl;
 //cout<<"Mean LT = "<<Total_LT/vec_stthits.size()<<"	TOT = "<<fabs(vec_stthits[w]->leadTime-(Total_LT/vec_stthits.size()))<<endl;
                         if (vec_stthits.size()<40)
                         {
