@@ -56,3 +56,9 @@ target_link_libraries(pdaq_calibrater PDAQ ${ROOT_LIBRARIES})
 
 add_executable(pdaq_cluster_finder PDAQ_Cluster_Finder.cc)
 target_link_libraries(pdaq_cluster_finder PDAQ ${ROOT_LIBRARIES})
+
+add_executable(pdaq_drift_cal PDAQ_Drift_Cal.C)
+target_link_libraries(pdaq_drift_cal PDAQ ${ROOT_LIBRARIES})
+
+add_executable(pdaq_spatial_resolution PDAQ_Spl_Res.C)
+target_link_libraries(pdaq_spatial_resolution PDAQ ${ROOT_LIBRARIES})

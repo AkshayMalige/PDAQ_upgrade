@@ -4,7 +4,6 @@
 #include <TObject.h>
 #include <SttHit.h>
 
-
 class SttTrackHit : public TObject {
 public:
 	// int channel;

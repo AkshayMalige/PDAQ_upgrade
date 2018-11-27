@@ -1,4 +1,4 @@
-# trbnet-address  channel  station  layer  cell  straw
+# trbnet-address  channel  station  layer  straw  cell
 [PreTest]
 [TestLookup]
 ##################################################### Layer1 #################################################

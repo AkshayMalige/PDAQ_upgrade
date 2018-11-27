@@ -11,13 +11,10 @@
 #pragma link C++ class SttEvent+;
 #pragma link C++ class EmcHit+;
 #pragma link C++ class EmcEvent+;
-
-#pragma link C++ class Stt_Cal_Event+;
-#pragma link C++ class PandaSttCal+;
-
 #pragma link C++ class SttTrackHit+;
 #pragma link C++ class Stt_Track_Event+;
-
+#pragma link C++ class Stt_Cal_Event+;
+#pragma link C++ class PandaSttCal+;
 #pragma link C++ class PandaSubsystem+;
 #pragma link C++ class PandaSubsystemEMC+;
 #pragma link C++ class PandaSubsystemSTT+;

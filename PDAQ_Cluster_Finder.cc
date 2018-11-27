@@ -209,8 +209,8 @@ Stt_Track_Event* stt_event = &(STT_TRACKS->stt_track_can);
     for (Int_t i = 0; i < iev; i++) 
     {
         tree->GetEntry(i);
-        cout << endl
-             << endl;
+//         cout << endl
+//              << endl;
 
         std::vector<SttHit*> vec_stthits;
 
@@ -248,7 +248,7 @@ Stt_Track_Event* stt_event = &(STT_TRACKS->stt_track_can);
 
                 if (cal_hit->layer == 0)
                 {
-                    printf("ERROR: cal_hit->layer %d %d %d\n", cal_hit->layer, cal_hit->channel, cal_hit->cell);
+                    //printf("ERROR: cal_hit->layer %d %d %d\n", cal_hit->layer, cal_hit->channel, cal_hit->cell);
                     continue;
                 }
 
@@ -625,7 +625,7 @@ for (Int_t xa=0; xa<vec_Cl_L1->size(); xa++)
     }
     for (Int_t cl = 0; cl < vec_All_Y.at(chi_indexY).size(); cl++)
     {
-        cout<<"       BEST  Y      "<< vec_All_Y.at(chi_indexY).at(cl)->cell<<"\t"<<smallestY<<endl;
+        //cout<<"       BEST  Y      "<< vec_All_Y.at(chi_indexY).at(cl)->cell<<"\t"<<smallestY<<endl;
         vec_tracks.push_back(vec_All_Y.at(chi_indexY).at(cl));
     }
 
@@ -661,7 +661,7 @@ vec_event.push_back(i);
 
     for (Int_t tq=0; tq<vec_tracks.size(); tq++)
     {
-        cout<<"TRACKS  : "<<vec_tracks[tq]->layer<<"\t"<<vec_tracks[tq]->cell<<"\t"<<vec_tracks[tq]->channel<<"\t"<<vec_tracks[tq]->leadTime<<"\t"<<meanTime<<"\t"<<(fabs((vec_tracks[tq]->leadTime)-meanTime))<<endl;
+        //cout<<"TRACKS  : "<<vec_tracks[tq]->layer<<"\t"<<vec_tracks[tq]->cell<<"\t"<<vec_tracks[tq]->channel<<"\t"<<vec_tracks[tq]->leadTime<<"\t"<<meanTime<<"\t"<<(fabs((vec_tracks[tq]->leadTime)-meanTime))<<endl;
 
 	vec_tracks[tq]->drifttime = (fabs((vec_tracks[tq]->leadTime)-meanTime));
      }
