@@ -22,7 +22,7 @@ public:
 	//short fee;
 	//short fee_channel;
 	short cell;
-
+	short straw;
 	double x;
 	double y;
 	double z;

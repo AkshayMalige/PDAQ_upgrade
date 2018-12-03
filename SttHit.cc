@@ -17,6 +17,7 @@ SttHit::SttHit() {
 			drifttime =0;
 			DriftRadius =0;
 			layer = 0;
+			straw = 0;
 			//module = 0;
 			//fee = 0;
 			//fee_channel = 0;

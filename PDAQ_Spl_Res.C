@@ -8,7 +8,7 @@ Bool_t PDAQ_Spl_Res(void)
  cout<<"Opened"<<endl; 
 
  
-    TFile * file = TFile::Open("Drift_Radius_test.root", "READ");
+    TFile * file = TFile::Open("Drift_Radius_test100k.root", "READ");
     TTree* tree = 0;
     file->GetObject("DR_Tree",tree);
     
@@ -28,7 +28,7 @@ Bool_t PDAQ_Spl_Res(void)
     TF1* f3 = new TF1("f3", "pol1");
     TF1* f4 = new TF1("f4", "pol1");
 
-    TFile* driftfile1 = new TFile("XYZ_Coordinates.root", "RECREATE");
+    TFile* driftfile1 = new TFile("XYZ_Coordinates100k.root", "RECREATE");
     //TFile* driftfile2 = new TFile("Y_Coordinates.root", "RECREATE");
     Double_t theta_X =0;
 
@@ -68,11 +68,11 @@ Bool_t PDAQ_Spl_Res(void)
 
     Double_t zaxis[16];
 
-    Double_t A1[100];
-    Double_t A2[100];
+    Double_t A1[200];
+    Double_t A2[200];
 
-    Double_t B1[100];
-    Double_t B2[100];
+    Double_t B1[200];
+    Double_t B2[200];
 
 
 
@@ -124,12 +124,22 @@ Bool_t PDAQ_Spl_Res(void)
         cout << endl;
         cout << "entry no. " << i << endl;
         Int_t oiv = Vec_o_test->size();
-        cout << "vecsize  :" << oiv << endl;
+        //cout << "vecsize  :" << oiv << endl;
 
         if (Vec_o_test->size() > 8) {
             cout << "SIZE GREATER THAN 8" << endl;
         }
 
+        for (int w =0; w<2; w++)
+	{
+	    for (int v=0; v< vec_dr_xaxis[0].size(); v++)
+	    {
+	      delete (vec_dr_xaxis[w][v]);
+	      delete (vec_dr_yaxis[w][v]);
+	    }
+	}
+
+        
         //vector<SttHit*> vec_hits;
         vec_hits.clear();
         vec_hits_new.clear();
@@ -140,10 +150,10 @@ Bool_t PDAQ_Spl_Res(void)
 
         Int_t oc_count = 0;
 
-//         char buff[200];
-//         sprintf(buff, "can_%d", i);
-//         TCanvas* c1 = new TCanvas(buff);
-//         sprintf(buff, "h_%d", i);
+        char buff[200];
+        sprintf(buff, "can_%d", i);
+        TCanvas* c1 = new TCanvas(buff);
+        sprintf(buff, "h_%d", i);
         int x_min = -10;
         int x_max = 90;
         int x_bins = (x_max - x_min) * 5;
@@ -190,7 +200,7 @@ Bool_t PDAQ_Spl_Res(void)
 //             //cout<<"see :"<<a->drifttime<<"\t"<<a->layer<<"\t"<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<a->x<<"\t"<<a->y<<"\t"<<a->z<<endl;
 //             /////////
 // 
-            cout << "\t" << vec_hits.size() << "\t" << vec_hits[n]->drifttime << "\t" << vec_hits[n]->x << "\t" << vec_hits[n]->y << "\t" << vec_hits[n]->z << "\t" << endl;
+            //cout << "\t" << vec_hits.size() << "\t" << vec_hits[n]->drifttime << "\t" << vec_hits[n]->x << "\t" << vec_hits[n]->y << "\t" << vec_hits[n]->z << "\t" << endl;
 //             straws->Draw("same");
 //           //  box->Draw("same");
 // 
@@ -306,6 +316,8 @@ Bool_t PDAQ_Spl_Res(void)
 
                     //cout<< "Xaxis :  "<<vec_hits[j]->layer<<"\t"<<vec_hits[j]->x<<"\t"<<vec_hits[j]->y<<"\t"<<vec_hits[j]->z<<"\t"<<vec_hits[j]->x<<"\t"<<dr1<<endl;
                     count++;
+		    
+
                  }
 
                 // Get the drift radius for the corresponding drift time for the hits having y-coordinates
@@ -346,12 +358,14 @@ Bool_t PDAQ_Spl_Res(void)
                     vec_dr_yaxis[0].push_back(new_y1);
                     vec_dr_yaxis[1].push_back(new_y2);
 
-                    yperfectmean[j] = dr2;
+                    //yperfectmean[j] = dr2;
                     //zaxis[j]= vec_hits[j]->z;
                     //cout <<"\t"<< "Yaxis :"<<vec_hits[j]->y<<vec_hits[j]->layer<<endl;
                     //<<"\t"<<vec_hits[j]->layer<<"\t"<<dr2<<endl;
 
                     count1++;
+		    //delete new_y1;
+		    //delete new_y2;
                 }
  
              }
@@ -406,7 +420,7 @@ Bool_t PDAQ_Spl_Res(void)
                 myCombination.push_back(vt);
 
                 //cout<<"}";
-                cout << "\n";
+                //cout << "\n";
 
                 //cout <<"size1 A1 :"<<(sizeof(A1))/8<<endl;
                 //cout <<"size2 A2:"<<(sizeof(A2))/8<<endl;
@@ -419,14 +433,15 @@ Bool_t PDAQ_Spl_Res(void)
 					cout << "Hello"<< " ";
 				}
 			}*/
-			cout<<"\n"<<endl;
+			//cout<<"\n"<<endl;
 			
                 TGraph* chiX = new TGraph(vt.size(), A1, A2);
-                chiX->Fit(f3);
+                chiX->Fit(f3,"q");
                 chi_value = f3->GetChisquare();
-                	cout<<"\n\nX chi value"<<chi_value<<endl;
+                	//cout<<"\nX chi value"<<chi_value<<endl;
 
                 chiX_array[co] = chi_value;
+		delete chiX;
             }
 
             //Get the index of the combination having the least chisquare.
@@ -434,7 +449,7 @@ Bool_t PDAQ_Spl_Res(void)
 
             Int_t chi_index = 0;
             for (Int_t ci = 0; ci < no_comb_x; ci++) {
-                cout << "chiSquare  :" << chiX_array[ci] << endl;
+                //cout << "chiSquare  :" << chiX_array[ci] << endl;
 
                 if (smallest > chiX_array[ci]) {
                     smallest = chiX_array[ci];
@@ -444,15 +459,15 @@ Bool_t PDAQ_Spl_Res(void)
 
             Double_t Ex[50];
 
-            cout << "\n\n"
-                 << "BEST COMBINATION  :";
+            //cout << "\n\n"
+              //   << "BEST COMBINATION  :";
             for (Int_t gdd = 0; gdd < count; gdd++) {
-                cout << "\t " << myCombination.at(chi_index).at(gdd) << " ";
+                //cout << "\t " << myCombination.at(chi_index).at(gdd) << " ";
                 Ex[gdd]=myCombination.at(chi_index).at(gdd);
             }
-            cout << "\n\n\n" << endl;
+            //cout << "\n\n\n" << endl;
 
-            cout << "\n SMALLEST ChiSquar  :" << smallest << "(" << chi_index << ")" << endl;
+           // cout << "\n SMALLEST ChiSquar  :" << smallest << "(" << chi_index << ")" << endl;
 
             for (Int_t coo = 0; coo < count; coo++) {
              	int bit_idx = (1 << coo);
@@ -463,9 +478,9 @@ Bool_t PDAQ_Spl_Res(void)
             }
              //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            for (Int_t cdf = 0; cdf < vec_hits_new.size(); cdf++) {
-                cout << "  XX  :" << strawX[cdf] << "  ZZ  :" << strawZ[cdf] << endl;
-            }
+//             for (Int_t cdf = 0; cdf < vec_hits_new.size(); cdf++) {
+//                 cout << "  XX  :" << strawX[cdf] << "  ZZ  :" << strawZ[cdf] << endl;
+//             }
 
 
             //Plot X vs Z coordinate and fit the points
@@ -496,13 +511,13 @@ Bool_t PDAQ_Spl_Res(void)
                 //xfit1->SetLineColor(kRed-10);
                 //xfit1->SetLineWidth(2);
 
-                xfit->Fit(f1);
+                xfit->Fit(f1,"q");
 
                 f1 = xfit->GetFunction("f1");
                 Double_t p0 = f1->GetParameter(0);
                 Double_t p1 = f1->GetParameter(1);
                 theta_X = atan (p1);
-                cout<< " THETA X  : "<< theta_X <<endl;
+                //cout<< " THETA X  : "<< theta_X <<endl;
         		//emcX_arry[i] = (70 - p0) / p1;
         		vec_emcX.push_back((70 - p0) / p1);
 
@@ -510,7 +525,7 @@ Bool_t PDAQ_Spl_Res(void)
 
                     xperfect3[k] = (A2[k] - p0) / p1;
 
-                    cout << "SPACE X  :" << fabs(A1[k] - xperfect3[k]) << endl;
+                    //cout << "SPACE X  :" << fabs(A1[k] - xperfect3[k]) << endl;
 
                     dSlope0 = -(1/p1);
                     dConst0 = vec_strawZx[k]+(vec_strawX[k]/p1);
@@ -526,8 +541,9 @@ Bool_t PDAQ_Spl_Res(void)
 
 
                 }
-                cout << "\n\n" << endl;
+                //cout << "\n\n" << endl;
             }
+            
 
             ///////////////////////////////////////////////////////////////////////////////////
             //COMBINATIONS to get least Y ChiSquar2############################################
@@ -564,30 +580,32 @@ Bool_t PDAQ_Spl_Res(void)
                 myCombination1.push_back(vt1);
 
                 //cout<<"}";
-                cout << "\n";
+                //cout << "\n";
 
-                cout << "size1 B1 :" << (sizeof(B1)) / 8 << endl;
-                cout << "size2 B2:" << (sizeof(B2)) / 8 << endl;
+                //cout << "size1 B1 :" << (sizeof(B1)) / 8 << endl;
+                //cout << "size2 B2:" << (sizeof(B2)) / 8 << endl;
 //                cout << "size3 yperfect2:" << (sizeof(yperfect2)) / 8 << endl;
 
-                for (Int_t coooq = 0; coooq < total_pairs; coooq++) {
-                    cout << "\t\t" << B1[coooq] << "\t";
-                }
-                cout << "\n" << endl;
+//                 for (Int_t coooq = 0; coooq < total_pairs; coooq++) {
+//                     cout << "\t\t" << B1[coooq] << "\t";
+//                 }
+                //cout << "\n" << endl;
 
                 TGraph* chiY = new TGraph(vt1.size(), B1, B2);
-                chiY->Fit(f4);
+                chiY->Fit(f4,"q");
                 chi_value1 = f4->GetChisquare();
                 //	cout<<"\n\n@#$@#$@#$@#$@#$"<<chi_value<<endl;
 
                 chiY_array[co] = chi_value1;
+		
+		delete chiY;
             }
 
             Double_t smallest1 = chiY_array[0];
 
 			Int_t chi_index1 = 0;
             for (Int_t ciq = 0; ciq < no_comb_y; ciq++) {
-                cout << "chiSquareY  :" << chiY_array[ciq] << endl;
+                //cout << "chiSquareY  :" << chiY_array[ciq] << endl;
 
                 if (smallest1 > chiY_array[ciq]) {
                     smallest1 = chiY_array[ciq];
@@ -597,15 +615,15 @@ Bool_t PDAQ_Spl_Res(void)
 
             Double_t Why[50];
 
-            cout << "\n\n"
-                 << "BEST COMBINATION 2 :";
+//             cout << "\n"
+//                  << "BEST COMBINATION 2 :";
             for (Int_t gddq = 0; gddq < count1; gddq++) {
-                cout << "\t " << myCombination1.at(chi_index1).at(gddq) << " ";
+                //cout << "\t " << myCombination1.at(chi_index1).at(gddq) << " ";
                 Why[gddq]=myCombination1.at(chi_index1).at(gddq);
             }
-            cout << "\n\n\n" << endl;
+            //cout << "\n\n\n" << endl;
 
-            cout << "\n SMALLEST ChiSquar 2 :" << smallest1 << "(" << chi_index1 << ")" << endl;
+            //cout << "\n SMALLEST ChiSquar 2 :" << smallest1 << "(" << chi_index1 << ")" << endl;
 
            for (Int_t coo = 0; coo < count1; coo++) {
              	int bit_idx = (1 << coo);
@@ -639,7 +657,7 @@ Bool_t PDAQ_Spl_Res(void)
                 yfit1->SetMarkerColor(kBlue + 2);
                 yfit1->SetLineColor(0);
 
-                yfit->Fit(f2);
+                yfit->Fit(f2,"q");
 
                 f2 = yfit->GetFunction("f2");
                 Double_t pp0 = f2->GetParameter(0);
@@ -654,7 +672,7 @@ Bool_t PDAQ_Spl_Res(void)
                 for (Int_t kk = 0; kk < count1; kk++) {
 
                     yperfect3[kk] = (B2[kk] - pp0) / pp1;
-                    cout << "SPACE Y  :" << fabs(B1[kk] - yperfect3[kk]) << endl;
+                    //cout << "SPACE Y  :" << fabs(B1[kk] - yperfect3[kk]) << endl;
                    // hy->Fill(fabs(B1[kk] - yperfect3[kk]));
 
                    // cout << "Double Check Y :"<< vec_strawY[kk]<<endl;
@@ -669,7 +687,7 @@ Bool_t PDAQ_Spl_Res(void)
 
                      hy -> Fill(Y_short);
 
-                    cout << "Y Real Check  :  " << vec_strawY[kk] << "\t" << vec_strawZy[kk] <<"\t" << Y_perpX <<"\t" <<Y_perpY<<"\t PERP : "<<Y_short << endl;
+                    //cout << "Y Real Check  :  " << vec_strawY[kk] << "\t" << vec_strawZy[kk] <<"\t" << Y_perpX <<"\t" <<Y_perpY<<"\t PERP : "<<Y_short << endl;
                 }
             }
 
@@ -695,8 +713,14 @@ Bool_t PDAQ_Spl_Res(void)
 //       //  emcX_arry[i] = emcX;
 //        // emcY_arry[i] = emcY; 
 // 
-// 
+// 		
          }
+         
+         for (int s=0; s< vec_hits.size(); s++)
+	 {
+	   delete (vec_hits[s]);
+	   
+	}
 // 
 //       // cout << "\n\nEMC COORDINATES : "<< emcX << "  -  "<< emcY<< endl;
 //  
@@ -708,16 +732,17 @@ Bool_t PDAQ_Spl_Res(void)
 
 
     }
-    Double_t emcX_arry[500];
-    Double_t emcY_arry[500];
+    Double_t emcX_arry[vec_emcX.size()];
+    Double_t emcY_arry[vec_emcX.size()];
     cout << "all driftradius   :" << vec_driftradius.size() << endl;
-    
+    cout<<"check0"<<endl;
+    //cout<<"vec_emcX size :"<<vec_emcX.size()<<endl;
     for ( Int_t ev=0; ev< vec_emcX.size(); ev++)
     {
 emcX_arry[ev] = vec_emcX[ev];
 emcY_arry[ev] = vec_emcY[ev];
     }
-         cout << "\n\n\n SIZES   :   " << vec_emcX.size()<< "  -  "<< vec_emcX.size()<<endl;
+         //cout << "\n\n SIZES   :   " << vec_emcX.size()<< "  -  "<< vec_emcX.size()<<endl;
      	// cout << "\n\n\n SIZES   :   " << emcX_arry.length<< "  -  "<< emcY_arry.length<<endl;
            /*  for ( Int_t abc = 0; abc < vec_emcX.size(); abc++)
 		    {
@@ -735,15 +760,15 @@ emcY_arry[ev] = vec_emcY[ev];
 
 cout <<"THETA SIZE : "<<vec_Xsr.size()<<"  "<<vec_Xtheta.size()<<endl;
 
-Double_t arr_Xt[500];
-Double_t arr_Xsr[500];
+Double_t arr_Xt[vec_Xtheta.size()];
+Double_t arr_Xsr[vec_Xtheta.size()];
 
-for (int tt =0; tt< 500; tt++)
+for (int tt =0; tt< vec_Xtheta.size(); tt++)
 {
 arr_Xt[tt]=vec_Xtheta[tt];
 arr_Xsr[tt]=vec_Xsr[tt];
  }
-   TGraph* theta_SR = new TGraph(500, arr_Xt, arr_Xsr);
+   TGraph* theta_SR = new TGraph(vec_Xtheta.size(), arr_Xt, arr_Xsr);
 
     theta_SR->Write("P");
     Z_value->Write();

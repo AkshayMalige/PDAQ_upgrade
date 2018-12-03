@@ -13,10 +13,10 @@ Bool_t PDAQ_Drift_Cal(void)
   PandaSttTrack* STT_TRACK = new PandaSttTrack();
   
   
-    TFile * file = TFile::Open("PDAQ_Stt_Tracks.root", "READ");
+    TFile * file = TFile::Open("PDAQ_Stt_Tracks100k.root", "READ");
 
     TTree* tree = 0;
-    file->GetObject("PDAQ_EMC_STT_cluster_analysis", tree);
+    file->GetObject("PDAQ_tree", tree);
     if (!tree) {
         std::cerr << "Tree doesn't exists" << std::endl;
         return 1;
@@ -50,7 +50,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
   
     tree->SetBranchAddress("STT_TRACKS", &STT_TRACK);
-    TFile* ftree = new TFile("Drift_Radius_test.root", "RECREATE");
+    TFile* ftree = new TFile("Drift_Radius_test100k.root", "RECREATE");
     TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
     
     DR_Tree->Branch("Vec_o_test", &vec_o_test);
@@ -69,6 +69,9 @@ Bool_t PDAQ_Drift_Cal(void)
     for (Int_t i = 0; i < iev; i++) 
     {
         tree->GetEntry(i);
+	if (i%100==0){
+	  cout<<i<<endl;
+	}
 	
 	for (int n = 0; n < STT_TRACK->stt_track_can.total_track_NTDCHits; n++)
 	{
@@ -91,7 +94,6 @@ Bool_t PDAQ_Drift_Cal(void)
       
 	    }
 	    
-	  cout<<"hey :"<<vec_o_test.size()<<endl;
  	  DR_Tree->Fill();
 	  vec_o_test.clear();
 	  vec_x.clear();
@@ -113,7 +115,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     for (int r = 0; r < vec_o_test1.size(); r++)
     {
-        if (vec_o_test1[r] <= 450)
+        if (vec_o_test1[r] <= 550)
         {
             vec_test.push_back(vec_o_test1[r]);
 	    driftTimeCounter2++;
@@ -201,6 +203,8 @@ Bool_t PDAQ_Drift_Cal(void)
 
     gDriftRadius->Write();
     DR_Tree->Write();
+    
+    return kTRUE;
     
  //////////////////// 
 }

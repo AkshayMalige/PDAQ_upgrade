@@ -1,14 +1,6 @@
 #include "PDAQ_RawDecoder_EMC_STT.h"
 
-template< typename T >
-std::string int_to_hex( T i )
-{
-  std::stringstream stream;
-  stream << "0x" 
-         << std::setfill ('0') << std::setw(sizeof(T)*2) 
-         << std::hex << i;
-  return stream.str();
-}
+
 //std::stringstream sstream;
 //===================================================================
 // Histograms
@@ -210,7 +202,7 @@ void PDAQ_RawDecoder_EMC_STT(char *in_file_name,char *out_file_name=0){
 	use_tree_output = true;
 	//
 	ofile = new TFile(out_file_name,"recreate");
-	tree = new TTree("PDAQ_EMC_STT_cluster_analysis","PDAQ_EMC_STT_cluster_analysis");
+	tree = new TTree("PDAQ_tree","PDAQ_tree");
 	//.......................
 
 	//.......................

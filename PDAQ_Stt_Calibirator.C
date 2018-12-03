@@ -42,7 +42,7 @@ int PDAQ_Stt_Calibirator(void)
     MLookupManager* lm = MLookupManager::instance();
     lm->setSource("lookup.txt");
     lm->parseSource();        
-    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0xe100, 0xe202, 49);
+    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0xe100, 0xe203, 49);
  
     MParManager* a = MParManager::instance();
     MFTGeomPar* ftGeomPar = new MFTGeomPar();
@@ -72,8 +72,8 @@ int PDAQ_Stt_Calibirator(void)
     SttDetector stt_det;
 
 
-    TFile file("PDAQ_SttRAW.root", "READ");
-    TTree* tree = (TTree*)file.Get("PDAQ_EMC_STT_cluster_analysis");
+    TFile file("RAWrun3b.root", "READ");
+    TTree* tree = (TTree*)file.Get("PDAQ_tree");
     if (!tree) {
         std::cerr << "Tree doesn't exists" << std::endl;
         return 1;
@@ -90,13 +90,13 @@ int PDAQ_Stt_Calibirator(void)
     Int_t nentries = (Int_t)tree->GetEntries();
     std::cout << nentries << "\n";
 
-    TFile* Ttree = new TFile("PDAQ_Stt_CAL.root", "RECREATE");
-    TTree* PDAQ_EMC_STT_cluster_analysis = new TTree("PDAQ_EMC_STT_cluster_analysis", "PDAQ_EMC_STT_cluster_analysis");    
-    PDAQ_EMC_STT_cluster_analysis->Branch("STT_CAL", "PandaSttCal", &CAL, 64000, 99);
+    TFile* Ttree = new TFile("PDAQ_Stt_CAL100k.root", "RECREATE");
+    TTree* PDAQ_tree = new TTree("PDAQ_tree", "PDAQ_tree");    
+    PDAQ_tree->Branch("STT_CAL", "PandaSttCal", &CAL, 64000, 99);
 
     Long_t global_cnt = 0;
 
-     for (Long_t e = 0; e < nentries; e++)
+     for (Long_t e = 0; e < 100000; e++)
     {
     	tree->GetEntry(e);
         int hitsInEvent = 0;
@@ -107,17 +107,20 @@ int PDAQ_Stt_Calibirator(void)
             printf("%ld\n", e);
         }
 
-	PDAQ_EMC_STT_cluster_analysis->Fill();
+	PDAQ_tree->Fill();
 	stt_event->CalClear();
         
         //cout<<"^^^^^^^^^totalNTDCHits : "<<STT->stt_raw.totalNTDCHits<<endl<<endl;
 
         for (int i = 0; i < STT->stt_raw.totalNTDCHits; i++)
-        {
-	  
-            SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
+        { //cout<<endl<<endl;
+	//cout<<"check0 "<<endl; 
+	//printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
+	SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
+	//printf("tdc : %x ch: %i",hit->tdcid,hit->new_channel);
+	
 	    TestChannel *tc = (TestChannel*)t->getAddress(hit->tdcid, hit->new_channel);       
-   
+	    //tc->print("   address");
             SttHit* cal_hit = stt_event->AddCalHit(hit->new_channel);  
 	    cal_hit->tdcid = hit->tdcid;
             cal_hit->leadTime = hit->leadTime;
@@ -125,7 +128,7 @@ int PDAQ_Stt_Calibirator(void)
             cal_hit->tot = hit->tot;
             cal_hit->isRef = hit->isRef;       
             cal_hit->layer = tc->lay;
-            cal_hit->cell = tc->straw;
+            cal_hit->straw = tc->straw;
 	    cal_hit->station= tc->mod;
 	    if (tc->straw%2==0){cal_hit->plane=1;}
 	    else   {cal_hit->plane = 0;} 
@@ -135,36 +138,35 @@ int PDAQ_Stt_Calibirator(void)
 	    {
 	    good_counter++;
 	    }
-	    
-	    if (cal_hit->isRef ==false)
+	    	     	   		//cout<<"check 1"<<endl;    
+
+	    if (cal_hit->isRef==false)
 	    {
+	    	     	   		//cout<<"check 2"<<endl;    
+
+	      //printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln: %i X: %.3f Y: %.3f Z: %.3f\n",
+	      //cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+
 	      double pit =ftGeomPar->getStrawPitch(cal_hit->station-1);
 	      double rad =ftGeomPar->getStrawRadius(cal_hit->station-1);
 	      double offX = ftGeomPar->getOffsetX(cal_hit->station-1,cal_hit->layer-1,cal_hit->plane);
 	      double offY =ftGeomPar->getOffsetY(cal_hit->station-1,cal_hit->layer-1,cal_hit->plane);
 	      double offZ =ftGeomPar->getOffsetZ(cal_hit->station-1,cal_hit->layer-1,cal_hit->plane);
 
-	      for (int i =1; i<65; i++)
-	      {
-		cout<< (offX + (i*rad))<<endl;
-		
-	      }
-	      
-	      cout<<"$$$$$$$$$$$$$$$$$$$$$$$$"<<endl;
-	      
+ 
 	      if (offX == 0)
 	      cal_hit->x= 0;
 	      else
-		cal_hit->x = (offX + (cal_hit->cell*rad)); 
+		cal_hit->x = (offX + (cal_hit->straw*rad)); 
 	      if (offY ==0)
 		cal_hit->y=0;
 	      else
-	      {cal_hit->y = (offY+ (cal_hit->cell*rad));}
+	      {cal_hit->y = (offY+ (cal_hit->straw*rad));}
 	      
 	      cal_hit->z = offZ; 
 	      
-	      //printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln: %i X: %.3f Y: %.3f Z: %.3f\n",
-	      //cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->cell,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+ 	      //printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln: %i X: %.3f Y: %.3f Z: %.3f\n",
+ 	      //cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
 
 	    }
 	    
@@ -174,13 +176,13 @@ int PDAQ_Stt_Calibirator(void)
 	      cal_hit->y =0;
 	      cal_hit->z =0;
 	    }
-	    	  
+ 	  
 	}
 
     }// over events
 
  
-    PDAQ_EMC_STT_cluster_analysis->Write();
+    PDAQ_tree->Write();
     cout << "Repeated entries  :"<< repeat<<"/"<<All_repeat<<endl;  
     cout << "Good Hits : "<<good_counter<<endl;
     // if (fp)
