@@ -99,7 +99,9 @@ std::vector<SttHit*>  GetPairs ( std::vector<SttHit*> vec_get_pairs ) {
 
 }
 
-Bool_t PDAQ_Cluster_Finder ( void ) {
+int PDAQ_Cluster_Finder ( char* intree, int maxEvents, char* outtree) {
+
+printf("MAX_FT_TOTAL_LAYERS  %i\nMAX_FT_LEADTIME_DIFF  %i\nMIN_FT_HITS_PER_TRACK  %i\nMAX_FT_CLUSTERFINDER_INTAKE  %i\nFT_DRIFTTIME_OFFSET  %i\n\n",MAX_FT_TOTAL_LAYERS,MAX_FT_LEADTIME_DIFF,MIN_FT_HITS_PER_TRACK,MAX_FT_CLUSTERFINDER_INTAKE,FT_DRIFTTIME_OFFSET);
 
 // PandaSttCal* CAL = new PandaSttCal();
 
@@ -110,7 +112,7 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
 
 //PandaSttCal* STT = 0;
 
-
+printf("%s\n",outtree);
     PandaSttCal* STT_CAL = new PandaSttCal();
 
 
@@ -118,14 +120,21 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
     PandaSttTrack* STT_TRACKS = new PandaSttTrack();
     Stt_Track_Event* stt_event = & ( STT_TRACKS->stt_track_can );
 
-
-    TFile file ( "PDAQ_Stt_CAL100k.root", "READ" );
-    TTree* tree = ( TTree* ) file.Get ( "PDAQ_tree" );
-    if ( !tree ) {
-        std::cerr << "Tree doesn't exists" << std::endl;
-        return 1;
+    TFile inFile(intree);
+    TTree* tree = (TTree*)inFile.Get("PDAQ_tree");
+    if (!tree)
+    {
+        std::cerr << "Tree PDAQ_tree was not found\n";
+        std::exit(1);
     }
-    tree->Print();
+    
+//     TFile file ( "PDAQ_Stt_CAL100k.root", "READ" );
+//     TTree* tree = ( TTree* ) file.Get ( "PDAQ_tree" );
+//     if ( !tree ) {
+//         std::cerr << "Tree doesn't exists" << std::endl;
+//         return 1;
+//     }
+    //tree->Print();
 
 
     std::vector<Double_t> vec_event;
@@ -141,9 +150,9 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
     std::vector<SttHit*> vec_All_tracks;
 
     tree->SetBranchAddress ( "STT_CAL", &STT_CAL );
-    tree->SetBranchAddress ( "STT_RAW", &STT_RAW );
+    //tree->SetBranchAddress ( "STT_RAW", &STT_RAW );
 
-    TFile* Ttree = new TFile ( "PDAQ_Stt_Tracks100k.root", "RECREATE" );
+    TFile* Ttree = new TFile (outtree, "RECREATE" );
     TTree* PDAQ_tree =  new TTree ( "PDAQ_tree", "PDAQ_tree" );
 
     //PDAQ_tree->Branch("STT_RAW", "PandaSubsystemSTT", &STT_RAW, 64000, 99);
@@ -170,9 +179,9 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
 
     Double_t repeat =0;
     Double_t All_repeat =0;
-    for ( int f = 0; f < 18; f++ ) {
-        h_Fee[f] = new TH1F ( TString::Format ( "h_Fee%f", f ), "h_Fee", 600, 100, 700 );
-    }
+//     for ( int f = 0; f < 18; f++ ) {
+//         h_Fee[f] = new TH1F ( TString::Format ( "h_Fee%f", f ), "h_Fee", 600, 100, 700 );
+//     }
 
     Int_t iev = ( Int_t ) tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl
@@ -180,28 +189,43 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
 
 //loop over all the vectors in the tree.
 // sleep(5);
-
-    SttHit* hitOnLayer[4][500];
+int event_counter =0;
+int All_hit_counter =0;
+int Good_hit_counter =0;
+int Layer_eq_4_counter =0;
+int vec_LT_g7_counter =0;
+int vec_LT_l250_counter =0;
+int final_counter =0;
+    
+    
+    
+    SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][500];
 
     TF1* f1 = new TF1 ( "f1", "pol1" );
     TF1* f2 = new TF1 ( "f2", "pol1" );
 
-    for ( Int_t i = 0; i < iev; i++ ) {
+    for ( Int_t i = 1; i < iev; i++ ) {
+           
+	event_counter++;
+
         tree->GetEntry ( i );
+	
+	
 //         cout << endl
 //              << endl;
 
         std::vector<SttHit*> vec_stthits;
-
+        if (i == maxEvents)
+            break;
 
         if ( i%10000 ==0 ) {
             cout << "entry no. " << i << endl;
         }
 
-        memset ( hitOnLayer, 0, 4*500*sizeof ( SttHit* ) );
-        int hitMultOnLayer[4];
+        memset ( hitOnLayer, 0, MAX_FT_TOTAL_LAYERS*500*sizeof ( SttHit* ) );
+        int hitMultOnLayer[MAX_FT_TOTAL_LAYERS];
 
-        for ( int h = 0; h < 4; h++ ) {
+        for ( int h = 0; h < MAX_FT_TOTAL_LAYERS; h++ ) {
             hitMultOnLayer[h] = 0;
         }
 
@@ -210,28 +234,34 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
         for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
 
             SttHit* cal_hit  = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
+            All_hit_counter++;
+	   // cout<<STT_CAL->stt_cal.total_cal_NTDCHits<<endl;
 
 
 //             int tdc_num = cal_hit->channel / 49;
             // hit on reference channel
             if ( cal_hit->isRef == true ) {
                 //cout<<"Reference Hit  -> "<<cal_hit->isRef<<"\t"<<cal_hit->layer<<"\t"<<cal_hit->module<<"\t"<<cal_hit->fee_channel<<"\t"<<cal_hit->straw<<endl;
-            } else {
+            } 
+            else {
 
                 if ( cal_hit->layer == 0 ) {
                     //printf("ERROR: cal_hit->layer %d %d %d\n", cal_hit->layer, cal_hit->channel, cal_hit->straw);
                     continue;
-                }
+		    }
 
                 hitOnLayer[cal_hit->layer - 1][hitMultOnLayer[cal_hit->layer - 1]] = cal_hit;
 
                 hitMultOnLayer[cal_hit->layer - 1]++;
-            }
+                Good_hit_counter++;
+
+	      
+		  }
 
         }
 
         bool good_layers = true;
-        for ( int c = 0; c < 4; c++ ) {
+        for ( int c = 0; c < MAX_FT_TOTAL_LAYERS; c++ ) {
             if ( hitMultOnLayer[c] != 1 ) {
                 good_layers = false;
                 break;
@@ -239,18 +269,21 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
         }
         int layerCounter = 0;
 
-        for ( int m = 0; m < 4; m++ ) {
+        for ( int m = 0; m < MAX_FT_TOTAL_LAYERS; m++ ) {
             if ( hitMultOnLayer[m] > 0 )
                 layerCounter++;
         }
 
-        if ( layerCounter == 4 ) {
+        if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
+	  
+              Layer_eq_4_counter++;
+
             std::vector<SttHit*> vec_leadTime;
             int filtercnt = 0;
-            int fil_max = 250;
+            int fil_max = MAX_FT_LEADTIME_DIFF;
 
 
-            for ( int l = 0; l < 4; l++ ) {
+            for ( int l = 0; l < MAX_FT_TOTAL_LAYERS; l++ ) {
                 for ( int h = 0; h < hitMultOnLayer[l]; h++ )
 
                 {
@@ -273,39 +306,85 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
 
             std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
             vec_stthits.clear();
+// cout<<"Initial :"<<vec_leadTime.size()<<"\t";
+// for (int ak=0; ak<vec_leadTime.size(); ak++) {cout<<vec_leadTime.at(ak)->leadTime<<"\t";}cout<<"\n";
 
+//             if ( vec_leadTime.size() >= MIN_FT_HITS_PER_TRACK ) {
+//                  vec_LT_g7_counter++;
+// 
+//                 for ( int v = 0; v < vec_leadTime.size(); v++ ) {
+//                     // iterate over collected and sorted hits
+//                     vec_stthits.clear();
+//                     filtercnt = 1;
+// 
+//                     SttHit* h = vec_leadTime.at ( v );
+//                     vec_stthits.push_back ( h );
+// 
+// 
+//                     for ( int vv = 0; vv < vec_leadTime.size(); vv++ ) {
+//                         // check each vs each if they fit into the window
+//                         if ( vv == v )    continue;
+//                         if ( ( fabs ( vec_leadTime[v]->leadTime - vec_leadTime[vv]->leadTime ) < fil_max ) )
+// 
+//                         {
+//                             SttHit* hh = vec_leadTime.at ( vv );
+//                             vec_stthits.push_back ( hh );
+//                             filtercnt++;
+//                             vec_LT_l250_counter++;
+// 
+//                         } else {
+//                             // in case the hit is outside the window break and start next iteration
+//                             // with the next hit
+//                             break;
+//                             vec_stthits.clear();
+// 
+//                         }
+//                     }
+//                 }
+//             }
 
-            if ( vec_leadTime.size() > 7 ) {
-
-                for ( int v = 0; v < vec_leadTime.size(); v++ ) {
-                    // iterate over collected and sorted hits
-                    vec_stthits.clear();
+            if (vec_leadTime.size()>= MIN_FT_HITS_PER_TRACK)
+            {
+                vec_LT_g7_counter++;
+                int LTcounter =0;
+                for (int v = 0; v < vec_leadTime.size()-1; v++)
+                { // iterate over collected and sorted hits
+                    //vec_filterLeadTime.clear();
                     filtercnt = 1;
-
-                    SttHit* h = vec_leadTime.at ( v );
-                    vec_stthits.push_back ( h );
-
-
-                    for ( int vv = 0; vv < vec_leadTime.size(); vv++ ) {
-                        // check each vs each if they fit into the window
-                        if ( vv == v )    continue;
-                        if ( ( fabs ( vec_leadTime[v]->leadTime - vec_leadTime[vv]->leadTime ) < fil_max ) )
-
-                        {
-                            SttHit* hh = vec_leadTime.at ( vv );
-                            vec_stthits.push_back ( hh );
-                            filtercnt++;
-                        } else {
-                            // in case the hit is outside the window break and start next iteration
-                            // with the next hit
-                            break;
-                            vec_stthits.clear();
-
-                        }
-                    }
+                    if ((fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) <= fil_max) )
+                    {
+                         LTcounter++;
+                        SttHit* h = vec_leadTime.at(v);
+                        vec_stthits.push_back(h);
+                     }
+                    // else if ((fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) > fil_max)&&LTcounter>7)
+                    //  {
+                    //      LTcounter++;
+                    //     SttHit* h = vec_leadTime.at(v+1);
+                    //     vec_filterLeadTime.push_back(h);
+                    //    }
+                    if ((v==vec_leadTime.size()-2)&&(fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) < fil_max)&&LTcounter>=7)
+                     {
+                         LTcounter++;
+                        SttHit* h = vec_leadTime.at(v+1);
+                        vec_stthits.push_back(h);
+                       }
+                    else if ((fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) > fil_max)&&LTcounter<8)
+                     {
+                       LTcounter =0;
+                       vec_stthits.clear();
+                       }
+                  
                 }
-            }
+               if (LTcounter<8){vec_stthits.clear();}
 
+
+            }	    
+	    
+	    
+	    
+// cout<<"Final :"<<vec_stthits.size()<<"\t";
+// for (int bk=0; bk<vec_stthits.size(); bk++) {cout<<vec_stthits.at(bk)->leadTime<<"\t";}cout<<"\n\n";
             //double meanTime = 0;
             std::vector<SttHit*> vec_layer1;
             std::vector<SttHit*> vec_layer2;
@@ -315,11 +394,15 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
             vec_layer2.clear();
             vec_layer3.clear();
             vec_layer4.clear();
+	    
 
             for ( int w = 0; w < vec_stthits.size(); w++ ) {
+		  
+	    if (vec_stthits.size()>4){final_counter++;}
+
                 // cout<<"["<<w<<"]"<<" L, M, C, F, Ch, T {"<<vec_stthits[w]->layer<<", "<<vec_stthits[w]->module<<", "<<vec_stthits[w]->straw<<", "<<vec_stthits[w]->fee<<", "<<vec_stthits[w]->fee_channel<<", "<<vec_stthits[w]->channel<<"}  "<<" X , Y , Z :{"<<vec_stthits[w]->x<<", "<<vec_stthits[w]->y<<", "<<vec_stthits[w]->z<<"}   "<<" LT DT  {"<<vec_stthits[w]->leadTime<<",  "<<vec_stthits[w]->drifttime<<"}"<<endl;
 //cout<<"Mean LT = "<<Total_LT/vec_stthits.size()<<"	TOT = "<<fabs(vec_stthits[w]->leadTime-(Total_LT/vec_stthits.size()))<<endl;
-                if ( vec_stthits.size() <40 ) {
+                if ( vec_stthits.size() <MAX_FT_CLUSTERFINDER_INTAKE ) {
                     if ( vec_stthits[w]->layer == 1 ) {
                         vec_layer1.push_back ( vec_stthits[w] );
                     } else if ( vec_stthits[w]->layer == 2 ) {
@@ -589,7 +672,7 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
             for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {
                 //cout<<"TRACKS  : "<<vec_tracks[tq]->layer<<"\t"<<vec_tracks[tq]->straw<<"\t"<<vec_tracks[tq]->channel<<"\t"<<vec_tracks[tq]->leadTime<<"\t"<<meanTime<<"\t"<<(fabs((vec_tracks[tq]->leadTime)-meanTime))<<endl;
 
-                vec_tracks[tq]->drifttime =  300+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
+                vec_tracks[tq]->drifttime =  FT_DRIFTTIME_OFFSET+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
             }
 
 
@@ -605,6 +688,7 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
             PDAQ_tree->Fill();
 
         }
+        //cout<<Layer_eq_4_counter<<"\t"<<i-2<<endl;
 
 
     }//End of loop over events
@@ -615,17 +699,29 @@ Bool_t PDAQ_Cluster_Finder ( void ) {
     cout<<"CGECH THE SIZE   :"<<vec_All_tracks.size() <<endl;
 
     PDAQ_tree->Write();
-    for ( int ko=0; ko<vec_event.size(); ko++ ) {
+//     for ( int ko=0; ko<vec_event.size(); ko++ ) {
+// 
+//         cout<<"EVENT : "<<vec_event[ko]<<endl;
+//     }
 
-        cout<<"EVENT : "<<vec_event[ko]<<endl;
-    }
-
+//printf("event_counter %i,All_hit_counter %i,Good_hit_counter %i,Layer_eq_4_counter %i,vec_LT_g7_counter %i,vec_LT_l250_counter %i,final_counter %i \n",event_counter,All_hit_counter,Good_hit_counter,Layer_eq_4_counter,vec_LT_g7_counter,vec_LT_l250_counter,final_counter);
+printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
 
     return 0;
 }
 
 
-int main() {
+// int main() {
+// 
+//     return PDAQ_Cluster_Finder();
+// }
 
-    return PDAQ_Cluster_Finder();
+int main ( int argc, char ** argv ) {
+
+    if ( argc >= 3 )
+        PDAQ_Cluster_Finder ( argv[1], atoi(argv[2]) , argv[3] );
+    else return 1;
+
+    return 0;
 }
+

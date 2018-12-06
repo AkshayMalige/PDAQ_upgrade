@@ -39,7 +39,7 @@ Bool_t PDAQ_Spl_Res(void)
 
     TH1F* Z_value = new TH1F("Z_value", "dummy", 5, 0, 5);
 
-    std::vector<double>* Vec_o_test =0;
+    std::vector<double>* vec_Driftradius =0;
     std::vector<double>* vec_x =0;
     std::vector<double>* vec_y=0;
     std::vector<double>* vec_z=0;
@@ -84,7 +84,7 @@ Bool_t PDAQ_Spl_Res(void)
     Int_t total_pairs = (array_length / pair_length);
     Int_t no_of_pairs = (total_pairs * total_pairs);
 
-    tree->SetBranchAddress("Vec_o_test", &Vec_o_test);
+    tree->SetBranchAddress("vec_Driftradius", &vec_Driftradius);
     tree->SetBranchAddress("vec_x", &vec_x);
     tree->SetBranchAddress("vec_y", &vec_y);
     tree->SetBranchAddress("vec_z", &vec_z);
@@ -122,11 +122,11 @@ Bool_t PDAQ_Spl_Res(void)
 
         tree->GetEntry(i);
         cout << endl;
-        cout << "entry no. " << i << endl;
-        Int_t oiv = Vec_o_test->size();
+        cout << "Track No. " << i << endl;
+        Int_t oiv = vec_Driftradius->size();
         //cout << "vecsize  :" << oiv << endl;
 
-        if (Vec_o_test->size() > 8) {
+        if (vec_Driftradius->size() > 8) {
             cout << "SIZE GREATER THAN 8" << endl;
         }
 
@@ -174,7 +174,7 @@ Bool_t PDAQ_Spl_Res(void)
         for (int n = 0; n < oiv; n++) {
             SttHit* a = new SttHit();
 
-            a->drifttime = Vec_o_test->at(n);
+            a->drifttime = vec_Driftradius->at(n);
             a->x = vec_x->at(n);
             a->y = vec_y->at(n);
             a->z = vec_z->at(n);
@@ -734,8 +734,7 @@ Bool_t PDAQ_Spl_Res(void)
     }
     Double_t emcX_arry[vec_emcX.size()];
     Double_t emcY_arry[vec_emcX.size()];
-    cout << "all driftradius   :" << vec_driftradius.size() << endl;
-    cout<<"check0"<<endl;
+    cout << "Total hits   :" << vec_driftradius.size() << endl;
     //cout<<"vec_emcX size :"<<vec_emcX.size()<<endl;
     for ( Int_t ev=0; ev< vec_emcX.size(); ev++)
     {
@@ -758,7 +757,7 @@ emcY_arry[ev] = vec_emcY[ev];
     hy->Write();
     h_theeta_X->Write();
 
-cout <<"THETA SIZE : "<<vec_Xsr.size()<<"  "<<vec_Xtheta.size()<<endl;
+//cout <<"THETA SIZE : "<<vec_Xsr.size()<<"  "<<vec_Xtheta.size()<<endl;
 
 Double_t arr_Xt[vec_Xtheta.size()];
 Double_t arr_Xsr[vec_Xtheta.size()];

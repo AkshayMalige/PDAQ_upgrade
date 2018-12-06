@@ -36,7 +36,7 @@ bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
     return (a->leadTime < b->leadTime);
 }
 
-int PDAQ_Stt_Calibirator(void)
+int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
 {
   
     MLookupManager* lm = MLookupManager::instance();
@@ -72,11 +72,20 @@ int PDAQ_Stt_Calibirator(void)
     SttDetector stt_det;
 
 
-    TFile file("RAWrun3b.root", "READ");
-    TTree* tree = (TTree*)file.Get("PDAQ_tree");
-    if (!tree) {
-        std::cerr << "Tree doesn't exists" << std::endl;
-        return 1;
+//     TFile file("Raw3b.root", "READ");
+//     TTree* tree = (TTree*)file.Get("PDAQ_tree");
+//     if (!tree) {
+//         std::cerr << "Tree doesn't exists" << std::endl;
+//         return 1;
+//     }
+    
+    
+    TFile inFile(intree);
+    TTree* tree = (TTree*)inFile.Get("PDAQ_tree");
+    if (!tree)
+    {
+        std::cerr << "Tree PDAQ_tree was not found\n";
+        std::exit(1);
     }
 
     //tree->Print();
@@ -90,13 +99,13 @@ int PDAQ_Stt_Calibirator(void)
     Int_t nentries = (Int_t)tree->GetEntries();
     std::cout << nentries << "\n";
 
-    TFile* Ttree = new TFile("PDAQ_Stt_CAL100k.root", "RECREATE");
+    TFile* Ttree = new TFile(outtree, "RECREATE");
     TTree* PDAQ_tree = new TTree("PDAQ_tree", "PDAQ_tree");    
     PDAQ_tree->Branch("STT_CAL", "PandaSttCal", &CAL, 64000, 99);
 
     Long_t global_cnt = 0;
 
-     for (Long_t e = 0; e < 100000; e++)
+     for (Long_t e = 0; e < nentries; e++)
     {
     	tree->GetEntry(e);
         int hitsInEvent = 0;
@@ -106,6 +115,9 @@ int PDAQ_Stt_Calibirator(void)
         {
             printf("%ld\n", e);
         }
+                if (e == maxEvents)
+            break;
+	    
 
 	PDAQ_tree->Fill();
 	stt_event->CalClear();
@@ -117,11 +129,16 @@ int PDAQ_Stt_Calibirator(void)
 	//cout<<"check0 "<<endl; 
 	//printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
 	SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
-	//printf("tdc : %x ch: %i",hit->tdcid,hit->new_channel);
+	//printf("tdc : %x ch: %i\n",hit->tdcid,hit->new_channel);
 	
-	    TestChannel *tc = (TestChannel*)t->getAddress(hit->tdcid, hit->new_channel);       
+// 	if ((TestChannel*)t->getAddress(hit->tdcid, hit->new_channel)){continue;}
+// 	else {
+// 	  cout<<"Bad TDC Address"<<endl;}
+	  
+	  
+	    TestChannel *tc = (TestChannel*)t->getAddress(hit->tdcid, hit->channel);       
 	    //tc->print("   address");
-            SttHit* cal_hit = stt_event->AddCalHit(hit->new_channel);  
+            SttHit* cal_hit = stt_event->AddCalHit(hit->channel);  
 	    cal_hit->tdcid = hit->tdcid;
             cal_hit->leadTime = hit->leadTime;
             cal_hit->trailTime = hit->trailTime;
@@ -187,7 +204,7 @@ int PDAQ_Stt_Calibirator(void)
     cout << "Good Hits : "<<good_counter<<endl;
     // if (fp)
     //     fclose(fp);
-
+printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
 
 return 0;
 }

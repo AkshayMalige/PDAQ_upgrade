@@ -29,14 +29,15 @@
 #include "panda_subsystem_sb.h"
 #include "panda_stt_cal.h"
 #include "panda_stt_track.h"
-
+#include "FT_filter_def.h"
 
 
 using namespace std;
 
 
 
-Bool_t PDAQ_Cluster_Finder(void);
+//Bool_t PDAQ_Cluster_Finder(void);
+int PDAQ_Cluster_Finder(char* intree, int maxEvents = 1000000000, char* outtree="PDAQ_cluster_output.root");
 
 
 #endif

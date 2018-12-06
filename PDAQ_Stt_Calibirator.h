@@ -45,6 +45,6 @@
 using namespace std;
 
 
-int PDAQ_Stt_Calibirator(void);
+int PDAQ_Stt_Calibirator(char* intree, int maxEvents = 1000000000, char* outtree="PDAQ_calibrator_tree.root");
 
 #endif
