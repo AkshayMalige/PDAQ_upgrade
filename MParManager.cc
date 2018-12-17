@@ -208,7 +208,7 @@ bool MParManager::parseSource()
             {
                 pos = str.find_first_of(']', 1);
                 cont_name = str.substr(1, pos-1);
-                printf("Found container %s\n", cont_name.c_str());
+                //printf("Found container %s\n", cont_name.c_str());
 
                 containers.insert(std::pair<std::string, MParContainer *>(cont_name, new MParContainer(cont_name)));
 

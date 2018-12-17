@@ -45,6 +45,12 @@ void MFTGeomPar::clear()
     delete [] mods;
     mods = nullptr;
     nModules = 0;
+    
+    nTrack_min_size =0;
+    nleadtime_window =0.0;
+    ncluster_limit =0;
+    ndrift_time_offset =0.0;
+    
 
     for (Int_t i = 0; i < FWDET_STRAW_MAX_MODULES; ++i)
     {
@@ -79,6 +85,32 @@ Int_t MFTGeomPar::getModules() const
     // return number of layers in single detector
     return nModules;
 }
+
+Int_t MFTGeomPar::getTrackMinSize() const
+{
+    // return number of layers in single detector
+    return nTrack_min_size;
+}
+
+Float_t MFTGeomPar::getLeadtimeWindow() const
+{
+    // return number of layers in single detector
+    return nleadtime_window;
+}
+
+Int_t MFTGeomPar::getClusterLimit() const
+{
+    // return number of layers in single detector
+    return ncluster_limit;
+}
+
+Float_t MFTGeomPar::getDTOffset() const
+{
+    // return number of layers in single detector
+    return ndrift_time_offset;
+}
+
+
 
 Int_t MFTGeomPar::getLayers(Int_t m) const
 {
@@ -198,6 +230,32 @@ void MFTGeomPar::setModules(int m)
     if (m <= FWDET_STRAW_MAX_MODULES)
         nModules = m;
 }
+
+void MFTGeomPar::setTrackMinSize(int t)
+{
+    //if (m <= FWDET_STRAW_MAX_MODULES)
+        nTrack_min_size = t;
+}
+
+void MFTGeomPar::setLeadtimeWindow(float lt)
+{
+    //if (m <= FWDET_STRAW_MAX_MODULES)
+        nleadtime_window = lt;
+}
+
+void MFTGeomPar::setClusterLimit(int c)
+{
+    //if (m <= FWDET_STRAW_MAX_MODULES)
+        ncluster_limit = c;
+}
+
+void MFTGeomPar::setDTOffset(float d)
+{
+    //if (m <= FWDET_STRAW_MAX_MODULES)
+        ndrift_time_offset = d;
+}
+
+
 
 
 void MFTGeomPar::setLayers(Int_t m, Int_t l)
@@ -387,6 +445,11 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
     parcont->add("fStrawRadius",   par_strawR);
     parcont->add("fStrawPitch",    par_strawP);
     parcont->add("fLayerRotation", par_layerRotation);
+    
+    parcont->add("nTrack_min_size",       nTrack_min_size);
+    parcont->add("nleadtime_window",       nleadtime_window);
+    parcont->add("ncluster_limit",       ncluster_limit);
+    parcont->add("ndrift_time_offset",       ndrift_time_offset);
 
 }
 
@@ -397,10 +460,24 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
     if (!parcont) return false;
 
     Int_t par_modules;
+    
+    Int_t par_track_min_size;
+    Float_t par_leadtime_window;
+    Int_t par_cluster_limit;
+    Float_t par_drift_time_offset;
+    
     if (!parcont->fill("nModules", par_modules))
-
         return false;
-
+    
+    
+    if (!parcont->fill("nTrack_min_size", par_track_min_size))
+        return false;
+    if (!parcont->fill("nleadtime_window", par_leadtime_window))
+        return false;
+    if (!parcont->fill("ncluster_limit", par_cluster_limit))
+        return false;
+    if (!parcont->fill("ndrift_time_offset", par_drift_time_offset))
+        return false;
 
     TArrayI par_layers(par_modules);
     if (!parcont->fill("nLayers", par_layers))
@@ -531,7 +608,12 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
      cnt_layers = 0;
 
      setModules(par_modules);
-
+     
+     setTrackMinSize(par_track_min_size);
+     setLeadtimeWindow(par_leadtime_window);
+     setClusterLimit(par_cluster_limit);
+     setDTOffset(par_drift_time_offset);
+     
     for (Int_t i = 0; i < par_modules; ++i)
     {
     //     // get number of layers
@@ -621,6 +703,11 @@ void MFTGeomPar::print() const
             printf(" %2.3f", sm_mods[m].fStrawPitch);
         putchar('\n');
     }
+    printf("\n\nTracking Parameters :\n");
+    printf("Minimum Track size = %d\n", nTrack_min_size);
+    printf("Minimum Leadtime window = %2.1f\n", nleadtime_window);
+    printf("Clusterfinder intake limit = %d\n", ncluster_limit);
+    printf("Drift time offset = %2.1f\n\n\n", ndrift_time_offset);
 }
 
 

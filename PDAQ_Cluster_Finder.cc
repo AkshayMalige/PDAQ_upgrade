@@ -1,116 +1,13 @@
 #include "PDAQ_Cluster_Finder.h"
 
-
-
 using namespace std;
-
-
-bool f_sttHitCompareLeadTime ( SttHit* a, SttHit* b ) {
-    return ( a->leadTime < b->leadTime );
-}
-
-
-bool f_sttHitCompareCell ( SttHit* a, SttHit* b ) {
-    return ( a->straw < b->straw );
-}
-
-
-std::vector<std::vector<SttHit*>*>* clusterfinder ( std::vector<SttHit*>* vec_flayer ) {
-    std::vector<std::vector<SttHit*>*>* vec_Cl = new std::vector<std::vector<SttHit*>*>();
-    std::vector<SttHit*>* clusterPointer;
-
-    std::sort ( vec_flayer->begin(), vec_flayer->end(), f_sttHitCompareCell );
-
-    if ( vec_flayer->size() ==1 ) {
-        clusterPointer = new std::vector<SttHit*>();
-        clusterPointer->push_back ( vec_flayer->at ( 0 ) );
-        vec_Cl->push_back ( clusterPointer );
-        return vec_Cl;
-    } else {
-        for ( Int_t aa=0; aa < vec_flayer->size(); aa++ ) {
-            if ( aa < vec_flayer->size()-1 ) {
-                if ( fabs ( vec_flayer->at ( aa )->straw - vec_flayer->at ( aa+1 )->straw ) < 2 ) {
-                    clusterPointer = new vector<SttHit*>();
-                    clusterPointer->push_back ( vec_flayer->at ( aa ) );
-                    clusterPointer->push_back ( vec_flayer->at ( aa+1 ) );
-                    vec_Cl->push_back ( clusterPointer );
-                } else if ( aa==0 ) {
-                    clusterPointer = new vector<SttHit*>();
-                    clusterPointer->push_back ( vec_flayer->at ( aa ) );
-                    vec_Cl->push_back ( clusterPointer );
-                } else if ( aa > 0 ) {
-                    if ( fabs ( vec_flayer->at ( aa-1 )->straw - vec_flayer->at ( aa )->straw ) == 1 ) {
-                        continue;
-                    }
-
-                    else {
-                        clusterPointer = new vector<SttHit*>();
-                        clusterPointer->push_back ( vec_flayer->at ( aa ) );
-                        vec_Cl->push_back ( clusterPointer );
-
-                    }
-                }
-            }
-
-            else if ( aa == vec_flayer->size()-1 ) {
-                if ( ( fabs ( vec_flayer->at ( aa-1 )->straw - vec_flayer->at ( aa )->straw ) > 1 ) ) {
-                    clusterPointer = new vector<SttHit*>();
-                    clusterPointer->push_back ( vec_flayer->at ( aa ) );
-                    vec_Cl->push_back ( clusterPointer );
-                }
-            }
-        }
-        return vec_Cl;
-    }
-}
-
-std::vector<SttHit*>  GetPairs ( std::vector<SttHit*> vec_get_pairs ) {
-    std::vector<SttHit*> vec_fpair_clu;
-    std::sort ( vec_get_pairs.begin(), vec_get_pairs.end(), f_sttHitCompareCell );
-
-
-    for ( Int_t sa=0; sa<vec_get_pairs.size(); sa++ ) {
-
-        if ( sa < vec_get_pairs.size()-1 ) {
-            if ( fabs ( vec_get_pairs[sa]->straw - vec_get_pairs[sa+1]->straw ) == 1 ) {
-                vec_fpair_clu.push_back ( vec_get_pairs[sa] );
-                //cout<<"PAIR : "<<vec_get_pairs[sa]->layer<<"\t"<<vec_get_pairs[sa]->straw<<endl;
-
-            }
-
-            else if ( sa >0 ) {
-                if ( fabs ( vec_get_pairs[sa-1]->straw - vec_get_pairs[sa]->straw ) == 1 )
-                    vec_fpair_clu.push_back ( vec_get_pairs[sa] );
-                //cout<<"PAIR : "<<vec_get_pairs[sa]->layer<<"\t"<<vec_get_pairs[sa]->straw<<endl;
-
-            }
-
-        }
-
-        else if ( sa == vec_get_pairs.size()-1 ) {
-            if ( fabs ( vec_get_pairs[sa-1]->straw - vec_get_pairs[sa]->straw ) == 1 )
-                vec_fpair_clu.push_back ( vec_get_pairs[sa] );
-            //cout<<"PAIR : "<<vec_get_pairs[sa]->layer<<"\t"<<vec_get_pairs[sa]->straw<<endl;
-
-        }
-
-    }
-    return vec_fpair_clu;
-
-}
 
 int PDAQ_Cluster_Finder ( char* intree, int maxEvents, char* outtree) {
 
-printf("MAX_FT_TOTAL_LAYERS  %i\nMAX_FT_LEADTIME_DIFF  %i\nMIN_FT_HITS_PER_TRACK  %i\nMAX_FT_CLUSTERFINDER_INTAKE  %i\nFT_DRIFTTIME_OFFSET  %i\n\n",MAX_FT_TOTAL_LAYERS,MAX_FT_LEADTIME_DIFF,MIN_FT_HITS_PER_TRACK,MAX_FT_CLUSTERFINDER_INTAKE,FT_DRIFTTIME_OFFSET);
-
-// PandaSttCal* CAL = new PandaSttCal();
-
-// SttEvent* stt_event = &(CAL->stt_cal);
+//printf("MAX_FT_TOTAL_LAYERS  %i\nMAX_FT_LEADTIME_DIFF  %i\nMIN_FT_HITS_PER_TRACK  %i\nMAX_FT_CLUSTERFINDER_INTAKE  %i\nFT_DRIFTTIME_OFFSET  %i\n\n",MAX_FT_TOTAL_LAYERS,MAX_FT_LEADTIME_DIFF,MIN_FT_HITS_PER_TRACK,MAX_FT_CLUSTERFINDER_INTAKE,FT_DRIFTTIME_OFFSET);
 
     PandaSubsystemSTT* STT_RAW = 0;
     PandaSubsystemSTT* CAL = 0;
-
-//PandaSttCal* STT = 0;
 
 printf("%s\n",outtree);
     PandaSttCal* STT_CAL = new PandaSttCal();
@@ -127,18 +24,8 @@ printf("%s\n",outtree);
         std::cerr << "Tree PDAQ_tree was not found\n";
         std::exit(1);
     }
-    
-//     TFile file ( "PDAQ_Stt_CAL100k.root", "READ" );
-//     TTree* tree = ( TTree* ) file.Get ( "PDAQ_tree" );
-//     if ( !tree ) {
-//         std::cerr << "Tree doesn't exists" << std::endl;
-//         return 1;
-//     }
-    //tree->Print();
-
 
     std::vector<Double_t> vec_event;
-
     std::vector<Double_t> vec_test;
     std::vector<Double_t> vec_driftTime;
     std::vector<Double_t> vec_roundoff;
@@ -150,13 +37,8 @@ printf("%s\n",outtree);
     std::vector<SttHit*> vec_All_tracks;
 
     tree->SetBranchAddress ( "STT_CAL", &STT_CAL );
-    //tree->SetBranchAddress ( "STT_RAW", &STT_RAW );
-
     TFile* Ttree = new TFile (outtree, "RECREATE" );
     TTree* PDAQ_tree =  new TTree ( "PDAQ_tree", "PDAQ_tree" );
-
-    //PDAQ_tree->Branch("STT_RAW", "PandaSubsystemSTT", &STT_RAW, 64000, 99);
-    //PDAQ_tree->Branch("STT_CAL", "PandaSttCal", &STT_CAL, 64000, 99);
     PDAQ_tree->Branch ( "STT_TRACKS", "PandaSttTrack", &STT_TRACKS, 64000, 99 );
 
     TH1F* h_STT_EMC_td1 = new TH1F ( "h_STT_EMC_td1", "h_STT_EMC_td1", 1000, 0, 1000 );
@@ -179,43 +61,65 @@ printf("%s\n",outtree);
 
     Double_t repeat =0;
     Double_t All_repeat =0;
-//     for ( int f = 0; f < 18; f++ ) {
-//         h_Fee[f] = new TH1F ( TString::Format ( "h_Fee%f", f ), "h_Fee", 600, 100, 700 );
-//     }
 
     Int_t iev = ( Int_t ) tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl
     << endl;
 
-//loop over all the vectors in the tree.
-// sleep(5);
-int event_counter =0;
-int All_hit_counter =0;
-int Good_hit_counter =0;
-int Layer_eq_4_counter =0;
-int vec_LT_g7_counter =0;
-int vec_LT_l250_counter =0;
-int final_counter =0;
+    int event_counter =0;
+    int All_hit_counter =0;
+    int Good_hit_counter =0;
+    int Layer_eq_4_counter =0;
+    int vec_LT_g7_counter =0;
+    int vec_LT_l250_counter =0;
+    int final_counter =0; 
     
+    float max_lead_time_diff = 0;
+    int min_track_hits = 0;
     
+     
+
+    MParManager* a = MParManager::instance();
+    MFTGeomPar* ftGeomPar = new MFTGeomPar();
+    MPar * d;
+	
+    a->setParamSource("ftparams.txt");
+    a->parseSource();
+    pm()->addParameterContainer("MFTPar", ftGeomPar);
+	
+    max_lead_time_diff = ftGeomPar->getLeadtimeWindow();
+    min_track_hits = ftGeomPar->getTrackMinSize();
+    int stations = ftGeomPar->getModules();
     
+    int MAX_FT_TOTAL_LAYERS =0;
+    //int MAX_FT_TOTAL_LAYERS1 =0;
+    
+    if (stations > 1)
+    {
+      for (int a=0; a<stations; a++)
+      {
+	MAX_FT_TOTAL_LAYERS +=  ftGeomPar->getLayers(a);
+      }          
+    }
+    
+    else
+    {
+      MAX_FT_TOTAL_LAYERS = ftGeomPar->getLayers(0);
+    }
+    
+        
     SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][500];
 
-    TF1* f1 = new TF1 ( "f1", "pol1" );
-    TF1* f2 = new TF1 ( "f2", "pol1" );
-
-    for ( Int_t i = 1; i < iev; i++ ) {
+    for ( Int_t i = 0; i < iev; i++ ) {
            
 	event_counter++;
 
         tree->GetEntry ( i );
-	
-	
-//         cout << endl
-//              << endl;
 
         std::vector<SttHit*> vec_stthits;
-        if (i == maxEvents)
+        std::vector<SttHit*> vec_stthits2;
+
+	if (i == maxEvents)
             break;
 
         if ( i%10000 ==0 ) {
@@ -231,32 +135,30 @@ int final_counter =0;
 
 
         //Loop over the vector elements//////////////////////////////////////////////////////
-        for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
-
+        for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) 
+	{
             SttHit* cal_hit  = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
             All_hit_counter++;
-	   // cout<<STT_CAL->stt_cal.total_cal_NTDCHits<<endl;
-
-
-//             int tdc_num = cal_hit->channel / 49;
             // hit on reference channel
-            if ( cal_hit->isRef == true ) {
+            if ( cal_hit->isRef == true ) 
+	    {
                 //cout<<"Reference Hit  -> "<<cal_hit->isRef<<"\t"<<cal_hit->layer<<"\t"<<cal_hit->module<<"\t"<<cal_hit->fee_channel<<"\t"<<cal_hit->straw<<endl;
             } 
-            else {
+            else 
+	    {
 
-                if ( cal_hit->layer == 0 ) {
-                    //printf("ERROR: cal_hit->layer %d %d %d\n", cal_hit->layer, cal_hit->channel, cal_hit->straw);
+                if ( cal_hit->layer == 0 ) 
+		{
                     continue;
-		    }
+		}
 
-                hitOnLayer[cal_hit->layer - 1][hitMultOnLayer[cal_hit->layer - 1]] = cal_hit;
+	      hitOnLayer[cal_hit->layer - 1][hitMultOnLayer[cal_hit->layer - 1]] = cal_hit;
 
-                hitMultOnLayer[cal_hit->layer - 1]++;
-                Good_hit_counter++;
+	      hitMultOnLayer[cal_hit->layer - 1]++;
+	      Good_hit_counter++;
 
 	      
-		  }
+	      }
 
         }
 
@@ -280,7 +182,7 @@ int final_counter =0;
 
             std::vector<SttHit*> vec_leadTime;
             int filtercnt = 0;
-            int fil_max = MAX_FT_LEADTIME_DIFF;
+            int fil_max = max_lead_time_diff;
 
 
             for ( int l = 0; l < MAX_FT_TOTAL_LAYERS; l++ ) {
@@ -294,427 +196,82 @@ int final_counter =0;
 
             for ( Int_t je=0; je<vec_leadTime.size()-1; je++ ) {
 
-
                 //cout << "All entries  :  "<<vec_leadTime[je]->isRef<<"\t"<<" Lead Time : "<< vec_leadTime[je]->leadTime<<"\t" << " layer : "<< vec_leadTime[je]->layer<<"\t"<< "module : "<< vec_leadTime[je]->module<<"\t"<< " fee : "<< vec_leadTime[je]->fee<<"\t" << "FEE_Ch : "<< vec_leadTime[je]->fee_channel<<"\t"<<"Cell : "<<vec_leadTime[je]->straw<<endl;
                 if ( ( vec_leadTime[je+1]->leadTime ) == ( vec_leadTime[je]->leadTime ) && ( vec_leadTime[je+1]->channel == vec_leadTime[je]->channel ) ) {
                     repeat++;
-                    //printf("{ LT,l,m,c,cf=%d,%d,%2d,%2d}{ LT1,l1,m1,c1,cf1=%d,%d,%2d,%2d}", vec_leadTime[je]->layer,vec_leadTime[je]->module,vec_leadTime[je]->fee,vec_leadTime[je]->fee_channel,vec_leadTime[je+1]->layer,vec_leadTime[je+1]->module,vec_leadTime[je+1]->fee,vec_leadTime[je+1]->fee_channel);
-                    //cout<<vec_leadTime[je]->isRef<<"\t"<<vec_leadTime[je]->leadTime<<"\t"<<vec_leadTime[je]->tot<<"\t"<<vec_leadTime[je+1]->leadTime<<" "<<vec_leadTime[je]->tot<<endl;
                 }
                 All_repeat++;
             }
 
             std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
             vec_stthits.clear();
-// cout<<"Initial :"<<vec_leadTime.size()<<"\t";
-// for (int ak=0; ak<vec_leadTime.size(); ak++) {cout<<vec_leadTime.at(ak)->leadTime<<"\t";}cout<<"\n";
-
-//             if ( vec_leadTime.size() >= MIN_FT_HITS_PER_TRACK ) {
-//                  vec_LT_g7_counter++;
-// 
-//                 for ( int v = 0; v < vec_leadTime.size(); v++ ) {
-//                     // iterate over collected and sorted hits
-//                     vec_stthits.clear();
-//                     filtercnt = 1;
-// 
-//                     SttHit* h = vec_leadTime.at ( v );
-//                     vec_stthits.push_back ( h );
-// 
-// 
-//                     for ( int vv = 0; vv < vec_leadTime.size(); vv++ ) {
-//                         // check each vs each if they fit into the window
-//                         if ( vv == v )    continue;
-//                         if ( ( fabs ( vec_leadTime[v]->leadTime - vec_leadTime[vv]->leadTime ) < fil_max ) )
-// 
-//                         {
-//                             SttHit* hh = vec_leadTime.at ( vv );
-//                             vec_stthits.push_back ( hh );
-//                             filtercnt++;
-//                             vec_LT_l250_counter++;
-// 
-//                         } else {
-//                             // in case the hit is outside the window break and start next iteration
-//                             // with the next hit
-//                             break;
-//                             vec_stthits.clear();
-// 
-//                         }
-//                     }
-//                 }
-//             }
-
-            if (vec_leadTime.size()>= MIN_FT_HITS_PER_TRACK)
-            {
-                vec_LT_g7_counter++;
-                int LTcounter =0;
-                for (int v = 0; v < vec_leadTime.size()-1; v++)
-                { // iterate over collected and sorted hits
-                    //vec_filterLeadTime.clear();
-                    filtercnt = 1;
-                    if ((fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) <= fil_max) )
-                    {
-                         LTcounter++;
-                        SttHit* h = vec_leadTime.at(v);
-                        vec_stthits.push_back(h);
-                     }
-                    // else if ((fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) > fil_max)&&LTcounter>7)
-                    //  {
-                    //      LTcounter++;
-                    //     SttHit* h = vec_leadTime.at(v+1);
-                    //     vec_filterLeadTime.push_back(h);
-                    //    }
-                    if ((v==vec_leadTime.size()-2)&&(fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) < fil_max)&&LTcounter>=7)
-                     {
-                         LTcounter++;
-                        SttHit* h = vec_leadTime.at(v+1);
-                        vec_stthits.push_back(h);
-                       }
-                    else if ((fabs(vec_leadTime[v]->leadTime - vec_leadTime[v+1]->leadTime) > fil_max)&&LTcounter<8)
-                     {
-                       LTcounter =0;
-                       vec_stthits.clear();
-                       }
-                  
-                }
-               if (LTcounter<8){vec_stthits.clear();}
-
-
-            }	    
-	    
-	    
-	    
-// cout<<"Final :"<<vec_stthits.size()<<"\t";
-// for (int bk=0; bk<vec_stthits.size(); bk++) {cout<<vec_stthits.at(bk)->leadTime<<"\t";}cout<<"\n\n";
-            //double meanTime = 0;
-            std::vector<SttHit*> vec_layer1;
-            std::vector<SttHit*> vec_layer2;
-            std::vector<SttHit*> vec_layer3;
-            std::vector<SttHit*> vec_layer4;
-            vec_layer1.clear();
-            vec_layer2.clear();
-            vec_layer3.clear();
-            vec_layer4.clear();
-	    
-
-            for ( int w = 0; w < vec_stthits.size(); w++ ) {
-		  
-	    if (vec_stthits.size()>4){final_counter++;}
-
-                // cout<<"["<<w<<"]"<<" L, M, C, F, Ch, T {"<<vec_stthits[w]->layer<<", "<<vec_stthits[w]->module<<", "<<vec_stthits[w]->straw<<", "<<vec_stthits[w]->fee<<", "<<vec_stthits[w]->fee_channel<<", "<<vec_stthits[w]->channel<<"}  "<<" X , Y , Z :{"<<vec_stthits[w]->x<<", "<<vec_stthits[w]->y<<", "<<vec_stthits[w]->z<<"}   "<<" LT DT  {"<<vec_stthits[w]->leadTime<<",  "<<vec_stthits[w]->drifttime<<"}"<<endl;
-//cout<<"Mean LT = "<<Total_LT/vec_stthits.size()<<"	TOT = "<<fabs(vec_stthits[w]->leadTime-(Total_LT/vec_stthits.size()))<<endl;
-                if ( vec_stthits.size() <MAX_FT_CLUSTERFINDER_INTAKE ) {
-                    if ( vec_stthits[w]->layer == 1 ) {
-                        vec_layer1.push_back ( vec_stthits[w] );
-                    } else if ( vec_stthits[w]->layer == 2 ) {
-                        vec_layer2.push_back ( vec_stthits[w] );
-                    } else if ( vec_stthits[w]->layer == 3 ) {
-                        vec_layer3.push_back ( vec_stthits[w] );
-                    } else if ( vec_stthits[w]->layer == 4 ) {
-                        vec_layer4.push_back ( vec_stthits[w] );
-                    }
-
-                }
-            }
-
-            std::vector< vector<SttHit*>* >* vec_Cl_L1;
-            std::vector< vector<SttHit*>* >* vec_Cl_L2;
-            std::vector< vector<SttHit*>* >* vec_Cl_L3;
-            std::vector< vector<SttHit*>* >* vec_Cl_L4;
-
-            std::vector<SttHit*> vec_Clusters;
-
-            std::vector<double> vec_Chi2x;
-            std::vector<double> vec_Chi2y;
-
-            std::vector<double> vec_P0;
-            std::vector<double> vec_P1;
-
-            std::vector<double> vec_PP0;
-            std::vector<double> vec_PP1;
-// FILTER TO GET ONLY HITS WITH A PAIR////////////////////////////////////////////////////////////
-
-            std::vector<SttHit*> vec_pair_clu;
-            vec_pair_clu.clear();
-
-            std::vector<SttHit*> vec_pair_layer11;
-            std::vector<SttHit*> vec_pair_layer22;
-            std::vector<SttHit*> vec_pair_layer33;
-            std::vector<SttHit*> vec_pair_layer44;
-
-            vec_pair_layer11.clear();
-            vec_pair_layer22.clear();
-            vec_pair_layer33.clear();
-            vec_pair_layer44.clear();
-
-            if ( vec_layer1.size() >1 && vec_layer2.size() >1 && vec_layer3.size() >1 && vec_layer4.size() >1 ) {
-                vec_pair_layer11 = GetPairs ( vec_layer1 );
-                vec_pair_layer22 = GetPairs ( vec_layer2 );
-                vec_pair_layer33 = GetPairs ( vec_layer3 );
-                vec_pair_layer44 = GetPairs ( vec_layer4 );
-
-            } else continue;
-
-// for (Int_t a =0; a< vec_pair_layer11.size(); a++)
-// {
-//
-// //cout<<"COUT : "<<vec_pair_layer11[a]->straw<<endl;
-//  }
-
-// END OF FILTER TO GET ONLY HITS WITH A PAIR////////////////////////////////////////////////////////////
-
-            if ( vec_pair_layer11.size() > 0 && vec_pair_layer22.size() > 0 && vec_pair_layer33.size() > 0 && vec_pair_layer44.size() > 0 ) {
-                vec_Cl_L1 = clusterfinder ( &vec_pair_layer11 );
-                vec_Cl_L2 = clusterfinder ( &vec_pair_layer22 );
-                vec_Cl_L3 = clusterfinder ( &vec_pair_layer33 );
-                vec_Cl_L4 = clusterfinder ( &vec_pair_layer44 );
-            } else continue;
-
-            std::vector< vector<SttHit*> > vec_All_X;
-            std::vector< vector<SttHit*> > vec_All_Y;
-            vec_All_X.clear();
-            vec_All_Y.clear();
-
-            for ( Int_t xa=0; xa<vec_Cl_L1->size(); xa++ ) {
-
-                for ( Int_t xb=0; xb<vec_Cl_L2->size(); xb++ ) {
-                    for ( Int_t xc=0; xc< vec_Cl_L3->size(); xc++ ) {
-                        for ( Int_t xd=0; xd< vec_Cl_L4->size(); xd++ ) {
-                            vec_Clusters.clear();
-
-                            for ( Int_t xaa =0; xaa< vec_Cl_L1->at ( xa )->size(); xaa++ ) {
-                                //cout<< "Vector  : "<<vec_Cl_L1->at(xa)->at(xaa)->layer <<"\t"<< vec_Cl_L1->at(xa)->at(xaa)->straw<<endl;
-                                vec_Clusters.push_back ( vec_Cl_L1->at ( xa )->at ( xaa ) );
-                            }
-
-                            for ( Int_t xbb=0; xbb< vec_Cl_L2->at ( xb )->size(); xbb++ ) {
-                                //cout<< "Vector  : "<<vec_Cl_L2->at(xb)->at(xbb)->layer <<"\t"<< vec_Cl_L2->at(xb)->at(xbb)->straw<<endl;
-                                vec_Clusters.push_back ( vec_Cl_L2->at ( xb )->at ( xbb ) );
-                            }
-
-                            for ( Int_t xcc=0; xcc< vec_Cl_L3->at ( xc )->size(); xcc++ ) {
-                                //cout<< "Vector  : "<<vec_Cl_L3->at(xc)->at(xcc)->layer <<"\t"<< vec_Cl_L3->at(xc)->at(xcc)->straw<<endl;
-                                vec_Clusters.push_back ( vec_Cl_L3->at ( xc )->at ( xcc ) );
-                            }
-
-                            for ( Int_t xdd=0; xdd< vec_Cl_L4->at ( xd )->size(); xdd++ ) {
-                                //cout<< "Vector  : "<<vec_Cl_L4->at(xd)->at(xdd)->layer <<"\t"<< vec_Cl_L4->at(xd)->at(xdd)->straw<<endl;
-                                vec_Clusters.push_back ( vec_Cl_L4->at ( xd )->at ( xdd ) );
-
-                            }
-
-                            Double_t chi_valueX =0;
-                            Double_t chi_valueY =0;
-                            Int_t loneCounterX =0;
-                            Int_t loneCounterY =0;
-
-                            std::vector<SttHit*> vec_ClustersX;
-                            std::vector<SttHit*> vec_ClustersY;
-
-                            vec_ClustersX.clear();
-                            vec_ClustersY.clear();
-
-                            for ( Int_t ya=0; ya<vec_Clusters.size(); ya++ ) {
-                                //cout<< " Cluster Vector :"<<vec_Clusters[ya]->layer<<"\t"<<vec_Clusters[ya]->straw<<"\t"<<vec_Clusters[ya]->x<<"\t"<<vec_Clusters[ya]->y<<endl;
-                                if ( vec_Clusters[ya]->layer == 1 || vec_Clusters[ya]->layer ==3 ) {
-                                    vec_ClustersX.push_back ( vec_Clusters[ya] );
-                                    loneCounterX++;
-                                }
-                                if ( vec_Clusters[ya]->layer == 2 || vec_Clusters[ya]->layer ==4 ) {
-                                    vec_ClustersY.push_back ( vec_Clusters[ya] );
-                                    loneCounterY++;
-                                }
-                            }
-
-                            vec_All_X.push_back ( vec_ClustersX );
-                            vec_All_Y.push_back ( vec_ClustersY );
-
-                            Double_t clusterArrayX[vec_ClustersX.size()];
-                            Double_t clusterArrayZx[vec_ClustersX.size()];
-                            Double_t clusterArrayY[vec_ClustersY.size()];
-                            Double_t clusterArrayZy[vec_ClustersY.size()];
-
-
-                            for ( Int_t yb=0; yb<vec_ClustersX.size(); yb++ ) {
-                                clusterArrayX[yb]=vec_ClustersX[yb]->x;
-                                clusterArrayZx[yb]=vec_ClustersX[yb]->z;
-                            }
-
-
-                            for ( Int_t yc=0; yc<vec_ClustersY.size(); yc++ ) {
-                                clusterArrayY[yc]=vec_ClustersY[yc]->y;
-                                clusterArrayZy[yc]=vec_ClustersY[yc]->z;
-                            }
-
-
-
-                            TGraph* chiX = new TGraph ( vec_ClustersX.size(), clusterArrayX, clusterArrayZx );
-                            chiX->Fit ( f1,"q" );
-                            chi_valueX = f1->GetChisquare();
-                            vec_Chi2x.push_back ( chi_valueX );
-
-                            Double_t p0 = f1->GetParameter ( 0 );
-                            Double_t p1 = f1->GetParameter ( 1 );
-
-                            vec_P0.push_back ( p0 );
-                            vec_P1.push_back ( p1 );
-                            //Double_t extrpX = ((65 - p0) / p1);
-
-
-                            TGraph* chiY = new TGraph ( vec_ClustersY.size(), clusterArrayY, clusterArrayZy );
-                            chiY->Fit ( f2,"q" );
-                            chi_valueY = f2->GetChisquare();
-                            vec_Chi2y.push_back ( chi_valueY );
-                            Double_t pp0 = f2->GetParameter ( 0 );
-                            Double_t pp1 = f2->GetParameter ( 1 );
-
-                            vec_PP0.push_back ( pp0 );
-                            vec_PP1.push_back ( pp1 );
-                            //Double_t extrpY = ((65 - pp0) / pp1);
-                            //Double_t sumChi = (chi_valueX + chi_valueY);
-
-                            //cout<<"X CHI :"<<chi_valueX<<"\t"<<"Y CHI"<<chi_valueY<<endl;
-
-                            //cout<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Chi X : "<<chi_valueX<<"\t"<<"Chi Y : "<<chi_valueY<<"^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
-// 		delete f1;
-// 		delete f2;
-                            delete chiX;
-                            delete chiY;
-                        }
-                    }
-                }
-
-            }
-
-            std::vector<SttHit*> vec_tracks;
-            vec_tracks.clear();
-
-            Float_t smallestX = vec_Chi2x[0];
-            Float_t smallestP0 = vec_P0[0];
-            Float_t smallestP1 = vec_P1[0];
-
-            Int_t chi_indexX = 0;
-
-            for ( Int_t ci = 0; ci < vec_Chi2x.size(); ci++ ) {
-                //cout << "chiSquare X :" << vec_Chi2x[ci] << endl;
-
-                if ( smallestX > vec_Chi2x[ci] ) {
-                    smallestX = vec_Chi2x[ci];
-                    chi_indexX = ci;
-                }
-                if ( smallestP0 > vec_P0[ci] ) {
-                    smallestP0 = vec_P0[ci];
-                }
-                if ( smallestP1 > vec_P1[ci] ) {
-                    smallestP1 = vec_P1[ci];
-                }
-            }
-
-            Float_t smallestY = vec_Chi2y[0];
-            Float_t smallestPP0 = vec_PP0[0];
-            Float_t smallestPP1 = vec_PP1[0];
-
-            Int_t chi_indexY = 0;
-
-            for ( Int_t cj = 0; cj < vec_Chi2y.size(); cj++ ) {
-                //cout << "chiSquare Y :" << vec_Chi2y[cj] << endl;
-
-                if ( smallestY > vec_Chi2y[cj] ) {
-                    smallestY = vec_Chi2y[cj];
-                    chi_indexY = cj;
-                }
-                if ( smallestPP0 > vec_PP0[cj] ) {
-                    smallestPP0 = vec_PP0[cj];
-                }
-                if ( smallestPP1 > vec_PP1[cj] ) {
-                    smallestPP1 = vec_PP1[cj];
-                }
-            }
-            //cout<<"INDEX X:"<<chi_indexX<<"\t"<<"INDEX Y:"<<chi_indexY<<endl;
-
-            for ( Int_t ck = 0; ck < vec_All_X.at ( chi_indexX ).size(); ck++ ) {
-                //cout<<"       BEST  X      "<< vec_All_X.at(chi_indexX).at(ck)->straw<<"\t"<<smallestX<<endl;
-                vec_tracks.push_back ( vec_All_X.at ( chi_indexX ).at ( ck ) );
-            }
-            for ( Int_t cl = 0; cl < vec_All_Y.at ( chi_indexY ).size(); cl++ ) {
-                //cout<<"       BEST  Y      "<< vec_All_Y.at(chi_indexY).at(cl)->straw<<"\t"<<smallestY<<endl;
-                vec_tracks.push_back ( vec_All_Y.at ( chi_indexY ).at ( cl ) );
-            }
-
-            vec_driftTime.clear();
-
-
-            double sumLeadTime = 0;
-            double meanTime = 0;
-
-            for ( Int_t d = 0; d<vec_tracks.size(); d++ ) {
-                sumLeadTime += vec_tracks.at ( d )->leadTime;
-
-            }
-
-            meanTime = sumLeadTime/vec_tracks.size();
-            vec_event.push_back ( i );
-
-//Write Tracks
-            stt_event->TrackClear();
-
-            SttTrackHit* b = stt_event->AddTrackHit();
-            b->vec_Track = vec_tracks;
-            b->trackId = i;
-            b->trackSize = vec_tracks.size();
-            b->Px0 = smallestP0;
-            b->Px1 = smallestP1;
-            b->Py0 = smallestPP0;
-            b->Py1 = smallestPP1;
-            b->Chix = smallestX;
-            b->Chiy = smallestY;
-
-
-            for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {
-                //cout<<"TRACKS  : "<<vec_tracks[tq]->layer<<"\t"<<vec_tracks[tq]->straw<<"\t"<<vec_tracks[tq]->channel<<"\t"<<vec_tracks[tq]->leadTime<<"\t"<<meanTime<<"\t"<<(fabs((vec_tracks[tq]->leadTime)-meanTime))<<endl;
-
-                vec_tracks[tq]->drifttime =  FT_DRIFTTIME_OFFSET+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
-            }
-
-
-            vec_Chi2x.clear();
-            vec_Chi2y.clear();
-
-            vec_P0.clear();
-            vec_P1.clear();
-
-            vec_PP0.clear();
-            vec_PP1.clear();
-
-            PDAQ_tree->Fill();
-
-        }
-        //cout<<Layer_eq_4_counter<<"\t"<<i-2<<endl;
-
-
-    }//End of loop over events
-
-    delete f1;
-    delete f2;
-
-    cout<<"CGECH THE SIZE   :"<<vec_All_tracks.size() <<endl;
-
-    PDAQ_tree->Write();
-//     for ( int ko=0; ko<vec_event.size(); ko++ ) {
-// 
-//         cout<<"EVENT : "<<vec_event[ko]<<endl;
-//     }
-
-//printf("event_counter %i,All_hit_counter %i,Good_hit_counter %i,Layer_eq_4_counter %i,vec_LT_g7_counter %i,vec_LT_l250_counter %i,final_counter %i \n",event_counter,All_hit_counter,Good_hit_counter,Layer_eq_4_counter,vec_LT_g7_counter,vec_LT_l250_counter,final_counter);
-printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
+   
+	    if ( vec_leadTime.size() >= min_track_hits )
+	    {
+	      const int minNumber = min_track_hits;
+	      const int maxDifference = max_lead_time_diff - 1;
+	      int currentNumber = 0;
+	      int currentSum    = 0;
+	      int numGroups     = 0;
+	      double last          = vec_leadTime[0]->leadTime - maxDifference - 1;
+	      vec_stthits.clear();
+
+	      for ( int e =0 ; e<vec_leadTime.size();e++ )
+	      {
+		  //cout<<"E "<<e<<endl;
+		  if ( vec_leadTime[e]->leadTime - last <= maxDifference )         // Continue with current group
+		  {
+		    //currentSum += V[e];
+		    currentNumber++;
+		    SttHit* h = vec_leadTime.at(e);
+		    vec_stthits.push_back(h);
+		    //group.push_back( V[e] );
+		  }
+		  else                                     // Finish previous group and start anew
+		  {
+		    if ( currentNumber >= minNumber )     // Previous was a valid group
+		    {
+			numGroups++;
+			//cout << "Group " << numGroups << ":(size) "<<vec_stthits.size();
+			PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event);
+			//for ( int g = 0; g < vec_stthits.size(); g++ ) cout << ", " << vec_stthits[g]->leadTime;
+			//cout << "   Sum: " << currentSum << '\n';
+		    }
+		    vec_stthits.clear();
+		    SttHit* h = vec_leadTime.at(e);
+		    vec_stthits.push_back(h);
+		    //currentSum = V[e];                       // Start afresh
+		    currentNumber = 1;
+		  }
+		  last = vec_leadTime[e]->leadTime;
+	      }
+
+	      // Deal with leftovers at the end
+	      if ( currentNumber >= minNumber )           // Previous was a valid group
+	      {
+		  numGroups++;
+		  //cout << "Final Group " << numGroups << ":(size) "<<vec_stthits.size();
+		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event);
+		  //for ( int g = 0; g < vec_stthits.size(); g++ ) cout << ", " << vec_stthits[g]->leadTime;
+		  //cout << "   Sum: " << currentSum << '\n';
+	      }
+	    }
+     
+	  //cout<<"Final :"<<vec_stthits.size()<<"\n";
+	  // for (int bk=0; bk<vec_stthits.size(); bk++) {cout<<vec_stthits.at(bk)->leadTime<<"\t";}cout<<"\n\n";
+
+	  }
+
+
+      }//End of loop over events
+
+      PDAQ_tree->Write();
+
+	  //printf("event_counter %i,All_hit_counter %i,Good_hit_counter %i,Layer_eq_4_counter %i,vec_LT_g7_counter %i,vec_LT_l250_counter %i,final_counter %i \n",event_counter,All_hit_counter,Good_hit_counter,Layer_eq_4_counter,vec_LT_g7_counter,vec_LT_l250_counter,final_counter);
+	  printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
 
     return 0;
 }
-
-
-// int main() {
-// 
-//     return PDAQ_Cluster_Finder();
-// }
 
 int main ( int argc, char ** argv ) {
 

@@ -22,6 +22,7 @@ class MFTGeomPar : public MPar
 protected:
     // members
     Int_t modules;                  ///< number of modules
+    Int_t track_min_size;
     struct SingleModule             ///< single module configuration
     {
         Int_t layers;               ///< numbre of layers
@@ -52,6 +53,7 @@ public:
     Float_t getFiberOffsetX(Int_t m, Int_t l) const;
     Float_t getFiberOffsetY(Int_t m, Int_t l) const;
     Float_t getFibersPitch(Int_t m, Int_t l) const;
+    Int_t getTrackMinSize() const {return track_min_size;}
 };
 
 #endif // MFIBERSSTACKGEOMPAR_H

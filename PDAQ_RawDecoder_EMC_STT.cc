@@ -488,7 +488,7 @@ void PDAQ_RawDecoder_EMC_STT ( char *in_file_name,char *out_file_name=0 ) {
                     // 		v->stt_tdc_event_sizes = tdc_size;
                     lastRise = 0;
                 } else if ( find_hits == false ) {
-                    if ( stt_channel_offsets.find ( tdc_id ) != stt_channel_offsets.end() ) { // decode only registered TDCs
+                    //if ( stt_channel_offsets.find ( tdc_id ) != stt_channel_offsets.end() ) { // decode only registered TDCs
                         //printf("%x   %x\n",stt_channel_offsets.find(tdc_id),stt_channel_offsets.end());
                         if ( ( ( sub[i] >> 28 ) & 0xf ) == 0x8 ) { // hit marker
 
@@ -576,7 +576,7 @@ void PDAQ_RawDecoder_EMC_STT ( char *in_file_name,char *out_file_name=0 ) {
                             epoch = sub[i] & 0xffffff;
 
                         }
-                    }
+                    //}
 
                     if ( current_size == tdc_size - 1 ) {
                         find_tdc = false;

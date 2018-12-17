@@ -64,7 +64,7 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
 
     ftGeomPar->print();
     
-    cout<<ftGeomPar->getStrawRadius(1)<<endl;
+    //cout<<ftGeomPar->getStrawRadius(1)<<endl;
   
     PandaSubsystemSTT* STT = 0;
     PandaSttCal* CAL = new PandaSttCal();
@@ -129,14 +129,23 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
 	//cout<<"check0 "<<endl; 
 	//printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
 	SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
-	//printf("tdc : %x ch: %i\n",hit->tdcid,hit->new_channel);
+	//printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
 	
 // 	if ((TestChannel*)t->getAddress(hit->tdcid, hit->new_channel)){continue;}
 // 	else {
 // 	  cout<<"Bad TDC Address"<<endl;}
-	  
-	  
-	    TestChannel *tc = (TestChannel*)t->getAddress(hit->tdcid, hit->channel);       
+	 
+	//if (hit->tdcid!=0x8200 && hit->tdcid!=0x8100){
+//cout<<"Before"<<endl;	  
+	    TestChannel *tc = 0;
+	    tc = (TestChannel*)t->getAddress(hit->tdcid, hit->channel);   
+	    //cout<<"After"<<endl;
+	    
+	    if (tc == 0) {
+	    }
+	    else {
+	    
+	    
 	    //tc->print("   address");
             SttHit* cal_hit = stt_event->AddCalHit(hit->channel);  
 	    cal_hit->tdcid = hit->tdcid;
@@ -193,6 +202,7 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
 	      cal_hit->y =0;
 	      cal_hit->z =0;
 	    }
+	    }//}
  	  
 	}
 

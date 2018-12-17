@@ -24,6 +24,12 @@ class MFTGeomPar : public MPar
 protected:
     // members
     Int_t nModules;                  ///< number of modules
+    
+    
+    Int_t nTrack_min_size; 
+    Float_t nleadtime_window;
+    Int_t ncluster_limit;
+    Float_t ndrift_time_offset;
     struct SingleModule             ///< single module configuration
     {
         Int_t nLayers;               ///< numbre of layers
@@ -77,6 +83,20 @@ public:
     void setOffsetY(Int_t m, Int_t l, Int_t p, Float_t x);
     void setOffsetX(Int_t m, Int_t l, Int_t p, Float_t x);
     void setLayerRotation(Int_t m, Int_t l, Float_t r);
+    
+    
+    Int_t getTrackMinSize() const;
+    void setTrackMinSize(Int_t t);
+    
+    Float_t getLeadtimeWindow() const;
+    void setLeadtimeWindow(Float_t lt);
+    
+    Int_t getClusterLimit() const;
+    void setClusterLimit(Int_t c);
+    
+    Float_t getDTOffset() const;
+    void setDTOffset(Float_t d);
+    
 
 };
 

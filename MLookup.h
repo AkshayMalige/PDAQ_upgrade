@@ -61,6 +61,7 @@ public:
 
     MLookupChannel * getAddress(UInt_t addr, UInt_t chan) {
         if (!is_init) init();
+	if (addr < a_min || addr > a_max) return nullptr;
         return boards[addr-a_min]->getChannel(chan);
     }
 

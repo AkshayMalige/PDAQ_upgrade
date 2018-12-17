@@ -54,7 +54,8 @@ void MFTGeomPar::clear()
 bool MFTGeomPar::getParams(MParContainer* parcont)
 {
     if (!parcont->fill("nModules", modules)) return false;
-
+    if (!parcont->fill("nTrackMin", track_min_size)) return false;
+    
     if (mods) delete [] mods;
     mods = new SingleModule[modules];
 
@@ -172,6 +173,7 @@ void MFTGeomPar::print() const
             printf(" %2.0f", mods[m].fibers_pitch[l]);
         putchar('\n');
     }
+    printf("Minimum Track size = %d\n", track_min_size);
 }
 
 /** Get number of layers in the module

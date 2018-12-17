@@ -20,6 +20,7 @@
 #pragma link C++ class PandaSubsystemSTT+;
 #pragma link C++ class PandaSubsystemSB+;
 #pragma link C++ class PandaSttTrack+;
+//#pragma link C++ class vector_parameters+;
 
 
 #endif
