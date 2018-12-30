@@ -4,12 +4,10 @@ using namespace std;
 
 int PDAQ_Cluster_Finder ( char* intree, int maxEvents, char* outtree) {
 
-//printf("MAX_FT_TOTAL_LAYERS  %i\nMAX_FT_LEADTIME_DIFF  %i\nMIN_FT_HITS_PER_TRACK  %i\nMAX_FT_CLUSTERFINDER_INTAKE  %i\nFT_DRIFTTIME_OFFSET  %i\n\n",MAX_FT_TOTAL_LAYERS,MAX_FT_LEADTIME_DIFF,MIN_FT_HITS_PER_TRACK,MAX_FT_CLUSTERFINDER_INTAKE,FT_DRIFTTIME_OFFSET);
-
     PandaSubsystemSTT* STT_RAW = 0;
     PandaSubsystemSTT* CAL = 0;
 
-printf("%s\n",outtree);
+    printf("%s\n",outtree);
     PandaSttCal* STT_CAL = new PandaSttCal();
 
 
@@ -146,20 +144,16 @@ printf("%s\n",outtree);
             } 
             else 
 	    {
-
                 if ( cal_hit->layer == 0 ) 
 		{
                     continue;
 		}
-
+		
 	      hitOnLayer[cal_hit->layer - 1][hitMultOnLayer[cal_hit->layer - 1]] = cal_hit;
 
 	      hitMultOnLayer[cal_hit->layer - 1]++;
-	      Good_hit_counter++;
-
-	      
+	      Good_hit_counter++;	      
 	      }
-
         }
 
         bool good_layers = true;
@@ -196,7 +190,6 @@ printf("%s\n",outtree);
 
             for ( Int_t je=0; je<vec_leadTime.size()-1; je++ ) {
 
-                //cout << "All entries  :  "<<vec_leadTime[je]->isRef<<"\t"<<" Lead Time : "<< vec_leadTime[je]->leadTime<<"\t" << " layer : "<< vec_leadTime[je]->layer<<"\t"<< "module : "<< vec_leadTime[je]->module<<"\t"<< " fee : "<< vec_leadTime[je]->fee<<"\t" << "FEE_Ch : "<< vec_leadTime[je]->fee_channel<<"\t"<<"Cell : "<<vec_leadTime[je]->straw<<endl;
                 if ( ( vec_leadTime[je+1]->leadTime ) == ( vec_leadTime[je]->leadTime ) && ( vec_leadTime[je+1]->channel == vec_leadTime[je]->channel ) ) {
                     repeat++;
                 }
@@ -218,29 +211,22 @@ printf("%s\n",outtree);
 
 	      for ( int e =0 ; e<vec_leadTime.size();e++ )
 	      {
-		  //cout<<"E "<<e<<endl;
 		  if ( vec_leadTime[e]->leadTime - last <= maxDifference )         // Continue with current group
 		  {
-		    //currentSum += V[e];
 		    currentNumber++;
 		    SttHit* h = vec_leadTime.at(e);
 		    vec_stthits.push_back(h);
-		    //group.push_back( V[e] );
 		  }
 		  else                                     // Finish previous group and start anew
 		  {
 		    if ( currentNumber >= minNumber )     // Previous was a valid group
 		    {
 			numGroups++;
-			//cout << "Group " << numGroups << ":(size) "<<vec_stthits.size();
 			PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event);
-			//for ( int g = 0; g < vec_stthits.size(); g++ ) cout << ", " << vec_stthits[g]->leadTime;
-			//cout << "   Sum: " << currentSum << '\n';
 		    }
 		    vec_stthits.clear();
 		    SttHit* h = vec_leadTime.at(e);
-		    vec_stthits.push_back(h);
-		    //currentSum = V[e];                       // Start afresh
+		    vec_stthits.push_back(h);        // Start afresh
 		    currentNumber = 1;
 		  }
 		  last = vec_leadTime[e]->leadTime;
@@ -250,15 +236,9 @@ printf("%s\n",outtree);
 	      if ( currentNumber >= minNumber )           // Previous was a valid group
 	      {
 		  numGroups++;
-		  //cout << "Final Group " << numGroups << ":(size) "<<vec_stthits.size();
 		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event);
-		  //for ( int g = 0; g < vec_stthits.size(); g++ ) cout << ", " << vec_stthits[g]->leadTime;
-		  //cout << "   Sum: " << currentSum << '\n';
 	      }
 	    }
-     
-	  //cout<<"Final :"<<vec_stthits.size()<<"\n";
-	  // for (int bk=0; bk<vec_stthits.size(); bk++) {cout<<vec_stthits.at(bk)->leadTime<<"\t";}cout<<"\n\n";
 
 	  }
 
@@ -266,11 +246,8 @@ printf("%s\n",outtree);
       }//End of loop over events
 
       PDAQ_tree->Write();
-
-	  //printf("event_counter %i,All_hit_counter %i,Good_hit_counter %i,Layer_eq_4_counter %i,vec_LT_g7_counter %i,vec_LT_l250_counter %i,final_counter %i \n",event_counter,All_hit_counter,Good_hit_counter,Layer_eq_4_counter,vec_LT_g7_counter,vec_LT_l250_counter,final_counter);
-	  printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
-
-    return 0;
+      printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
+      return 0;
 }
 
 int main ( int argc, char ** argv ) {
