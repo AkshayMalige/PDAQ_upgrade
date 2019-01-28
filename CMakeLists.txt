@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(PDAQ)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 include_directories(${MyProject_SOURCE_DIR})
 # You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:
 #   - RcmaOOT built with classic configure/make use the provided $ROOTSYS/etc/cmake/FindROOT.cmake
@@ -50,6 +53,9 @@ target_link_libraries(PDAQ ${ROOT_LIBRARIES})
 
 add_executable(pdaq_unpacker PDAQ_RawDecoder_EMC_STT.cc)
 target_link_libraries(pdaq_unpacker PDAQ ${ROOT_LIBRARIES})
+
+add_executable(pdaq_unpacker_HADES PDAQ_RawDecoder_HADES.cc)
+target_link_libraries(pdaq_unpacker_HADES PDAQ ${ROOT_LIBRARIES})
 
 add_executable(pdaq_calibrater pdaq_calibirator.cc PDAQ_Stt_Calibirator.C)
 target_link_libraries(pdaq_calibrater PDAQ ${ROOT_LIBRARIES})
