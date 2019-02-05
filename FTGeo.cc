@@ -63,7 +63,7 @@ void MFTGeomPar::clear()
         sm_mods[i].fStrawPitch = 0.0;
         sm_mods[i].fOffsetZ = 0.0;
         sm_mods[i].fOffsetX = 0.0;
-	sm_mods[i].fOffsetY = 0.0;
+		sm_mods[i].fOffsetY = 0.0;
         sm_mods[i].fLayerRotation = 0;
     }
 }
@@ -631,7 +631,7 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
             {
                 setOffsetZ(i, l, s, par_offsetZ[2*(cnt_layers + l) + s]);
                 setOffsetX(i, l, s, par_offsetX[2*(cnt_layers + l) + s]);
-		setOffsetY(i, l, s, par_offsetY[2*(cnt_layers + l) + s]);
+				setOffsetY(i, l, s, par_offsetY[2*(cnt_layers + l) + s]);
 
             }
             setLayerRotation(i, l, par_layerRotation[cnt_layers + l]);
