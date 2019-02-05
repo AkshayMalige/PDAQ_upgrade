@@ -5,9 +5,9 @@
 [MFTPar]
 nModules:  Int_t  1
 nLayers:  Int_t \
-  4 
+  8 
 nStraws:  Int_t \
-  64
+  32
 nShortOffset:  Int_t \
   0 
 nShortWidth:  Int_t \
@@ -20,20 +20,32 @@ fOffsetZ:  Float_t \
   1.01   0.0  	\
   13.01  12.00  \
   27.5   28.51  \
+  40.61  39.59 \
+  1.01   0.0  	\
+  13.01  12.00  \
+  27.5   28.51  \
   40.61  39.59 
 fOffsetX:  Float_t \
   13.105  13.105  \
   0.0  	  0.0  \
   13.105  13.105  \
-  0.0  	  0.0
+  0.0  	  0.0	\
+  1.01   0.0  	\
+  13.01  12.00  \
+  27.5   28.51  \
+  40.61  39.59 
 fOffsetY:  Float_t \
   0.0     0.0  \
   71.705  71.705  \ 
   0.0     0.0 \
   55.305  55.305  \
+  1.01   0.0  	\
+  13.01  12.00  \
+  27.5   28.51  \
+  40.61  39.59 
 
 fLayerRotation:  Float_t \
-  0.0 90.0  0.0 90.0 \ 
+  0.0 90.0  0.0 90.0  0.0 90.0  0.0 90.0 \ 
 
 nTrack_min_size: Int_t 8 \
 
@@ -42,10 +54,4 @@ nleadtime_window: Float_t 250 \
 ncluster_limit: Int_t 40 \
 
 ndrift_time_offset: Float_t 300 \
-
-
-
-
-
-
 

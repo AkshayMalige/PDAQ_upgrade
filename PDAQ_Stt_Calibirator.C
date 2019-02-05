@@ -36,13 +36,13 @@ bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
     return (a->leadTime < b->leadTime);
 }
 
-int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
+int PDAQ_Stt_Calibirator(char* intree, int maxEvents , char* outtree)
 {
   
     MLookupManager* lm = MLookupManager::instance();
     lm->setSource("lookup.txt");
     lm->parseSource();        
-    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0xe100, 0xe203, 49);
+    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0x6000, 0xe203, 49);
  
     MParManager* a = MParManager::instance();
     MFTGeomPar* ftGeomPar = new MFTGeomPar();
@@ -95,6 +95,7 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
     Double_t repeat =0;
     Double_t All_repeat =0;
     int good_counter =0;
+    double percentage =0.0;
 
     Int_t nentries = (Int_t)tree->GetEntries();
     std::cout << nentries << "\n";
@@ -111,9 +112,11 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
         int hitsInEvent = 0;
         std::vector<SttHit*> vec_filterLeadTime;
 
+        //percentage = (e*100)/nentries;
+
         if (e % 10000 == 0)
         {
-            printf("%ld\n", e);
+            printf("%d\n",e);
         }
                 if (e == maxEvents)
             break;
@@ -166,12 +169,12 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
 	    }
 	    	     	   		//cout<<"check 1"<<endl;    
 
-	    if (cal_hit->isRef==false)
+	    if (cal_hit->isRef==false && cal_hit->tdcid != 0xe103)
 	    {
 	    	     	   		//cout<<"check 2"<<endl;    
 
-	      //printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln: %i X: %.3f Y: %.3f Z: %.3f\n",
-	      //cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+	     // printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln: %i X: %.3f Y: %.3f Z: %.3f\n",
+	    //  cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
 
 	      double pit =ftGeomPar->getStrawPitch(cal_hit->station-1);
 	      double rad =ftGeomPar->getStrawRadius(cal_hit->station-1);
