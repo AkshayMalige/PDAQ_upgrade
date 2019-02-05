@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(PDAQ)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 
 include_directories(${MyProject_SOURCE_DIR})
 # You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:

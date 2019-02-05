@@ -108,7 +108,9 @@ UInt_t readWord(std::ifstream* in_file) {
 
 //===================================================================
 // Reading and decoding input file
+
 void PDAQ_RawDecoder_HADES ( char *in_file_name,int maxEvents = 99999999,char *out_file_name=0 ) {
+
     pd_init_hst();
     //---------------------------------------------------------------
     // Open input file
@@ -172,9 +174,11 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,int maxEvents = 99999999,char *o
 
     while ( !in_file.eof() ) {
             
+
          if (N_events == maxEvents) {
              break;
          }
+
 
         // skip queue headers
         in_file.read ( ( char* ) &word,4 );
@@ -305,7 +309,10 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,int maxEvents = 99999999,char *o
 
             }  // end of loop over tdcs
 
+
             if (end_of_queue == true ) {
+
+
                 // printf("CLOSING EVENT\n");
 
                 tree->Fill();
@@ -314,10 +321,12 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,int maxEvents = 99999999,char *o
 
                 N_events++;
 
+
                 if ( N_events % 10000 == 0 ) printf ( "%d\n", N_events );
                 break;
                 //}
             }
+
         }  // end of sub loop
         
     }
@@ -337,7 +346,9 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,int maxEvents = 99999999,char *o
 int main ( int argc, char ** argv ) {
 
     if ( argc >= 3 )
+
         PDAQ_RawDecoder_HADES ( argv[1],atoi(argv[2]),argv[2] );
+
     else return 1;
 
     return 0;
