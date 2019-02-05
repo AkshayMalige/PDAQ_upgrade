@@ -129,7 +129,7 @@ int PDAQ_Stt_Calibirator(char* intree, int maxEvents, char* outtree)
 	//cout<<"check0 "<<endl; 
 	//printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
 	SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
-	//printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
+	printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
 	
 // 	if ((TestChannel*)t->getAddress(hit->tdcid, hit->new_channel)){continue;}
 // 	else {
