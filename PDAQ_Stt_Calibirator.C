@@ -36,7 +36,7 @@ bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
     return (a->leadTime < b->leadTime);
 }
 
-int PDAQ_Stt_Calibirator(char* intree, int maxEvents , char* outtree)
+int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 {
   
     MLookupManager* lm = MLookupManager::instance();
