@@ -65,6 +65,9 @@ target_link_libraries(pdaq_calibrater PDAQ ${ROOT_LIBRARIES})
 add_executable(pdaq_cluster_finder PDAQ_Cluster_Finder.cc)
 target_link_libraries(pdaq_cluster_finder PDAQ ${ROOT_LIBRARIES})
 
+add_executable(pdaq_cluster_finder_cosy PDAQ_Cluster_Finder_Cosy.cc)
+target_link_libraries(pdaq_cluster_finder_cosy PDAQ ${ROOT_LIBRARIES})
+
 add_executable(pdaq_drift_cal PDAQ_Drift_Cal.C)
 target_link_libraries(pdaq_drift_cal PDAQ ${ROOT_LIBRARIES})
 

@@ -352,7 +352,7 @@ int main ( int argc, char ** argv ) {
 	  printf("\n\nNote : One Million Events will be processed. To change add the number of events to be processed after the ouput file name.\n");
 	  //atoi(argv[3]) == 1000;
 	  sleep(2);
-	  PDAQ_RawDecoder_HADES ( argv[1],argv[2],1000000 );
+	  PDAQ_RawDecoder_HADES ( argv[1],argv[2],100000000 );
 	}
 	else 
 	  PDAQ_RawDecoder_HADES ( argv[1],argv[2],atoi(argv[3]) );

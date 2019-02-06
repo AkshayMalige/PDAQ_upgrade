@@ -132,21 +132,20 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 	//cout<<"check0 "<<endl; 
 	//printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
 	SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
-	printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
 	
 // 	if ((TestChannel*)t->getAddress(hit->tdcid, hit->new_channel)){continue;}
 // 	else {
 // 	  cout<<"Bad TDC Address"<<endl;}
 	 
-	//if (hit->tdcid!=0x8200 && hit->tdcid!=0x8100){
-//cout<<"Before"<<endl;	  
+	if (hit->isRef == false ){
+	    printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
 	    TestChannel *tc = 0;
 	    tc = (TestChannel*)t->getAddress(hit->tdcid, hit->channel);   
 	    //cout<<"After"<<endl;
 	    
 	    if (tc == 0) {
 	    }
-	    else {
+	    else if(tc->mod ==1) {
 	    
 	    
 	    //tc->print("   address");
@@ -205,7 +204,9 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 	      cal_hit->y =0;
 	      cal_hit->z =0;
 	    }
-	    }//}
+	    }
+	  
+	}
  	  
 	}
 

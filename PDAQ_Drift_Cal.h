@@ -34,9 +34,6 @@
 
 using namespace std;
 
-
-
 Bool_t PDAQ_Drift_Cal(void);
-
 
 #endif
