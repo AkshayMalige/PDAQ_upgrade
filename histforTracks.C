@@ -1,21 +1,21 @@
-#include <fstream>
-#include <TF1.h>
-#include <TLinearFitter.h>
-#include "TH2F.h"
-#include "TTree.h"
-#include "TFile.h"
-#include <string>
-#include <cmath>
 #include <iostream>
-#include <cstdlib>
+#include <fstream>
+#include <iomanip>
 #include <vector>
-#include <algorithm>
+#include <TH1F.h>
+#include "TFile.h"
 #include <TGraph.h>
+#include <TLinearFitter.h>
+#include <TH2D.h>
+#include "TTree.h"
+#include <TNamed.h>
+#include <TObject.h>
 #include <math.h>
 #include <cstdlib>
-#include <TLinearFitter.h>
-
-
+#include <TMultiGraph.h>
+#include "TRandom.h"
+#include <TCanvas.h>
+#include <TEllipse.h>
 #include "SttRawHit.h"
 #include "SttHit.h"
 #include "SttTrackHit.h"
@@ -42,7 +42,7 @@ Bool_t histforTracks(void)
   PandaSttTrack* STT_TRACK = new PandaSttTrack();
   
   
-    TFile * file = TFile::Open("c.root", "READ");
+    TFile * file = TFile::Open("c1.root", "READ");
 
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
@@ -88,8 +88,10 @@ Bool_t histforTracks(void)
     // DR_Tree->Branch("vec_z", &vec_z);
     // DR_Tree->Branch("vec_layer", &vec_layer);
 
-    TH2F* h_track[100];
+    TH2F* h_track[500];
 
+    TH1F* h_x;
+    h_x = new TH1F("h_x", "h_x", 16, 0, 16);
     
     Int_t iev = (Int_t)tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl
@@ -106,6 +108,22 @@ Bool_t histforTracks(void)
 		
 		for (int n = 0; n < STT_TRACK->stt_track_can.total_track_NTDCHits; n++)
 		{
+	        // char buff[200];
+	        // sprintf(buff, "can_%d", i);
+	        // TCanvas* c1 = new TCanvas(buff);
+	        // sprintf(buff, "h_%d", i);
+	        // int x_min = -10;
+	        // int x_max = 90;
+	        // int x_bins = (x_max - x_min) * 5;
+	        // int z_min = -10;
+	        // int z_max = 80;
+	        // int z_bins = (z_max - z_min) * 5;
+
+	        // TH2I* h = new TH2I(buff, "h;x,y [cm];z [cm]", x_bins, x_min, x_max, z_bins, z_min, z_max);
+	        // c1->cd();
+	        //h->Draw();
+
+
 	  		h_track[i] = new TH2F (Form("Track No %d - Straw Vs Layer",i),Form ("Track %d Straw VsLayer; Straw;Layer",i ),18.0,-1.0,17.0,20,0.0,10.0);
 
 
@@ -122,6 +140,28 @@ Bool_t histforTracks(void)
 				// vec_y.push_back(vec_track_can[t]->y);
 				// vec_z.push_back(vec_track_can[t]->z);
 				// vec_layer.push_back(vec_track_can[t]->layer);
+	   //          float uuu = 0.0;
+	   //          bool is_y = (vec_track_can[t]->layer % 2 == 0);
+	   //          if (is_y)
+	   //              uuu = vec_track_can[t]->y;
+	   //          else
+	   //              uuu = vec_track_can[t]->x;
+	   //          cout<<uuu<<"\t"<<vec_track_can[t]->z<<endl;
+	   //          TEllipse* straws = new TEllipse(uuu, vec_track_can[t]->z, 0.505, 0.505);
+	   //        //  box = new TBox(25,60,43,78);
+			 // //	box->SetFillColor(37);
+
+	   //          TMultiGraph* mg = new TMultiGraph();
+	            //mg->Draw();
+	            //TMultiGraph* mg1 = new TMultiGraph();
+
+	            //cout<<"see :"<<a->drifttime<<"\t"<<a->layer<<"\t"<<a->module<<"\t"<<a->fee<<"\t"<<a->fee_channel<<"\t"<<a->x<<"\t"<<a->y<<"\t"<<a->z<<endl;
+	            /////////
+
+	            //cout << "\t" << vec_hits.size() << "\t" << vec_hits[n]->drifttime << "\t" << vec_hits[n]->layer << "\t" << vec_hits[n]->module << "\t" << vec_hits[n]->fee << "\t" << vec_hits[n]->fee_channel << "\t" << vec_hits[n]->x << "\t" << vec_hits[n]->y << "\t" << vec_hits[n]->z << "\t" << endl;
+	            //straws->Draw("same");
+
+
 		    	if (vec_track_can[t]->straw%2 ==0)
 		    	{
 		    		h_track[i]->Fill((floor(vec_track_can[t]->straw)/2)-1,vec_track_can[t]->layer+0.5);
@@ -129,9 +169,15 @@ Bool_t histforTracks(void)
 		    	else
 		    		h_track[i]->Fill(vec_track_can[t]->straw/2,vec_track_can[t]->layer);
 
+		    	if (vec_track_can[t]->layer == 1 || vec_track_can[t]->layer == 4 || vec_track_can[t]->layer == 5 || vec_track_can[t]->layer == 8)
+		    		h_x->Fill(vec_track_can[t]->straw/2);
+		    	else
+		    		printf("assasa\n");
+
 				counterofdt++;		
 	      
 		    }
+
 		    	h_track[i]->Write();
 		 	  //DR_Tree->Fill();
 			  // vec_o_test.clear();
@@ -145,6 +191,8 @@ Bool_t histforTracks(void)
 
 	  
       }
+
+	h_x->Write();
 
     return kTRUE;
     

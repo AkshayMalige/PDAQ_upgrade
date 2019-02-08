@@ -120,7 +120,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 	if (i == maxEvents)
             break;
 
-        if ( i%10000 ==0 ) {
+        if ( i%2 ==0 ) {
             cout << "entry no. " << i << endl;
         }
 

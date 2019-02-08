@@ -345,7 +345,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 
 
 	  TF1* f1 = new TF1 ( "f1", "pol1" );
-	  TF1* f2 = new TF1 ( "f2", "pol1" );	 
+	  //TF1* f2 = new TF1 ( "f2", "pol1" );	 
 	  TGraph* chiX = new TGraph ( vec_ClustersX.size(), clusterArrayX, clusterArrayZx );
 	  chiX->Fit ( f1,"q" );
 	  chi_valueX = f1->GetChisquare();
@@ -399,7 +399,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 	    smallestP1 = vec_P1[ci];
 	}
     }
-    	    printf("smallest chix :%2.3f\n", smallestX);
+    	    //printf("smallest chix :%2.3f\n", smallestX);
 
 //     Float_t smallestY = vec_Chi2y[0];
 //     Float_t smallestPP0 = vec_PP0[0];
@@ -437,13 +437,13 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 
     for ( Int_t d = 0; d<vec_tracks.size(); d++ ) {
 	sumLeadTime += vec_tracks.at ( d )->leadTime;
-	printf("track size : %d", vec_tracks.size());
+	//printf("track size : %d", vec_tracks.size());
 // 	for (int ac=0; ac< 8; ac++)
 // 	  {
-	    printf("TDC :%x , Layer -%d , Straw -%d  \n",vec_tracks[d]->tdcid, vec_tracks[d]->layer,vec_tracks[d]->straw);
+	   // printf("TDC :%x , Layer -%d , Straw -%d  \n",vec_tracks[d]->tdcid, vec_tracks[d]->layer,vec_tracks[d]->straw);
 	  //}
     }
-	printf("\n*********************\n");
+	//printf("\n*********************\n");
 
     meanTime = sumLeadTime/vec_tracks.size();
 

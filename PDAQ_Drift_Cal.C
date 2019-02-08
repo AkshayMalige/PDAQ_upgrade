@@ -13,7 +13,7 @@ Bool_t PDAQ_Drift_Cal(void)
   PandaSttTrack* STT_TRACK = new PandaSttTrack();
   
   
-    TFile * file = TFile::Open("tracks3b.root", "READ");
+    TFile * file = TFile::Open("c.root", "READ");
 
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
