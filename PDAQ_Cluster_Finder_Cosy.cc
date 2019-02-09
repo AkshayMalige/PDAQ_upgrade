@@ -79,8 +79,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 
     MParManager* a = MParManager::instance();
     MFTGeomPar* ftGeomPar = new MFTGeomPar();
-    MPar * d;
-	
+    
     a->setParamSource("ftparams.txt");
     a->parseSource();
     pm()->addParameterContainer("MFTPar", ftGeomPar);
@@ -120,7 +119,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 	if (i == maxEvents)
             break;
 
-        if ( i%2 ==0 ) {
+        if ( i%100 ==0 ) {
             cout << "entry no. " << i << endl;
         }
 
@@ -137,6 +136,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 	{
             SttHit* cal_hit  = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
             All_hit_counter++;
+            printf("%x  %i\n",cal_hit->tdcid,cal_hit->layer);
             // hit on reference channel
             if ( cal_hit->isRef == true ) 
 	    {
@@ -222,7 +222,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 		    if ( currentNumber >= minNumber )     // Previous was a valid group
 		    {
 			numGroups++;
-			PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event);
+			PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar);
 		    }
 		    vec_stthits.clear();
 		    SttHit* h = vec_leadTime.at(e);
@@ -236,7 +236,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 	      if ( currentNumber >= minNumber )           // Previous was a valid group
 	      {
 		  numGroups++;
-		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event);
+		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar);
 	      }
 	    }
 

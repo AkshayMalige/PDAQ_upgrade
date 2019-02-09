@@ -160,26 +160,18 @@ std::vector< std::vector<std::vector<SttHit*> >> make_tuples( const std::vector<
 
 int PDAQ_Cluster_Finder_Cosy(char* intree, int maxEvents = 1000000000, char* outtree="PDAQ_cluster_output.root");
 
-bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,Stt_Track_Event* stt_event)
+bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,Stt_Track_Event* stt_event, MFTGeomPar* ftGeomPar)
 {
       //for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
 	//vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
-// 	for (int ac=0; ac< vec_stthits.size(); ac++)
-// 	{
-// 	  printf("TDC :%x , Layer -%d , Straw -%d  \n",vec_stthits[ac]->tdcid, vec_stthits[ac]->layer,vec_stthits[ac]->straw);
-// 	}
+ 	for (int ac=0; ac< vec_stthits.size(); ac++)
+ 	{
+ 	  printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid, vec_stthits[ac]->layer,vec_stthits[ac]->straw);
+ 	}
 // 	printf("\n*********************\n");
     //}
     int max_cluster_intake=0;
     float max_dt_offset = 0;     
-
-    MParManager* a = MParManager::instance();
-    MFTGeomPar* ftGeomPar = new MFTGeomPar();
-    MPar * d;
-	
-    a->setParamSource("ftparams.txt");
-    a->parseSource();
-    pm()->addParameterContainer("MFTPar", ftGeomPar);	
  
     //max_cluster_intake = ftGeomPar->getClusterLimit();
     max_dt_offset = ftGeomPar->getDTOffset();

@@ -163,6 +163,8 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
     UInt_t tdc_words = 0;
     bool end_of_queue = false;
 
+    UInt_t trigger_nr = 0;
+    UInt_t decoding = 0;
     UInt_t channel_nr = 0;
     UInt_t edge = 0;
     UInt_t fine = 0;
@@ -183,151 +185,163 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
         // skip queue headers
         in_file.read ( ( char* ) &word,4 );
         queue_size = word / 4;
-        // printf("\t Queue: size: %d\n", queue_size); 
-        in_file.ignore(28);
+        //printf("\t Queue: size: %d\n", queue_size);
+        
+        if (queue_size < 20) {  // skipping empty queues
+            in_file.ignore((queue_size - 1) * 4);
+        }
+        
+        else {
+            in_file.ignore(28);
 
-        queue_words = 8;
+            queue_words = 8;
 
-        end_of_queue = false;
+            end_of_queue = false;
 
-        while( !in_file.eof() ) {
-
-            // decode sub headers
-            word = readWord(&in_file);  // sub_size
-            sub_size = word / 4;
-            in_file.ignore(4);  // decoding
-            word = readWord(&in_file);  // sub_id
-            sub_id = word & 0xffff;
-            in_file.ignore(4);  // trigger nr
-            // printf("Subevent: id: %x size: %d\n", sub_id, sub_size);
-
-            queue_words += 4;
-
-            // loop over TDCs
             while( !in_file.eof() ) {
 
-                word = readWord(&in_file);  // tdc headers
-                // printf("%x\n", word);
-                tdc_size = (word >> 16) & 0xffff;  // tdc size
-                tdc_id = word & 0xffff;
-                // printf("\tTDC: id: %x size: %d\n", tdc_id, tdc_size);
+                // decode sub headers
+                word = readWord(&in_file);  // sub_size
+                sub_size = word / 4;
+                //in_file.ignore(4);  // decoding
+                word = readWord(&in_file);
+                decoding = word;
+                word = readWord(&in_file);  // sub_id
+                sub_id = word & 0xffff;
+                //in_file.ignore(4);  // trigger nr
+                word = readWord(&in_file);
+                trigger_nr = word;
+                //printf("Subevent: id: %x size: %d trg:%x\n", sub_id, sub_size, trigger_nr);
 
-                queue_words++;
-                tdc_words = 0;
+                queue_words += 4;
 
-                if (tdc_id == 0x5555) {  // skip control subsub
-                    in_file.ignore(4);
+                // loop over TDCs
+                while( !in_file.eof() ) {
+
+                    word = readWord(&in_file);  // tdc headers
+                    // printf("%x\n", word);
+                    tdc_size = (word >> 16) & 0xffff;  // tdc size
+                    tdc_id = word & 0xffff;
+                    // printf("\tTDC: id: %x size: %d\n", tdc_id, tdc_size);
+
                     queue_words++;
-                    if (sub_size % 2 != 0) {  // skip padding word
+                    tdc_words = 0;
+
+                    if (tdc_id == 0x5555) {  // skip control subsub
                         in_file.ignore(4);
                         queue_words++;
+                        if (sub_size % 2 != 0) {  // skip padding word
+                            in_file.ignore(4);
+                            queue_words++;
+                        }
+                        //printf("trailer: queue:%d queue_words:%d\n", queue_size, queue_words);
+                        if (queue_size == queue_words) {
+                            end_of_queue = true;
+                        }
+                        break;
                     }
-                    // printf("trailer: queue:%d queue_words:%d\n", queue_size, queue_words);
-                    if (queue_size == queue_words) {
-                        end_of_queue = true;
-                    }
-                    break;
-                }
-                else {
-                    // loop over TDC data
-                    while ( !in_file.eof()) {
+                    else {
+                        // loop over TDC data
+                        while ( !in_file.eof()) {
 
-                        word = readWord(&in_file);
-                        tdc_words++;
-                        queue_words++;
-                        // printf("%x\n", word);
+                            word = readWord(&in_file);
+                            tdc_words++;
+                            queue_words++;
+                            // printf("%x\n", word);
 
-                        if ( ( ( word >> 28 ) & 0xf ) == 0x8 ) { // hit marker
-                            channel_nr = (( word >> 22 ) & 0x7f );
-                            edge = ( ( word >> 11 ) & 0x1 );
-                            fine = ( ( word >> 12 ) & 0x3ff );
-                            coarse = ( word & 0x7ff );
+                            if ( ( ( word >> 28 ) & 0xf ) == 0x8 ) { // hit marker
+                                channel_nr = (( word >> 22 ) & 0x7f );
+                                edge = ( ( word >> 11 ) & 0x1 );
+                                fine = ( ( word >> 12 ) & 0x3ff );
+                                coarse = ( word & 0x7ff );
 
-                            h_stt_tdc_channels->Fill ( channel_nr );
+                                h_stt_tdc_channels->Fill ( channel_nr );
 
-                            double time = ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
-                            time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
+                                double time = ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
+                                time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
 
-                            if ( channel_nr == 0 ) { // ref time
-                                refTime = time;
+                                if ( channel_nr == 0 ) { // ref time
+                                    refTime = time;
 
-                                SttRawHit* a = stt_event->AddHit ( channel_nr );
-                                a->tdcid = tdc_id;
-                                a->leadTime = time;
-                                a->trailTime = 0;
-                                a->isRef = true;
+                                    SttRawHit* a = stt_event->AddHit ( channel_nr );
+                                    a->tdcid = tdc_id;
+                                    a->leadTime = time;
+                                    a->trailTime = 0;
+                                    a->isRef = true;
 
-                                // printf("\tRef R: %f on channel %d on %x on %x\n", a->leadTime, channel_nr, tdc_id, sub_id);
-                            } else {
-                                if ( edge == 1 ) { // rising edge
-                                    h_stt_tdc_leadTimes->Fill ( time - refTime );
+                                    // printf("\tRef R: %f on channel %d on %x on %x\n", a->leadTime, channel_nr, tdc_id, sub_id);
+                                } else {
+                                    if ( edge == 1 ) { // rising edge
+                                        h_stt_tdc_leadTimes->Fill ( time - refTime );
 
-                                    lastRise = refTime - time;
-                                } else { // falling edge
+                                        lastRise = refTime - time;
+                                    } else { // falling edge
 
-                                    if ( lastRise != 0 ) { // only in case there was a rising to pair
+                                        if ( lastRise != 0 ) { // only in case there was a rising to pair
 
-                                        bool doubleHit = false;
+                                            bool doubleHit = false;
 
-                                        // for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++ ) {
-                                        //     //cout<<"totalNTDCHits "<<stt_event->totalNTDCHits<<"\t"<<endl;
-                                        //     if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->channel == channel_nr + stt_channel_offsets[tdc_id] ) {
-                                        //         if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->leadTime == lastRise ) {
-                                        //             //cout<<"Double hit :"<<endl;
-                                        //             doubleHit = true;
-                                        //             doubleCntr++;
-                                        //         }
-                                        //     }
+                                            // for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++ ) {
+                                            //     //cout<<"totalNTDCHits "<<stt_event->totalNTDCHits<<"\t"<<endl;
+                                            //     if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->channel == channel_nr + stt_channel_offsets[tdc_id] ) {
+                                            //         if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->leadTime == lastRise ) {
+                                            //             //cout<<"Double hit :"<<endl;
+                                            //             doubleHit = true;
+                                            //             doubleCntr++;
+                                            //         }
+                                            //     }
 
-                                        //     doubleCntr1++;
-                                        // }
+                                            //     doubleCntr1++;
+                                            // }
 
-                                        if ( doubleHit == false ) {
-                                            SttRawHit* a = stt_event->AddHit ( channel_nr);
-                                            a->tdcid = tdc_id;
-                                            a->leadTime = lastRise;
-                                            a->trailTime = ( refTime - time );
-                                            a->tot = ( a->leadTime - a->trailTime );
-                                            a->isRef = false;
-                                            // printf("\tHit: %f on channel %d on %x on %x\n", a->leadTime, channel_nr, tdc_id, sub_id);
+                                            if ( doubleHit == false ) {
+                                                SttRawHit* a = stt_event->AddHit ( channel_nr);
+                                                a->tdcid = tdc_id;
+                                                a->leadTime = lastRise;
+                                                a->trailTime = ( refTime - time );
+                                                a->tot = ( a->leadTime - a->trailTime );
+                                                a->isRef = false;
+                                                // printf("\tHit: %f on channel %d on %x on %x\n", a->leadTime, channel_nr, tdc_id, sub_id);
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        else if ( ( ( word >> 28 ) & 0xf ) == 0x6 ) { // epoch counter
-                            epoch = word & 0xffffff;
-                            // printf("\tEpoch: %x on %x on %x\n", epoch, tdc_id, sub_id);
-                        }
+                            else if ( ( ( word >> 28 ) & 0xf ) == 0x6 ) { // epoch counter
+                                epoch = word & 0xffffff;
+                                // printf("\tEpoch: %x on %x on %x\n", epoch, tdc_id, sub_id);
+                            }
 
-                        if (tdc_words == tdc_size) {
-                            // printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
-                            break;
-                        }
-                    }  // end of tdc data loop
-                }  // tdc select if
+                            if (tdc_words == tdc_size) {
+                                //printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
+                                break;
+                            }
+                        }  // end of tdc data loop
+                    }  // tdc select if
 
-            }  // end of loop over tdcs
-
-
-            if (end_of_queue == true ) {
+                }  // end of loop over tdcs
 
 
-                // printf("CLOSING EVENT\n");
-
-                tree->Fill();
-                stt_event->Clear();
-                emc_event->Clear();
-
-                N_events++;
+                if (end_of_queue == true ) {
 
 
-                if ( N_events % 10000 == 0 ) printf ( "%d\n", N_events );
-                break;
-                //}
-            }
+                    // printf("CLOSING EVENT\n");
 
-        }  // end of sub loop
+                    tree->Fill();
+                    stt_event->Clear();
+                    emc_event->Clear();
+
+                    N_events++;
+
+
+                    if ( N_events % 10000 == 0 ) printf ( "%d\n", N_events );
+                    break;
+                    //}
+                }
+
+            }  // end of sub loop
+            
+        }  // end of queue size if
         
     }
 
