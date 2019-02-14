@@ -1,4 +1,5 @@
 #include "PDAQ_RawDecoder_EMC_STT.h"
+#include "panda_subsystem_sci.h"
 
 
 //std::stringstream sstream;
@@ -34,6 +35,7 @@ SttDetector stt_det;
 PandaSubsystemSB* sb = new PandaSubsystemSB();
 PandaSubsystemSTT* stt = new PandaSubsystemSTT();
 PandaSubsystemEMC* emc = new PandaSubsystemEMC();
+PandaSubsystemSCI* sci = new PandaSubsystemSCI();
 
 //===================================================================
 // Zero event
@@ -128,6 +130,8 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
 
     EmcEvent* emc_event = & ( emc->emc_raw );
 
+    SciEvent* sci_event = & ( sci->sci_raw );
+
     // Open output file
     bool use_tree_output = false;
     TFile *ofile;
@@ -143,6 +147,8 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
         tree->Branch ( "SB", "PandaSubsystemSB", &sb, 64000, 2 );
         tree->Branch ( "STT", "PandaSubsystemSTT", &stt, 64000, 99 );
         tree->Branch ( "EMC", "PandaSubsystemEMC", &emc, 64000, 99 );
+	tree->Branch ( "SCI", "PandaSubsystemSCI", &sci, 64000, 99 );
+
     } else {
         abort();
     }
@@ -259,8 +265,9 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
 
                                 double time = ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
                                 time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
+				
 
-                                if ( channel_nr == 0 ) { // ref time
+                                 if ( channel_nr == 0 ) { // ref time
                                     refTime = time;
 
                                     SttRawHit* a = stt_event->AddHit ( channel_nr );
@@ -272,9 +279,19 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
                                     // printf("\tRef R: %f on channel %d on %x on %x\n", a->leadTime, channel_nr, tdc_id, sub_id);
                                 } else {
                                     if ( edge == 1 ) { // rising edge
+					lastRise = refTime - time;
                                         h_stt_tdc_leadTimes->Fill ( time - refTime );
+					  if (tdc_id == 0x6500 && channel_nr ==1)
+					    {
+					      SciHit* s = sci_event->AddSciHit();
+					      s->tdcid = tdc_id;
+					      s->channel = channel_nr;
+					      s->leadTime = lastRise;
+					      s->trailTime = ( refTime - time );
+					      s->isRef = false;
+					      //printf("0x6500\n");
+					    }
 
-                                        lastRise = refTime - time;
                                     } else { // falling edge
 
                                         if ( lastRise != 0 ) { // only in case there was a rising to pair
@@ -293,8 +310,19 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
 
                                             //     doubleCntr1++;
                                             // }
+					   /* if (tdc_id == 0x6500 && channel_nr ==1)
+					    {
+					      SciHit* s = sci_event->AddSciHit();
+					      s->tdcid = tdc_id;
+					      s->channel = channel_nr;
+                                              s->leadTime = lastRise;
+                                              s->trailTime = ( refTime - time );
+					      s->isRef = false;
+					      //printf("0x6500");
+					    }*/
 
-                                            if ( doubleHit == false ) {
+                                            
+					    
                                                 SttRawHit* a = stt_event->AddHit ( channel_nr);
                                                 a->tdcid = tdc_id;
                                                 a->leadTime = lastRise;
@@ -302,7 +330,7 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
                                                 a->tot = ( a->leadTime - a->trailTime );
                                                 a->isRef = false;
                                                 // printf("\tHit: %f on channel %d on %x on %x\n", a->leadTime, channel_nr, tdc_id, sub_id);
-                                            }
+                                            
                                         }
                                     }
                                 }
@@ -330,11 +358,12 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
                     tree->Fill();
                     stt_event->Clear();
                     emc_event->Clear();
+		    sci_event->Clear();
 
                     N_events++;
 
 
-                    if ( N_events % 10000 == 0 ) printf ( "%d\n", N_events );
+                    if ( N_events % 1000 == 0 ) printf ( "%d\n", N_events );
                     break;
                     //}
                 }
@@ -355,6 +384,8 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
         ofile->Close();
     }
     std::cout << "Total number of processed events: " << N_events << std::endl;
+    cout << "In File: "<<"\t"<<in_file_name<<"\t"<<"Out File: "<<"\t"<<out_file_name<<endl;
+
 }
 
 int main ( int argc, char ** argv ) {

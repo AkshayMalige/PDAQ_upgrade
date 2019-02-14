@@ -120,9 +120,9 @@ int PDAQ_Cluster_Finder ( char* intree, int maxEvents, char* outtree) {
 	if (i == maxEvents)
             break;
 
-        if ( i%10000 ==0 ) {
+        //if ( i%10000 ==0 ) {
             cout << "entry no. " << i << endl;
-        }
+        //}
 
         memset ( hitOnLayer, 0, MAX_FT_TOTAL_LAYERS*500*sizeof ( SttHit* ) );
         int hitMultOnLayer[MAX_FT_TOTAL_LAYERS];

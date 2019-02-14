@@ -3,6 +3,7 @@
 #include <MLookupContainer.h>
 #include <MLookupManager.h>
 #include <MLookupManager.cc>
+#include "panda_subsystem_sci.h"
                            
 using namespace std;
 
@@ -30,7 +31,6 @@ public:
 };
 
 
-
 bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
 {
     return (a->leadTime < b->leadTime);
@@ -42,7 +42,7 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
     MLookupManager* lm = MLookupManager::instance();
     lm->setSource("lookup.txt");
     lm->parseSource();        
-    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0x6000, 0xe203, 49);
+    MLookupTable * t = (MLookupTable*) new TestLookupTable("TestLookup", 0x6000, 0x6500, 49);
  
     MParManager* a = MParManager::instance();
     MFTGeomPar* ftGeomPar = new MFTGeomPar();
@@ -61,6 +61,7 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
     { 
 	printf("*ftGeomPar:%i\n", ftGeomPar);
     }
+       
 
     ftGeomPar->print();
     
@@ -70,7 +71,9 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
     PandaSttCal* CAL = new PandaSttCal();
     Stt_Cal_Event* stt_event = &(CAL->stt_cal);
     SttDetector stt_det;
-
+    PandaSubsystemSCI* SCI = 0;
+    PandaSubsystemSCI* SCI_CAL = new PandaSubsystemSCI();
+    SciEvent* sci_event = & ( SCI_CAL->sci_raw );
 
 //     TFile file("Raw3b.root", "READ");
 //     TTree* tree = (TTree*)file.Get("PDAQ_tree");
@@ -90,12 +93,13 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 
     //tree->Print();
     cout<<"tree loading: "<<tree->SetBranchAddress("STT", &STT)<<endl;
-
+    cout<<"tree loading: "<<tree->SetBranchAddress("SCI", &SCI)<<endl;
 
     Double_t repeat =0;
     Double_t All_repeat =0;
     int good_counter =0;
     double percentage =0.0;
+
 
     Int_t nentries = (Int_t)tree->GetEntries();
     std::cout << nentries << "\n";
@@ -103,8 +107,11 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
     TFile* Ttree = new TFile(outtree, "RECREATE");
     TTree* PDAQ_tree = new TTree("PDAQ_tree", "PDAQ_tree");    
     PDAQ_tree->Branch("STT_CAL", "PandaSttCal", &CAL, 64000, 99);
+    PDAQ_tree->Branch("SCI_CAL", "PandaSubsystemSCI", &SCI_CAL, 64000, 99);
 
     Long_t global_cnt = 0;
+    //TH2F* h_TotVsChannel = new TH2F("TotVsChannel", "TotVsChannel", 1000, -100, 700, 300, 0, 300);
+
 
      for (Long_t e = 0; e < nentries; e++)
     {
@@ -124,29 +131,43 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 
 	PDAQ_tree->Fill();
 	stt_event->CalClear();
+	sci_event->Clear();
         
-        //cout<<"^^^^^^^^^totalNTDCHits : "<<STT->stt_raw.totalNTDCHits<<endl<<endl;
+        //cout<<"^^^^^^^^^totalNTDCHits : "<<STT->stt_raw.totalNTDCHits<<"\t^^^^^ Sci "<<SCI->sci_raw.totalNTDCHits<<endl<<endl;
 
+        for (int s = 0; s < SCI->sci_raw.totalNTDCHits; s++)
+        {
+	  SciHit* scihit  = (SciHit*)SCI->sci_raw.adc_hits->ConstructedAt(s);
+	  SciHit* shit = sci_event->AddSciHit();  
+	  shit->tdcid = scihit->tdcid;
+	  shit->channel = scihit->channel;
+	  shit->leadTime = scihit->leadTime;
+	  shit->trailTime = scihit->trailTime;
+	  shit->isRef = scihit->isRef;
+	        
+	}	
+	
+	
         for (int i = 0; i < STT->stt_raw.totalNTDCHits; i++)
         { //cout<<endl<<endl;
 	//cout<<"check0 "<<endl; 
 	//printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
+
 	SttRawHit* hit  = (SttRawHit*)STT->stt_raw.tdc_hits->ConstructedAt(i); // retrieve particular hit 
-	
 // 	if ((TestChannel*)t->getAddress(hit->tdcid, hit->new_channel)){continue;}
 // 	else {
 // 	  cout<<"Bad TDC Address"<<endl;}
 	 
 	if (hit->isRef == false ){
-	    printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
+	    //printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
 	    TestChannel *tc = 0;
 	    tc = (TestChannel*)t->getAddress(hit->tdcid, hit->channel);   
 	    //cout<<"After"<<endl;
-	    
 	    if (tc == 0) {
 	    }
 	    else if(tc->mod ==1) {
-	    
+ 
+
 	    
 	    //tc->print("   address");
             SttHit* cal_hit = stt_event->AddCalHit(hit->channel);  
@@ -158,6 +179,9 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
             cal_hit->layer = tc->lay;
             cal_hit->straw = tc->straw;
 	    cal_hit->station= tc->mod;
+	    
+
+	    
 	    if (tc->straw%2==0){cal_hit->plane=1;}
 	    else   {cal_hit->plane = 0;} 
 	    
@@ -170,7 +194,6 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 
 	    if (cal_hit->isRef==false && cal_hit->tdcid != 0xe103)
 	    {
-	    	     	   		//cout<<"check 2"<<endl;    
 
 	     // printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln: %i X: %.3f Y: %.3f Z: %.3f\n",
 	    //  cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
@@ -211,8 +234,7 @@ int PDAQ_Stt_Calibirator(char* intree , char* outtree, int maxEvents)
 	}
 
     }// over events
-
- 
+    
     PDAQ_tree->Write();
     cout << "Repeated entries  :"<< repeat<<"/"<<All_repeat<<endl;  
     cout << "Good Hits : "<<good_counter<<endl;

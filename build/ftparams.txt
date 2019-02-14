@@ -49,7 +49,7 @@ fLayerRotation:  Float_t \
 
 nTrack_min_size: Int_t 16 \
 
-nleadtime_window: Float_t 250 \
+nleadtime_window: Float_t 2560 \
 
 ncluster_limit: Int_t 50 \
 

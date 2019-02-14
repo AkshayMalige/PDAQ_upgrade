@@ -1,16 +1,18 @@
 #include "PDAQ_Cluster_Finder_Cosy.h"
+#include "panda_subsystem_sci.h"
 
 using namespace std;
 
-int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
+int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 
     PandaSubsystemSTT* STT_RAW = 0;
     PandaSubsystemSTT* CAL = 0;
+    PandaSubsystemSCI* SCI_CAL = 0;
 
     printf("%s\n",outtree);
     PandaSttCal* STT_CAL = new PandaSttCal();
-
-
+    PandaSubsystemSCI* SCI_TRACKS = new PandaSubsystemSCI();
+    SciEvent* sci_event = & ( SCI_TRACKS->sci_raw );
 
     PandaSttTrack* STT_TRACKS = new PandaSttTrack();
     Stt_Track_Event* stt_event = & ( STT_TRACKS->stt_track_can );
@@ -35,6 +37,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
     std::vector<SttHit*> vec_All_tracks;
 
     tree->SetBranchAddress ( "STT_CAL", &STT_CAL );
+    tree->SetBranchAddress ( "SCI_CAL", &SCI_CAL );
+
     TFile* Ttree = new TFile (outtree, "RECREATE" );
     TTree* PDAQ_tree =  new TTree ( "PDAQ_tree", "PDAQ_tree" );
     PDAQ_tree->Branch ( "STT_TRACKS", "PandaSttTrack", &STT_TRACKS, 64000, 99 );
@@ -119,7 +123,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 	if (i == maxEvents)
             break;
 
-        if ( i%100 ==0 ) {
+        if ( i%1000 ==0 ) {
             cout << "entry no. " << i << endl;
         }
 
@@ -136,7 +140,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 	{
             SttHit* cal_hit  = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
             All_hit_counter++;
-            printf("%x  %i\n",cal_hit->tdcid,cal_hit->layer);
+            //printf("%x  %3.2f\n",cal_hit->tdcid,cal_hit->tot);
             // hit on reference channel
             if ( cal_hit->isRef == true ) 
 	    {
@@ -250,10 +254,21 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, int maxEvents, char* outtree) {
 }
 
 int main ( int argc, char ** argv ) {
-
+  
+  
     if ( argc >= 3 )
-        PDAQ_Cluster_Finder_Cosy ( argv[1], atoi(argv[2]) , argv[3] );
-    else return 1;
+      
+      	if (!argv[3])
+	{
+	  printf("\n\nNote : One Million Events will be processed. To change add the number of events to be processed after the ouput file name.\n");
+	  //atoi(argv[3]) == 1000;
+	  sleep(2);
+	  PDAQ_Cluster_Finder_Cosy ( argv[1],argv[2],1000000 );
+	}
+	else 
+        PDAQ_Cluster_Finder_Cosy ( argv[1] , argv[2],atoi(argv[3]) );
+    
+	else return 1;
 
     return 0;
 }

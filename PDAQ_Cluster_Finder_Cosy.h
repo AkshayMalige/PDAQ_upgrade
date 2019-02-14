@@ -158,16 +158,16 @@ std::vector< std::vector<std::vector<SttHit*> >> make_tuples( const std::vector<
     return result ;
 }
 
-int PDAQ_Cluster_Finder_Cosy(char* intree, int maxEvents = 1000000000, char* outtree="PDAQ_cluster_output.root");
+int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
 
 bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,Stt_Track_Event* stt_event, MFTGeomPar* ftGeomPar)
 {
       //for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
 	//vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
- 	for (int ac=0; ac< vec_stthits.size(); ac++)
+ 	/*for (int ac=0; ac< vec_stthits.size(); ac++)
  	{
  	  printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid, vec_stthits[ac]->layer,vec_stthits[ac]->straw);
- 	}
+ 	}*/
 // 	printf("\n*********************\n");
     //}
     int max_cluster_intake=0;
@@ -452,6 +452,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 //     b->Py1 = smallestPP1;
 //     b->Chix = smallestX;
 //     b->Chiy = smallestY;
+    //printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
 
 
     for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {

@@ -87,6 +87,9 @@ void MLookupTable::init()
         uint addr, chan;
         char address[1024];
         sscanf(lv[i].c_str(), "%x %d %s", &addr, &chan, address);
+	
+	//std::cerr<<"A "<<std::hex<<addr<<" "<<i<<std::endl;
+	
         if (addr < a_min or addr > a_max)
         {
             std::cerr << "Can't add board " << addr << " inside (0x" << std::hex << a_min << ", 0x" << a_max << std::dec << "), skipping." << std::endl;
