@@ -14,6 +14,7 @@ public:
 	// double tot;
 	double drifttime;
 	double DriftRadius;
+	double meanDriftTime;
 	
 	short station;
 	short plane;

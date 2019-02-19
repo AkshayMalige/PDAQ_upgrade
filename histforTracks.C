@@ -42,7 +42,7 @@ Bool_t histforTracks(void)
   PandaSttTrack* STT_TRACK = new PandaSttTrack();
   
   
-    TFile * file = TFile::Open("c1.root", "READ");
+    TFile * file = TFile::Open("c.root", "READ");
 
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
@@ -88,7 +88,7 @@ Bool_t histforTracks(void)
     // DR_Tree->Branch("vec_z", &vec_z);
     // DR_Tree->Branch("vec_layer", &vec_layer);
 
-    TH2F* h_track[500];
+    TH2F* h_track[100];
 
     TH1F* h_x;
     h_x = new TH1F("h_x", "h_x", 16, 0, 16);
@@ -99,7 +99,7 @@ Bool_t histforTracks(void)
 	 
 	 cout<<STT_TRACK->stt_track_can.total_track_NTDCHits<<endl;
 	
-    for (Int_t i = 0; i < iev; i++) 
+    for (Int_t i = 0; i < 100; i++) 
     {
         tree->GetEntry(i);
 		if (i%100==0){

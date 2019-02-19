@@ -18,10 +18,8 @@ SttHit::SttHit() {
 			DriftRadius =0;
 			layer = 0;
 			straw = 0;
-			//module = 0;
-			//fee = 0;
-			//fee_channel = 0;
 			cell = 0;
+			meanDriftTime =0;
 	
 			//cell2 = 0;
 			x = 0;

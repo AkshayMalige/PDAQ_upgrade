@@ -1,5 +1,6 @@
 #include "PDAQ_Cluster_Finder_Cosy.h"
 #include "panda_subsystem_sci.h"
+#include "SciHit.h"
 
 using namespace std;
 
@@ -78,6 +79,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
     
     float max_lead_time_diff = 0;
     int min_track_hits = 0;
+    bool Scint = false;
+    float refTime =0;
     
      
 
@@ -133,14 +136,16 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
         for ( int h = 0; h < MAX_FT_TOTAL_LAYERS; h++ ) {
             hitMultOnLayer[h] = 0;
         }
-
-
+	//cout<<"Sizes "<<STT_CAL->stt_cal.total_cal_NTDCHits<<"\t"<<SCI_CAL->sci_raw.totalNTDCHits<<"\t"<<t->channel<<endl;
+	
         //Loop over the vector elements//////////////////////////////////////////////////////
         for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) 
 	{
             SttHit* cal_hit  = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
             All_hit_counter++;
-            //printf("%x  %3.2f\n",cal_hit->tdcid,cal_hit->tot);
+
+	     
+  
             // hit on reference channel
             if ( cal_hit->isRef == true ) 
 	    {
@@ -203,7 +208,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
             std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
             vec_stthits.clear();
    
-	    if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake)
+	    if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake )
 	    {
 	      const int minNumber = min_track_hits;
 	      const int maxDifference = max_lead_time_diff - 1;
@@ -226,7 +231,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 		    if ( currentNumber >= minNumber )     // Previous was a valid group
 		    {
 			numGroups++;
-			PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar);
+			PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar,SCI_CAL);
 		    }
 		    vec_stthits.clear();
 		    SttHit* h = vec_leadTime.at(e);
@@ -240,11 +245,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 	      if ( currentNumber >= minNumber )           // Previous was a valid group
 	      {
 		  numGroups++;
-		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar);
+		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar,SCI_CAL);
 	      }
 	    }
 
 	  }
+	
 
       }//End of loop over events
 
@@ -263,7 +269,7 @@ int main ( int argc, char ** argv ) {
 	  printf("\n\nNote : One Million Events will be processed. To change add the number of events to be processed after the ouput file name.\n");
 	  //atoi(argv[3]) == 1000;
 	  sleep(2);
-	  PDAQ_Cluster_Finder_Cosy ( argv[1],argv[2],1000000 );
+	  PDAQ_Cluster_Finder_Cosy ( argv[1],argv[2],1000000);
 	}
 	else 
         PDAQ_Cluster_Finder_Cosy ( argv[1] , argv[2],atoi(argv[3]) );

@@ -22,6 +22,7 @@
 #include "SttHit.h"
 #include "SttEvent.h"
 #include "SttTrackEvent.h"
+#include "SciHit.h"
 
                           
 #include "panda_subsystem.h"
@@ -29,6 +30,7 @@
 #include "panda_subsystem_sb.h"
 #include "panda_stt_cal.h"
 #include "panda_stt_track.h"
+#include "panda_subsystem_sci.h"
 
 #include <cctype>
 #include <fstream>
@@ -160,7 +162,7 @@ std::vector< std::vector<std::vector<SttHit*> >> make_tuples( const std::vector<
 
 int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
 
-bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,Stt_Track_Event* stt_event, MFTGeomPar* ftGeomPar)
+bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,Stt_Track_Event* stt_event, MFTGeomPar* ftGeomPar,PandaSubsystemSCI* SCI_CAL)
 {
       //for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
 	//vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
@@ -429,11 +431,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 
     for ( Int_t d = 0; d<vec_tracks.size(); d++ ) {
 	sumLeadTime += vec_tracks.at ( d )->leadTime;
-	//printf("track size : %d", vec_tracks.size());
-// 	for (int ac=0; ac< 8; ac++)
-// 	  {
-	   // printf("TDC :%x , Layer -%d , Straw -%d  \n",vec_tracks[d]->tdcid, vec_tracks[d]->layer,vec_tracks[d]->straw);
-	  //}
+
     }
 	//printf("\n*********************\n");
 
@@ -442,26 +440,40 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 //Write Tracks
     stt_event->TrackClear();
 
-    SttTrackHit* b = stt_event->AddTrackHit();
-    b->vec_Track = vec_tracks;
-    b->trackId = i;
-    b->trackSize = vec_tracks.size();
-    b->Px0 = smallestP0;
-    b->Px1 = smallestP1;
+
 //     b->Py0 = smallestPP0;
 //     b->Py1 = smallestPP1;
 //     b->Chix = smallestX;
 //     b->Chiy = smallestY;
     //printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
-
-
-    for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {
-	vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
-// 	for (int ac=0; ac< vec_tracks.size(); ac++)
-// 	{
-// 	  printf("TDC :%x , Layer -%d , Straw -%d  \n",vec_tracks[tq][ac].tdcid, vec_tracks[tq][ac].layer,vec_tracks[tq][ac].straw);
-// 	}
-// 	printf("\n*********************\n");
+float refTime = 0;
+float refDiff = 0;
+    for (int rt=0; rt<SCI_CAL->sci_raw.totalNTDCHits; rt++)
+    {
+      SciHit* sh = (SciHit*) SCI_CAL->sci_raw.adc_hits->ConstructedAt(rt);
+      refDiff = (sh->leadTime - meanTime);
+      refTime = sh->leadTime;
+    }
+    if (refDiff<=500 )
+    {
+      SttTrackHit* b = stt_event->AddTrackHit();
+      b->vec_Track = vec_tracks;
+      b->trackId = i;
+      b->trackSize = vec_tracks.size();
+      b->Px0 = smallestP0;
+      b->Px1 = smallestP1;
+      b->DriftT = refDiff;
+      
+      for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {
+	  //vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
+	  vec_tracks[tq]->drifttime =  max_dt_offset+( refTime - ( vec_tracks[tq]->leadTime ) ) ;
+	  vec_tracks[tq]->meanDriftTime =  max_dt_offset+( meanTime - ( vec_tracks[tq]->leadTime ) ) ;
+  // 	for (int ac=0; ac< vec_tracks.size(); ac++)
+  // 	{
+	    //printf("TDC : %x , Layer: %d , Straw: %d  ,LeadTime:%3.2f, Meantime: %3.2f, DriftTime: %3.2f\n",vec_tracks[tq]->tdcid, vec_tracks[tq]->layer,vec_tracks[tq]->straw,vec_tracks[tq]->leadTime,meanTime, vec_tracks[tq]->drifttime);
+  // 	}
+  // 	printf("\n*********************\n");
+      }
     }
 
     

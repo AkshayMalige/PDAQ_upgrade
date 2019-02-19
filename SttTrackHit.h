@@ -35,6 +35,8 @@ public:
      double Py0;
      double Py1;
      double Chiy;
+     double DriftT;
+     
 	//short cell2;
 
 	//bool isRef;

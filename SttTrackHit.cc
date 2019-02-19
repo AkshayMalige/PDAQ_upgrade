@@ -24,6 +24,7 @@ SttTrackHit::SttTrackHit() {
       Py0 = 0;
       Py1 = 0;
       Chiy = 0;
+      DriftT =0;
 
 			// drifttime =0;
 			// DriftRadius =0;
