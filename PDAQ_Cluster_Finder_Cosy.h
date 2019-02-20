@@ -473,7 +473,7 @@ double scint_time_diff = 0;
       }
     }
     //cout<<"Next event"<<endl;
-    if (refDiff<=500 )
+    if (refDiff<=500 && scint_time_diff<=500)
     {
       SttTrackHit* b = stt_event->AddTrackHit();
       b->vec_Track = vec_tracks;
