@@ -6,9 +6,9 @@
 class SciHit : public TObject {
 public:
 	
-	UInt_t leadTime;
-	UInt_t trailTime;
-	UInt_t channel;
+	double leadTime;
+	double trailTime;
+	int channel;
 	UInt_t tdcid;
 
 	UInt_t sci_tdc_event_sizes;

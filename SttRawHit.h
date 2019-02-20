@@ -15,8 +15,6 @@ public:
 	double trailTime;
 	double tot;
 
-
-
 	bool isRef;
 
 	SttRawHit();

@@ -36,6 +36,7 @@ public:
      double Py1;
      double Chiy;
      double DriftT;
+     double scint_time_diff;
      
 	//short cell2;
 

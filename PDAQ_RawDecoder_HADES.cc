@@ -178,6 +178,9 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
     UInt_t epoch = 0;
     double refTime = 0;
     double lastRise = 0;
+    
+    double  doubleCntr =0;
+    double doubleCntr1 =0;
 
 
     while ( !in_file.eof() ) {
@@ -298,18 +301,18 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
 
                                             bool doubleHit = false;
 
-                                            // for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++ ) {
-                                            //     //cout<<"totalNTDCHits "<<stt_event->totalNTDCHits<<"\t"<<endl;
-                                            //     if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->channel == channel_nr + stt_channel_offsets[tdc_id] ) {
-                                            //         if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->leadTime == lastRise ) {
-                                            //             //cout<<"Double hit :"<<endl;
-                                            //             doubleHit = true;
-                                            //             doubleCntr++;
-                                            //         }
-                                            //     }
+                                            for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++ ) {
+                                                //cout<<"totalNTDCHits "<<stt_event->totalNTDCHits<<"\t"<<endl;
+                                                if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->channel == channel_nr + stt_channel_offsets[tdc_id] ) {
+                                                    //if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->leadTime == lastRise ) {
+                                                        //cout<<"Double hit :"<<endl;
+                                                        doubleHit = true;
+                                                        doubleCntr++;
+                                                    }
+                                                //}
 
-                                            //     doubleCntr1++;
-                                            // }
+                                                doubleCntr1++;
+                                            }
 					   /* if (tdc_id == 0x6500 && channel_nr ==1)
 					    {
 					      SciHit* s = sci_event->AddSciHit();
@@ -374,7 +377,7 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
         
     }
 
-    //cout<<"Repeated hits :"<<doubleCntr<<"/"<<doubleCntr1<<endl;
+    cout<<"Repeated hits :"<<doubleCntr<<"/"<<doubleCntr1<<endl;
 
     in_file.close();
     if ( use_tree_output ) {

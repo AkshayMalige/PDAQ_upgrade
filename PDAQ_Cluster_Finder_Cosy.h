@@ -448,12 +448,31 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
     //printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
 float refTime = 0;
 float refDiff = 0;
+bool scintSep = false;
+double scint_time_diff = 0;
+
     for (int rt=0; rt<SCI_CAL->sci_raw.totalNTDCHits; rt++)
     {
       SciHit* sh = (SciHit*) SCI_CAL->sci_raw.adc_hits->ConstructedAt(rt);
       refDiff = (sh->leadTime - meanTime);
       refTime = sh->leadTime;
     }
+    if (SCI_CAL->sci_raw.totalNTDCHits>0)
+    for (int ct=0; ct<SCI_CAL->sci_raw.totalNTDCHits-1; ct++)
+    {
+      SciHit* d1 = (SciHit*) SCI_CAL->sci_raw.adc_hits->ConstructedAt(ct);
+      SciHit* d2 = (SciHit*) SCI_CAL->sci_raw.adc_hits->ConstructedAt(ct+1);
+      scint_time_diff = fabs(d2->leadTime - d1->leadTime);
+      //cout<<d1->leadTime <<"\t"<<d2->leadTime<<"\t"<<scint_time_diff<<endl;
+      //printf("First:%f,   Second:%f  ,Diff:%f   \n",d1->leadTime,d2->leadTime,scint_time_diff);
+      if(fabs(d2->leadTime - d1->leadTime) <= 500) 
+      {
+	scintSep == true;
+	cout<<"Narrow Sint Hit Diff \n"<<endl;
+	
+      }
+    }
+    //cout<<"Next event"<<endl;
     if (refDiff<=500 )
     {
       SttTrackHit* b = stt_event->AddTrackHit();
@@ -463,12 +482,15 @@ float refDiff = 0;
       b->Px0 = smallestP0;
       b->Px1 = smallestP1;
       b->DriftT = refDiff;
+      b->scint_time_diff = scint_time_diff;
       
       for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {
 	  //vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
 	  vec_tracks[tq]->drifttime =  max_dt_offset+( refTime - ( vec_tracks[tq]->leadTime ) ) ;
 	  vec_tracks[tq]->meanDriftTime =  max_dt_offset+( meanTime - ( vec_tracks[tq]->leadTime ) ) ;
-  // 	for (int ac=0; ac< vec_tracks.size(); ac++)
+	  //printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f   SMDT:%f\n",max_dt_offset,vec_tracks[tq]->leadTime,refTime,meanTime,vec_tracks[tq]->drifttime,vec_tracks[tq]->meanDriftTime);
+	  //cout<<max_dt_offset<<"\tLT:\t"<<vec_tracks[tq]->leadTime<<"\tST:\t"<<refTime<<"\tMT:\t"<<meanTime<<"\tDT:\t"<<vec_tracks[tq]->drifttime<<"\tMDT:\t"<<vec_tracks[tq]->meanDriftTime<<endl;
+	  //for (int ac=0; ac< vec_tracks.size(); ac++)
   // 	{
 	    //printf("TDC : %x , Layer: %d , Straw: %d  ,LeadTime:%3.2f, Meantime: %3.2f, DriftTime: %3.2f\n",vec_tracks[tq]->tdcid, vec_tracks[tq]->layer,vec_tracks[tq]->straw,vec_tracks[tq]->leadTime,meanTime, vec_tracks[tq]->drifttime);
   // 	}
