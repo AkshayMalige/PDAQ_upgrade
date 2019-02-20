@@ -1,8 +1,9 @@
 #include "PDAQ_Cluster_Finder_Cosy.h"
-#include "panda_subsystem_sci.h"
-#include "SciHit.h"
-
-using namespace std;
+// #include "SttRawHit.h"
+// #include "SttHit.h"
+// #include "SttEvent.h"
+// #include "SttTrackEvent.h"
+// #include "SciHit.h"
 
 int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 

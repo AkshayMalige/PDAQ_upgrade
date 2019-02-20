@@ -1,58 +1,37 @@
 #ifndef PDAQ_CLUSTER_FINDER_COSY_H
 #define PDAQ_CLUSTER_FINDER_COSY_H
-
-#include <fstream>
-#include <TF1.h>
-#include <TLinearFitter.h>
-#include "TH2F.h"
-#include "TTree.h"
-#include "TFile.h"
-#include <string>
-#include <cmath>
-#include <iostream>
-#include <cstdlib>
-#include <vector>
-#include <algorithm>
-#include <TGraph.h>
-#include <math.h>
-#include <cstdlib>
-#include <TLinearFitter.h>
-
-#include "SttRawHit.h"
-#include "SttHit.h"
-#include "SttEvent.h"
-#include "SttTrackEvent.h"
-#include "SciHit.h"
-
-                          
-#include "panda_subsystem.h"
-#include "panda_subsystem_stt.h"
-#include "panda_subsystem_sb.h"
-#include "panda_stt_cal.h"
-#include "panda_stt_track.h"
-#include "panda_subsystem_sci.h"
-
-#include <cctype>
-#include <fstream>
-#include <sstream>
-#include <MPar.h>
-#include <MParContainer.h>
-#include <MParManager.h>
-#include "FTGeo.h"
-#include <algorithm>
-
-using namespace std;
+#include "PDAQ_Trackfilter.h"
 
 
-template< typename T >
-struct delete_pointer_element
-{
-    void operator()( T element ) const
-    {
-        delete element;
-    }
-};
+int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
 
+#endif
+
+// #include "SttRawHit.h"
+// #include "SttHit.h"
+// #include "SttEvent.h"
+// #include "SttTrackEvent.h"
+// #include "SciHit.h"
+// 
+//                           
+// #include "panda_subsystem.h"
+// #include "panda_subsystem_stt.h"
+// #include "panda_subsystem_sb.h"
+// #include "panda_stt_cal.h"
+// #include "panda_stt_track.h"
+// #include "panda_subsystem_sci.h"
+// 
+// #include <cctype>
+// #include <fstream>
+// #include <sstream>
+// #include <MPar.h>
+// #include <MParContainer.h>
+// #include <MParManager.h>
+// #include "FTGeo.h"
+// #include <algorithm>
+// 
+// using namespace std;
+/*
 bool f_sttHitCompareLeadTime ( SttHit* a, SttHit* b ) {
     return ( a->leadTime < b->leadTime );
 }
@@ -159,17 +138,17 @@ std::vector< std::vector<std::vector<SttHit*> >> make_tuples( const std::vector<
     add_tuples( vectors, 0, {}, result ) ;
     return result ;
 }
+*/
 
-int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
-
+/*
 bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,Stt_Track_Event* stt_event, MFTGeomPar* ftGeomPar,PandaSubsystemSCI* SCI_CAL)
 {
       //for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
 	//vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
- 	/*for (int ac=0; ac< vec_stthits.size(); ac++)
- 	{
- 	  printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid, vec_stthits[ac]->layer,vec_stthits[ac]->straw);
- 	}*/
+ 	//for (int ac=0; ac< vec_stthits.size(); ac++)
+ 	//{
+ 	 // printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid, vec_stthits[ac]->layer,vec_stthits[ac]->straw);
+ 	//}
 // 	printf("\n*********************\n");
     //}
     int max_cluster_intake=0;
@@ -393,38 +372,12 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 	    smallestP1 = vec_P1[ci];
 	}
     }
-    	    //printf("smallest chix :%2.3f\n", smallestX);
-
-//     Float_t smallestY = vec_Chi2y[0];
-//     Float_t smallestPP0 = vec_PP0[0];
-//     Float_t smallestPP1 = vec_PP1[0];
-// 
-//     Int_t chi_indexY = 0;
-// 
-//     for ( Int_t cj = 0; cj < vec_Chi2y.size(); cj++ ) {
-// 
-// 	if ( smallestY > vec_Chi2y[cj] ) {
-// 	    smallestY = vec_Chi2y[cj];
-// 	    chi_indexY = cj;
-// 	}
-// 	if ( smallestPP0 > vec_PP0[cj] ) {
-// 	    smallestPP0 = vec_PP0[cj];
-// 	}
-// 	if ( smallestPP1 > vec_PP1[cj] ) {
-// 	    smallestPP1 = vec_PP1[cj];
-// 	}
-//     }
 
     for ( Int_t ck = 0; ck < vec_All_X.at ( chi_indexX ).size(); ck++ ) {
 	vec_tracks.push_back ( vec_All_X.at ( chi_indexX ).at ( ck ) );
 	//printf("Chi best : TDC :%x , Layer -%d , Straw -%d  \n",vec_All_X.at ( chi_indexX ).at ( ck )->tdcid, vec_All_X.at ( chi_indexX ).at ( ck )->layer,vec_All_X.at ( chi_indexX ).at ( ck )->straw);
 
     }
-    	//printf("\n$$$$$$$$$$$$$$$$$$$$$$$$$\n");
-
-//     for ( Int_t cl = 0; cl < vec_All_Y.at ( chi_indexY ).size(); cl++ ) {
-// 	vec_tracks.push_back ( vec_All_Y.at ( chi_indexY ).at ( cl ) );
-//     }
 
     double sumLeadTime = 0;
     double meanTime = 0;
@@ -446,10 +399,10 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,TTree* PDAQ_tree,
 //     b->Chix = smallestX;
 //     b->Chiy = smallestY;
     //printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
-float refTime = 0;
-float refDiff = 0;
-bool scintSep = false;
-double scint_time_diff = 0;
+    float refTime = 0;
+    float refDiff = 0;
+    bool scintSep = false;
+    double scint_time_diff = 0;
 
     for (int rt=0; rt<SCI_CAL->sci_raw.totalNTDCHits; rt++)
     {
@@ -485,7 +438,6 @@ double scint_time_diff = 0;
       b->scint_time_diff = scint_time_diff;
       
       for ( Int_t tq=0; tq<vec_tracks.size(); tq++ ) {
-	  //vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - ( vec_tracks[tq]->leadTime ) ) ;
 	  vec_tracks[tq]->drifttime =  max_dt_offset+( refTime - ( vec_tracks[tq]->leadTime ) ) ;
 	  vec_tracks[tq]->meanDriftTime =  max_dt_offset+( meanTime - ( vec_tracks[tq]->leadTime ) ) ;
 	  //printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f   SMDT:%f\n",max_dt_offset,vec_tracks[tq]->leadTime,refTime,meanTime,vec_tracks[tq]->drifttime,vec_tracks[tq]->meanDriftTime);
@@ -512,6 +464,5 @@ double scint_time_diff = 0;
 
 return true;
      }  
-}
+}*/
 
-#endif
