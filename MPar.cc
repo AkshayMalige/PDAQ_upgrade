@@ -32,19 +32,12 @@ parameters in the container and write to param file.
 
 /** Default constructor
  */
-MPar::MPar() : parcont(nullptr)
-{
-}
+MPar::MPar() : parcont(nullptr) {}
 
 /** Destructor
  */
-MPar::~MPar()
-{
-}
+MPar::~MPar() {}
 
 /** Print container info
  */
-void MPar::print() const
-{
-    parcont->print();
-}
+void MPar::print() const { parcont->print(); }

@@ -19,57 +19,61 @@ class MLookupTable;
 
 class MLookupChannel
 {
-public:
+  public:
     UInt_t m, l, s, st;
-    virtual void setAddress(const char * address);
-    virtual void print(const char * prefix = 0);
+    virtual void setAddress(const char* address);
+    virtual void print(const char* prefix = 0);
 };
 
 class MLookupBoard
 {
-private:
+  private:
     UInt_t addr, nchan;
-    MLookupChannel ** channels;
+    MLookupChannel** channels;
 
-public:
+  public:
     MLookupBoard(UInt_t addr, UInt_t nchan);
     virtual ~MLookupBoard();
 
-    void setAddress(UInt_t chan, const char * line) { channels[chan]->setAddress(line); }
-    void setChannel(UInt_t chan, MLookupChannel * c) { channels[chan] = c; }
-    MLookupChannel * getChannel(UInt_t chan) { return channels[chan]; }
+    void setAddress(UInt_t chan, const char* line)
+    {
+        channels[chan]->setAddress(line);
+    }
+    void setChannel(UInt_t chan, MLookupChannel* c) { channels[chan] = c; }
+    MLookupChannel* getChannel(UInt_t chan) { return channels[chan]; }
 
     virtual void print();
 };
 
 class MLookupTable
 {
-protected:
+  protected:
     std::string container;
     int a_min, a_max, channels;
     bool is_init;
 
-    MLookupBoard ** boards;
+    MLookupBoard** boards;
 
-public:
+  public:
     // constructor
-    MLookupTable(const std::string & container, UInt_t addr_min, UInt_t addr_max, UInt_t channels = 49);
+    MLookupTable(const std::string& container, UInt_t addr_min, UInt_t addr_max,
+                 UInt_t channels = 49);
     // destructor
     virtual ~MLookupTable();
 
-    virtual MLookupChannel * initial() = 0;
+    virtual MLookupChannel* initial() = 0;
 
-    MLookupChannel * getAddress(UInt_t addr, UInt_t chan) {
+    MLookupChannel* getAddress(UInt_t addr, UInt_t chan)
+    {
         if (!is_init) init();
-	if (addr < a_min || addr > a_max) return nullptr;
-        return boards[addr-a_min]->getChannel(chan);
+        if (addr < a_min || addr > a_max) return nullptr;
+        return boards[addr - a_min]->getChannel(chan);
     }
 
     virtual void print();
 
-protected:
+  protected:
     void init();
-
 };
 
 #endif // MLOOKUP_H

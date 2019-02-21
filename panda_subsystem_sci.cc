@@ -3,13 +3,12 @@
 
 ClassImp(PandaSubsystemSCI)
 
-PandaSubsystemSCI::PandaSubsystemSCI() {
+    PandaSubsystemSCI::PandaSubsystemSCI()
+{
 
     subsystem_name = "SCINT";
 
-    //emc_raw = new EmcEvent();
+    // emc_raw = new EmcEvent();
 }
 
-PandaSubsystemSCI::~PandaSubsystemSCI() {
-
-}
+PandaSubsystemSCI::~PandaSubsystemSCI() {}

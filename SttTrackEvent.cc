@@ -2,26 +2,24 @@
 
 ClassImp(Stt_Track_Event)
 
-Stt_Track_Event::Stt_Track_Event() {
-	tdc_track_hits = new TClonesArray("SttTrackHit", 1000);
-	//tdc_events = new TClonesArray("SttHit", 1000);
-	//tdc_raw = new TClonesArray("SttRawHit", 1000);
+    Stt_Track_Event::Stt_Track_Event()
+{
+    tdc_track_hits = new TClonesArray("SttTrackHit", 1000);
+    // tdc_events = new TClonesArray("SttHit", 1000);
+    // tdc_raw = new TClonesArray("SttRawHit", 1000);
 
-
-
-	total_track_NTDCHits = 0;
-	//totalNTDCEvents = 0;
-	//rawNTDCEvents =0;
-
-
+    total_track_NTDCHits = 0;
+    // totalNTDCEvents = 0;
+    // rawNTDCEvents =0;
 }
 
-SttTrackHit* Stt_Track_Event::AddTrackHit() {
-	TClonesArray& thits = *tdc_track_hits;
-	SttTrackHit* track_hit = new (thits[total_track_NTDCHits++]) SttTrackHit();
-	//track_hit->SetChannel(trackId);
+SttTrackHit* Stt_Track_Event::AddTrackHit()
+{
+    TClonesArray& thits = *tdc_track_hits;
+    SttTrackHit* track_hit = new (thits[total_track_NTDCHits++]) SttTrackHit();
+    // track_hit->SetChannel(trackId);
 
-	return track_hit;
+    return track_hit;
 }
 
 // SttHit* SttEvent::event_size(int stt_tdc_event_sizes) {
@@ -40,21 +38,17 @@ SttTrackHit* Stt_Track_Event::AddTrackHit() {
 // 	return trawevents;
 // }
 
-void Stt_Track_Event::TrackClear(void) {
-	tdc_track_hits->Clear("C");
+void Stt_Track_Event::TrackClear(void)
+{
+    tdc_track_hits->Clear("C");
 
+    // tdc_events->Clear("C");
+    // tdc_raw->Clear("C");
 
-	//tdc_events->Clear("C");
-	//tdc_raw->Clear("C");
+    //	delete tdc_hits;
+    //	tdc_hits = new TClonesArray("SttHit", 1000);
 
-//	delete tdc_hits;
-//	tdc_hits = new TClonesArray("SttHit", 1000);
-
-	total_track_NTDCHits = 0;
-	//totalNTDCEvents = 0;
-	//rawNTDCEvents = 0;
-
-
+    total_track_NTDCHits = 0;
+    // totalNTDCEvents = 0;
+    // rawNTDCEvents = 0;
 }
-
-

@@ -1,38 +1,38 @@
 #ifndef H_STT_CAL_EVENT
 #define H_STT_CAL_EVENT
 
-#include <TObject.h>
-#include <TClonesArray.h>
 #include "SttHit.h"
+#include <TClonesArray.h>
+#include <TObject.h>
 //#include "SttRawHit.h"
 
-//class SttHit;
-class Stt_Cal_Event : public TObject {
-public:
+// class SttHit;
+class Stt_Cal_Event : public TObject
+{
+  public:
+    TClonesArray* tdc_cal_hits;
+    int total_cal_NTDCHits;
 
-	TClonesArray* tdc_cal_hits; 
-	int total_cal_NTDCHits;
-	
-	// TClonesArray* tdc_events; 
-	// int totalNTDCEvents;
+    // TClonesArray* tdc_events;
+    // int totalNTDCEvents;
 
-	// TClonesArray* tdc_raw; 
-	// int rawNTDCEvents;
-	
-	Stt_Cal_Event();
-	virtual ~Stt_Cal_Event() { Clear(); }
+    // TClonesArray* tdc_raw;
+    // int rawNTDCEvents;
 
-	void CalClear(Option_t * = 0);
+    Stt_Cal_Event();
+    virtual ~Stt_Cal_Event() { Clear(); }
 
-	SttHit* AddCalHit(int channel);
-	//SttHit* event_size(int stt_tdc_event_sizes);
+    void CalClear(Option_t* = 0);
 
-	//SttRawHit* AddRawHit(int channel);
+    SttHit* AddCalHit(int channel);
+    // SttHit* event_size(int stt_tdc_event_sizes);
 
-	// SttRawHit* AddHit(int channel);
-	// SttRawHit* event_size(int stt_tdc_event_sizes);
+    // SttRawHit* AddRawHit(int channel);
 
-	ClassDef(Stt_Cal_Event, 1)
+    // SttRawHit* AddHit(int channel);
+    // SttRawHit* event_size(int stt_tdc_event_sizes);
+
+    ClassDef(Stt_Cal_Event, 1)
 };
 
 #endif

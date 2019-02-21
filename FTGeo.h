@@ -13,48 +13,47 @@
 #define MFTGEOMPAR_H
 
 #include "FTdef.h"
-#include <TArrayI.h>
-#include <TArrayF.h>
+#include "MPar.h"
 #include "TArrayD.h"
 #include "TMatrixF.h"
-#include "MPar.h"
+#include <TArrayF.h>
+#include <TArrayI.h>
 
 class MFTGeomPar : public MPar
 {
-protected:
+  protected:
     // members
-    Int_t nModules;                  ///< number of modules
-    
-    
-    Int_t nTrack_min_size; 
+    Int_t nModules; ///< number of modules
+
+    Int_t nTrack_min_size;
     Float_t nleadtime_window;
     Int_t ncluster_limit;
     Float_t ndrift_time_offset;
-    struct SingleModule             ///< single module configuration
+    struct SingleModule ///< single module configuration
     {
-        Int_t nLayers;               ///< numbre of layers
-        Int_t nStraws; 
-        Int_t    nShortOffset;      // offset of a short straw
-        Int_t    nShortWidth; 
+        Int_t nLayers; ///< numbre of layers
+        Int_t nStraws;
+        Int_t nShortOffset; // offset of a short straw
+        Int_t nShortWidth;
 
-        Float_t  fStrawRadius;   // [layer]
-        Float_t  fStrawPitch;    // [layer]
+        Float_t fStrawRadius; // [layer]
+        Float_t fStrawPitch;  // [layer]
 
-        TMatrixF fOffsetZ;     ///< offset of the first fiber in the layer
-        TMatrixF fOffsetX;     ///< offset of the layers
-        TMatrixF fOffsetY;     ///< offset of the layers
+        TMatrixF fOffsetZ; ///< offset of the first fiber in the layer
+        TMatrixF fOffsetX; ///< offset of the layers
+        TMatrixF fOffsetY; ///< offset of the layers
 
-        TArrayF fLayerRotation;     ///< layer rotation around the axis
-    }sm_mods[FWDET_STRAW_MAX_MODULES];
+        TArrayF fLayerRotation; ///< layer rotation around the axis
+    } sm_mods[FWDET_STRAW_MAX_MODULES];
 
-    SingleModule * mods;            ///< params for each module
+    SingleModule* mods; ///< params for each module
 
-public:
+  public:
     MFTGeomPar();
     virtual ~MFTGeomPar();
 
-    bool getParams(MParContainer * parcont);
-    bool putParams(MParContainer * parcont) const;
+    bool getParams(MParContainer* parcont);
+    bool putParams(MParContainer* parcont) const;
     void clear();
     void print() const;
 
@@ -83,21 +82,18 @@ public:
     void setOffsetY(Int_t m, Int_t l, Int_t p, Float_t x);
     void setOffsetX(Int_t m, Int_t l, Int_t p, Float_t x);
     void setLayerRotation(Int_t m, Int_t l, Float_t r);
-    
-    
+
     Int_t getTrackMinSize() const;
     void setTrackMinSize(Int_t t);
-    
+
     Float_t getLeadtimeWindow() const;
     void setLeadtimeWindow(Float_t lt);
-    
+
     Int_t getClusterLimit() const;
     void setClusterLimit(Int_t c);
-    
+
     Float_t getDTOffset() const;
     void setDTOffset(Float_t d);
-    
-
 };
 
 #endif // MFIBERSSTACKGEOMPAR_H

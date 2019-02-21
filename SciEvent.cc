@@ -2,23 +2,23 @@
 
 ClassImp(SciEvent)
 
-SciEvent::SciEvent() {
-	adc_hits = new TClonesArray("SciHit", 1000);
-	//adc_parms = new TClonesArray("EmcHit", 1000);
+    SciEvent::SciEvent()
+{
+    adc_hits = new TClonesArray("SciHit", 1000);
+    // adc_parms = new TClonesArray("EmcHit", 1000);
 
-	totalNTDCHits = 0;
+    totalNTDCHits = 0;
 
-	//totalNADCHits = 0;
-
+    // totalNADCHits = 0;
 }
 
-SciHit* SciEvent::AddSciHit() {
-	TClonesArray& thits = *adc_hits;
-	SciHit* hit = new (thits[totalNTDCHits++]) SciHit();
-	//hit->SetChannel(emc_Hits_ADC_channel);
+SciHit* SciEvent::AddSciHit()
+{
+    TClonesArray& thits = *adc_hits;
+    SciHit* hit = new (thits[totalNTDCHits++]) SciHit();
+    // hit->SetChannel(emc_Hits_ADC_channel);
 
-	return hit;
-
+    return hit;
 }
 
 // EmcHit* EmcEvent::AddParm() {
@@ -29,19 +29,16 @@ SciHit* SciEvent::AddSciHit() {
 
 // 	return parm;
 
-
 // }
 
-void SciEvent::Clear(Option_t *) {
-	adc_hits->Clear("C");
-	//adc_parms->Clear("C");
+void SciEvent::Clear(Option_t*)
+{
+    adc_hits->Clear("C");
+    // adc_parms->Clear("C");
 
-	////delete adc_hits;
-	//adc_hits = new TClonesArray("EmcHit", 1000);
+    ////delete adc_hits;
+    // adc_hits = new TClonesArray("EmcHit", 1000);
 
-	totalNTDCHits = 0;
-	//totalNADCHits = 0;
-
+    totalNTDCHits = 0;
+    // totalNADCHits = 0;
 }
-
-

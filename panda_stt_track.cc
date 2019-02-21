@@ -3,13 +3,12 @@
 
 ClassImp(PandaSttTrack)
 
-PandaSttTrack::PandaSttTrack() {
+    PandaSttTrack::PandaSttTrack()
+{
 
     subsystem_name = "STT_TRACK";
 
-    //stt_raw = new SttEvent();
+    // stt_raw = new SttEvent();
 }
 
-PandaSttTrack::~PandaSttTrack() {
-
-}
+PandaSttTrack::~PandaSttTrack() {}

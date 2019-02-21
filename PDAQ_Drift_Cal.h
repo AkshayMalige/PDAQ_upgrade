@@ -1,36 +1,34 @@
 #ifndef PDAQ_DRIFT_CAL_H
 #define PDAQ_DRIFT_CAL_H
 
-#include <fstream>
-#include <TF1.h>
-#include <TLinearFitter.h>
+#include "TFile.h"
 #include "TH2F.h"
 #include "TTree.h"
-#include "TFile.h"
-#include <string>
-#include <cmath>
-#include <iostream>
-#include <cstdlib>
-#include <vector>
-#include <algorithm>
+#include <TF1.h>
 #include <TGraph.h>
-#include <math.h>
-#include <cstdlib>
 #include <TLinearFitter.h>
+#include <TLinearFitter.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <math.h>
+#include <string>
+#include <vector>
 
-
-#include "SttRawHit.h"
-#include "SttHit.h"
-#include "SttTrackHit.h"
 #include "SttEvent.h"
+#include "SttHit.h"
+#include "SttRawHit.h"
 #include "SttTrackEvent.h"
+#include "SttTrackHit.h"
 
-                          
-#include "panda_subsystem.h"
-#include "panda_subsystem_stt.h"
-#include "panda_subsystem_sb.h"
 #include "panda_stt_cal.h"
 #include "panda_stt_track.h"
+#include "panda_subsystem.h"
+#include "panda_subsystem_sb.h"
+#include "panda_subsystem_stt.h"
 
 using namespace std;
 

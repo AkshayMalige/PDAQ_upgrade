@@ -9,17 +9,16 @@
  * For the list of contributors see $MAPTSYS/README/CREDITS.             *
  *************************************************************************/
 
-#include <algorithm> 
+#include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <iostream>
 #include <locale>
 #include <sstream>
 
-
-#include "MLookupManager.h"
-#include "MLookupContainer.h"
 #include "MLookup.h"
+#include "MLookupContainer.h"
+#include "MLookupManager.h"
 
 /** class MLookupManager
 \ ingroup lib_base
@@ -38,37 +37,38 @@ extern void trim(std::string &s);
 extern void simplify(std::string & s);
 extern bool isFloat(const string & str);*/
 
-
- void Ltrim(std::string &s);
- void Lsimplify(std::string & s);
- bool LlisFloat(const string & str);
-
+void Ltrim(std::string& s);
+void Lsimplify(std::string& s);
+bool LlisFloat(const string& str);
 
 /** Trim from start (in place)
  *
  * \param s string
  */
-static inline void lLtrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
-        return !std::isspace(ch);
-    }));
+static inline void lLtrim(std::string& s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                    [](int ch) { return !std::isspace(ch); }));
 }
 
 /** Trim from end (in place)
  *
  * \param s string
  */
-static inline void rLtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
+static inline void rLtrim(std::string& s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+                         [](int ch) { return !std::isspace(ch); })
+                .base(),
+            s.end());
 }
 
 /** Trim from both ends (in place)
  *
  * \param s string
  */
-inline void Ltrim(std::string &s) {
+inline void Ltrim(std::string& s)
+{
     lLtrim(s);
     rLtrim(s);
 }
@@ -78,7 +78,8 @@ inline void Ltrim(std::string &s) {
  * \param s string
  * \return Ltrimmed string
  */
-static inline std::string lLtrim_copy(std::string s) {
+static inline std::string lLtrim_copy(std::string s)
+{
     lLtrim(s);
     return s;
 }
@@ -88,7 +89,8 @@ static inline std::string lLtrim_copy(std::string s) {
  * \param s string
  * \return trimmed string
  */
-static inline std::string rLtrim_copy(std::string s) {
+static inline std::string rLtrim_copy(std::string s)
+{
     rLtrim(s);
     return s;
 }
@@ -98,7 +100,8 @@ static inline std::string rLtrim_copy(std::string s) {
  * \param s string
  * \return trimmed string
  */
-static inline std::string Ltrim_copy(std::string s) {
+static inline std::string Ltrim_copy(std::string s)
+{
     Ltrim(s);
     return s;
 }
@@ -107,14 +110,13 @@ static inline std::string Ltrim_copy(std::string s) {
  *
  * \param s string
  */
-void Lsimplify(std::string & s)
+void Lsimplify(std::string& s)
 {
     size_t pos = 0;
-    while(1)
+    while (1)
     {
         pos = s.find_first_of('\t', pos);
-        if (pos == s.npos)
-            return;
+        if (pos == s.npos) return;
         s.replace(pos, 1, " ");
     }
 }
@@ -126,7 +128,7 @@ void Lsimplify(std::string & s)
  * \param str string
  * \return is float
  */
-bool LlisFloat(const string & str)
+bool LlisFloat(const string& str)
 {
     std::istringstream iss(str);
     float f;
@@ -134,17 +136,15 @@ bool LlisFloat(const string & str)
     return iss.eof() && !iss.fail();
 }
 
-
-MLookupManager * MLookupManager::lm = nullptr;
+MLookupManager* MLookupManager::lm = nullptr;
 
 /** Returns instance of the Detector Manager class.
  *
  * \return manager instance
  */
-MLookupManager * MLookupManager::instance()
+MLookupManager* MLookupManager::instance()
 {
-    if (!lm)
-        lm = new MLookupManager;
+    if (!lm) lm = new MLookupManager;
 
     return lm;
 }
@@ -152,22 +152,15 @@ MLookupManager * MLookupManager::instance()
 /** Shortcut
  * \return MLookupManager instance
  */
-MLookupManager * lm()
-{
-    return MLookupManager::instance();
-}
+MLookupManager* lm() { return MLookupManager::instance(); }
 
 /** Default constructor
  */
-MLookupManager::MLookupManager()
-{
-}
+MLookupManager::MLookupManager() {}
 
 /** Destructor
  */
-MLookupManager::~MLookupManager()
-{
-}
+MLookupManager::~MLookupManager() {}
 
 /** Parse source file
  *
@@ -176,20 +169,18 @@ MLookupManager::~MLookupManager()
 bool MLookupManager::parseSource()
 {
     std::ifstream ifs(source);
-    if (!ifs.is_open())
-    {
+    if (!ifs.is_open()) {
         std::cerr << "Source " << source << " could not be open!" << std::endl;
         abort();
     }
     size_t length = 0;
-    if (ifs)
-    {
+    if (ifs) {
         ifs.seekg(0, ifs.end);
         length = ifs.tellg();
         ifs.seekg(0, ifs.beg);
     }
 
-    char * cbuff = new char[length];
+    char* cbuff = new char[length];
 
     WhatNext wn = WNContainer;
 
@@ -198,7 +189,7 @@ bool MLookupManager::parseSource()
     std::string type_name;
     std::vector<std::string> values;
 
-    while(!ifs.eof())
+    while (!ifs.eof())
     {
         ifs.getline(cbuff, length);
 
@@ -209,18 +200,18 @@ bool MLookupManager::parseSource()
         size_t pos = 0;
 
         // check if comment or empty line
-        if (str[0] == '#' or (str.length() == 0 and wn != WNParamCont))
-        {
+        if (str[0] == '#' or (str.length() == 0 and wn != WNParamCont)) {
             continue;
         }
-        // if container mark found, check whether it should be there, e.g. container after param new line is forbidden
+        // if container mark found, check whether it should be there, e.g.
+        // container after param new line is forbidden
         else if (str[0] == '[')
         {
-            if (wn == WNContainer or wn == WNContainerOrParam)
-            {
+            if (wn == WNContainer or wn == WNContainerOrParam) {
                 pos = str.find_first_of(']', 1);
-                cont_name = str.substr(1, pos-1);
-//                 printf("Found container %s\n", cont_name.c_str());
+                cont_name = str.substr(1, pos - 1);
+                //                 printf("Found container %s\n",
+                //                 cont_name.c_str());
 
                 addLookupContainer(cont_name, new MLookupContainer(cont_name));
 
@@ -231,16 +222,17 @@ bool MLookupManager::parseSource()
             }
             else
             {
-                std::cerr << "Didn't expected container here: " << std::endl << str << std::endl;
+                std::cerr << "Didn't expected container here: " << std::endl
+                          << str << std::endl;
                 return false;
             }
         }
         else
         {
             // check if container name
-            if (wn == WNContainer)
-            {
-                std::cerr << "Expected container name here: " << std::endl << str << std::endl;
+            if (wn == WNContainer) {
+                std::cerr << "Expected container name here: " << std::endl
+                          << str << std::endl;
                 return false;
             }
             else if (wn == WNParam or wn == WNContainerOrParam)
@@ -258,9 +250,10 @@ bool MLookupManager::parseSource()
  */
 void MLookupManager::print() const
 {
-     std::map<std::string, MLookupContainer *>::const_iterator it = containers.begin();
-     for (; it != containers.end(); ++it)
-         it->second->print();
+    std::map<std::string, MLookupContainer*>::const_iterator it =
+        containers.begin();
+    for (; it != containers.end(); ++it)
+        it->second->print();
 }
 
 /** Add new parameter container.
@@ -269,25 +262,29 @@ void MLookupManager::print() const
  * \param parcont container object
  * \return success
  */
-bool MLookupManager::addLookupContainer(const std::string& cont_name, MLookupContainer* lookupcont)
+bool MLookupManager::addLookupContainer(const std::string& cont_name,
+                                        MLookupContainer* lookupcont)
 {
-//     FIXME
-//     MLookupContainer * lc = containers[cont_name];
-//     if (!lc)
-//     {
-//         std::cerr << "Container " << cont_name << " doesn't exists!" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
-// 
-//     lookupcont->clear();
-//     bool ret = lookupcont->getParams(lc);
-//     if (!ret)
-//     {
-//         std::cerr << "Initialization of " << cont_name << " param container failed!" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
-// 
-    containers.insert(std::pair<std::string, MLookupContainer*>(cont_name, lookupcont));
+    //     FIXME
+    //     MLookupContainer * lc = containers[cont_name];
+    //     if (!lc)
+    //     {
+    //         std::cerr << "Container " << cont_name << " doesn't exists!" <<
+    //         std::endl;
+    //         exit(EXIT_FAILURE);
+    //     }
+    //
+    //     lookupcont->clear();
+    //     bool ret = lookupcont->getParams(lc);
+    //     if (!ret)
+    //     {
+    //         std::cerr << "Initialization of " << cont_name << " param
+    //         container failed!" << std::endl;
+    //         exit(EXIT_FAILURE);
+    //     }
+    //
+    containers.insert(
+        std::pair<std::string, MLookupContainer*>(cont_name, lookupcont));
     return true;
 }
 
@@ -296,7 +293,8 @@ bool MLookupManager::addLookupContainer(const std::string& cont_name, MLookupCon
  * \param cont_name container name
  * \return pointer to container
  */
-MLookupContainer * MLookupManager::getLookupContainer(const std::string& cont_name)
+MLookupContainer*
+MLookupManager::getLookupContainer(const std::string& cont_name)
 {
     return containers[cont_name];
 }

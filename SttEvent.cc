@@ -2,26 +2,24 @@
 
 ClassImp(SttEvent)
 
-SttEvent::SttEvent() {
-	tdc_hits = new TClonesArray("SttRawHit", 1000);
-	//tdc_events = new TClonesArray("SttHit", 1000);
-	//tdc_raw = new TClonesArray("SttRawHit", 1000);
+    SttEvent::SttEvent()
+{
+    tdc_hits = new TClonesArray("SttRawHit", 1000);
+    // tdc_events = new TClonesArray("SttHit", 1000);
+    // tdc_raw = new TClonesArray("SttRawHit", 1000);
 
-
-
-	totalNTDCHits = 0;
-	//totalNTDCEvents = 0;
-	//rawNTDCEvents =0;
-
-
+    totalNTDCHits = 0;
+    // totalNTDCEvents = 0;
+    // rawNTDCEvents =0;
 }
 
-SttRawHit* SttEvent::AddHit(int channel) {
-	TClonesArray& thits = *tdc_hits;
-	SttRawHit* hit = new (thits[totalNTDCHits++]) SttRawHit();
-	hit->SetChannel(channel);
+SttRawHit* SttEvent::AddHit(int channel)
+{
+    TClonesArray& thits = *tdc_hits;
+    SttRawHit* hit = new (thits[totalNTDCHits++]) SttRawHit();
+    hit->SetChannel(channel);
 
-	return hit;
+    return hit;
 }
 
 // SttHit* SttEvent::event_size(int stt_tdc_event_sizes) {
@@ -40,20 +38,17 @@ SttRawHit* SttEvent::AddHit(int channel) {
 // 	return trawevents;
 // }
 
-void SttEvent::Clear(void) {
-	tdc_hits->Clear("C");
+void SttEvent::Clear(void)
+{
+    tdc_hits->Clear("C");
 
+    // tdc_events->Clear("C");
+    // tdc_raw->Clear("C");
 
-	//tdc_events->Clear("C");
-	//tdc_raw->Clear("C");
+    //	delete tdc_hits;
+    //	tdc_hits = new TClonesArray("SttHit", 1000);
 
-//	delete tdc_hits;
-//	tdc_hits = new TClonesArray("SttHit", 1000);
-
-	totalNTDCHits = 0;
-	//totalNTDCEvents = 0;
-	//rawNTDCEvents = 0;
-
-
+    totalNTDCHits = 0;
+    // totalNTDCEvents = 0;
+    // rawNTDCEvents = 0;
 }
-

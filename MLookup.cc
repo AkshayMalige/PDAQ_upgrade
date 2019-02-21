@@ -12,9 +12,9 @@
 #include <cstdio>
 #include <iostream>
 
-#include "MLookupManager.h"
-#include "MLookupContainer.h"
 #include "MLookup.h"
+#include "MLookupContainer.h"
+#include "MLookupManager.h"
 
 /** \class MLookup
 \ingroup lib_base
@@ -24,7 +24,8 @@ MLookup is an abstract class to hold container and geometry parameters.
 It must be derivated and pure virtual members defined.
 
 The parameters are parsed from text file in MLookupManager and stored in the
-MLookupContainer. The getParam() method reads content of the MLookupContainer and
+MLookupContainer. The getParam() method reads content of the MLookupContainer
+and
 fills variables inside the MLookup object. The putParam method allows to update
 parameters in the container and write to param file.
 
@@ -38,23 +39,19 @@ void MLookupChannel::setAddress(const char* address)
     sscanf(address, "%*s %*s %d %d %d %d\n", &m, &l, &s, &st);
 }
 
-void MLookupChannel::print(const char * prefix)
+void MLookupChannel::print(const char* prefix)
 {
     printf("%s %d %d %d\n", prefix, m, l, s, st);
 }
 
-MLookupBoard::MLookupBoard(UInt_t addr, UInt_t nchan) :
-    addr(addr), nchan(nchan)
+MLookupBoard::MLookupBoard(UInt_t addr, UInt_t nchan) : addr(addr), nchan(nchan)
 {
     channels = new MLookupChannel*[nchan];
     for (uint i = 0; i < nchan; ++i)
         channels[i] = 0;
 }
 
-MLookupBoard::~MLookupBoard()
-{
-    delete [] channels;
-}
+MLookupBoard::~MLookupBoard() { delete[] channels; }
 
 void MLookupBoard::print()
 {
@@ -66,9 +63,10 @@ void MLookupBoard::print()
     }
 }
 
-
-MLookupTable::MLookupTable(const std::string& container, UInt_t addr_min, UInt_t addr_max, UInt_t channels) :
-    container(container), a_min(addr_min), a_max(addr_max), channels(channels), is_init(false)
+MLookupTable::MLookupTable(const std::string& container, UInt_t addr_min,
+                           UInt_t addr_max, UInt_t channels)
+    : container(container), a_min(addr_min), a_max(addr_max),
+      channels(channels), is_init(false)
 {
     size_t nboards = addr_max - addr_min + 1;
     boards = new MLookupBoard*[nboards];
@@ -77,9 +75,9 @@ MLookupTable::MLookupTable(const std::string& container, UInt_t addr_min, UInt_t
 
 void MLookupTable::init()
 {
-    MLookupContainer * lc = lm()->getLookupContainer(container);
+    MLookupContainer* lc = lm()->getLookupContainer(container);
 
-    const LookupVector & lv = lc->getLines();
+    const LookupVector& lv = lc->getLines();
 
     size_t n = lv.size();
     for (uint i = 0; i < n; ++i)
@@ -87,32 +85,29 @@ void MLookupTable::init()
         uint addr, chan;
         char address[1024];
         sscanf(lv[i].c_str(), "%x %d %s", &addr, &chan, address);
-	
-	//std::cerr<<"A "<<std::hex<<addr<<" "<<i<<std::endl;
-	
-        if (addr < a_min or addr > a_max)
-        {
-            std::cerr << "Can't add board " << addr << " inside (0x" << std::hex << a_min << ", 0x" << a_max << std::dec << "), skipping." << std::endl;
+
+        // std::cerr<<"A "<<std::hex<<addr<<" "<<i<<std::endl;
+
+        if (addr < a_min or addr > a_max) {
+            std::cerr << "Can't add board " << addr << " inside (0x" << std::hex
+                      << a_min << ", 0x" << a_max << std::dec << "), skipping."
+                      << std::endl;
             continue;
         }
         uint idx = addr - a_min;
-        if (boards[idx] == 0)
-        {
+        if (boards[idx] == 0) {
             boards[idx] = new MLookupBoard(addr, channels);
             for (int i = 0; i < channels; ++i)
                 boards[idx]->setChannel(i, initial());
         }
-//printf("idx=%d str=%s\n", idx, lv[i].c_str());
+        // printf("idx=%d str=%s\n", idx, lv[i].c_str());
         boards[idx]->setAddress(chan, lv[i].c_str());
     }
 
     is_init = true;
 }
 
-MLookupTable::~MLookupTable()
-{
-    delete [] boards;
-}
+MLookupTable::~MLookupTable() { delete[] boards; }
 
 void MLookupTable::print()
 {

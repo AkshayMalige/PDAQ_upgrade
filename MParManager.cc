@@ -9,18 +9,18 @@
  * For the list of contributors see $MAPTSYS/README/CREDITS.             *
  *************************************************************************/
 
-#include <algorithm> 
+#include "MPar.h"
+#include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <iostream>
 #include <locale>
 #include <sstream>
 #include <vector>
-#include "MPar.h"
 
-#include "MParManager.h"
-#include "MParContainer.h"
 #include "MPar.h"
+#include "MParContainer.h"
+#include "MParManager.h"
 
 /** \class MParManager
 \ingroup lib_base
@@ -41,28 +41,31 @@ the requested parameter containers exists.
  *
  * \param s string
  */
-    
-static inline void ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
-        return !std::isspace(ch);
-    }));
+
+static inline void ltrim(std::string& s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                    [](int ch) { return !std::isspace(ch); }));
 }
 
 /** Trim from end (in place)
  *
  * \param s string
  */
-static inline void rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
+static inline void rtrim(std::string& s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+                         [](int ch) { return !std::isspace(ch); })
+                .base(),
+            s.end());
 }
 
 /** Trim from both ends (in place)
  *
  * \param s string
  */
-static inline void trim(std::string &s) {
+static inline void trim(std::string& s)
+{
     ltrim(s);
     rtrim(s);
 }
@@ -72,7 +75,8 @@ static inline void trim(std::string &s) {
  * \param s string
  * \return trimmed string
  */
-static inline std::string ltrim_copy(std::string s) {
+static inline std::string ltrim_copy(std::string s)
+{
     ltrim(s);
     return s;
 }
@@ -82,7 +86,8 @@ static inline std::string ltrim_copy(std::string s) {
  * \param s string
  * \return trimmed string
  */
-static inline std::string rtrim_copy(std::string s) {
+static inline std::string rtrim_copy(std::string s)
+{
     rtrim(s);
     return s;
 }
@@ -92,7 +97,8 @@ static inline std::string rtrim_copy(std::string s) {
  * \param s string
  * \return trimmed string
  */
-static inline std::string trim_copy(std::string s) {
+static inline std::string trim_copy(std::string s)
+{
     trim(s);
     return s;
 }
@@ -101,14 +107,13 @@ static inline std::string trim_copy(std::string s) {
  *
  * \param s string
  */
-void simplify(std::string & s)
+void simplify(std::string& s)
 {
     size_t pos = 0;
-    while(1)
+    while (1)
     {
         pos = s.find_first_of('\t', pos);
-        if (pos == s.npos)
-            return;
+        if (pos == s.npos) return;
         s.replace(pos, 1, " ");
     }
 }
@@ -120,7 +125,7 @@ void simplify(std::string & s)
  * \param str string
  * \return is float
  */
-bool isFloat(const std::string & str)
+bool isFloat(const std::string& str)
 {
     std::istringstream iss(str);
     float f;
@@ -128,16 +133,15 @@ bool isFloat(const std::string & str)
     return iss.eof() && !iss.fail();
 }
 
-MParManager * MParManager::pm = nullptr;
+MParManager* MParManager::pm = nullptr;
 
 /** Returns instance of the Detector Manager class.
  *
  * \return manager instance
  */
-MParManager * MParManager::instance()
+MParManager* MParManager::instance()
 {
-    if (!pm)
-        pm = new MParManager;
+    if (!pm) pm = new MParManager;
 
     return pm;
 }
@@ -145,22 +149,15 @@ MParManager * MParManager::instance()
 /** Shortcut
  * \return MParManager instance
  */
-MParManager * pm()
-{
-    return MParManager::instance();
-}
+MParManager* pm() { return MParManager::instance(); }
 
 /** Default constructor
  */
-MParManager::MParManager()
-{
-}
+MParManager::MParManager() {}
 
 /** Destructor
  */
-MParManager::~MParManager()
-{
-}
+MParManager::~MParManager() {}
 
 /** Parse source file
  *
@@ -170,14 +167,13 @@ bool MParManager::parseSource()
 {
     std::ifstream ifs(source);
     size_t length = 0;
-    if (ifs)
-    {
+    if (ifs) {
         ifs.seekg(0, ifs.end);
         length = ifs.tellg();
         ifs.seekg(0, ifs.beg);
     }
 
-    char * cbuff = new char[length];
+    char* cbuff = new char[length];
 
     WhatNext wn = WNContainer;
 
@@ -186,7 +182,7 @@ bool MParManager::parseSource()
     std::string type_name;
     std::vector<std::string> values;
 
-    while(ifs.good())
+    while (ifs.good())
     {
         ifs.getline(cbuff, length);
 
@@ -197,20 +193,20 @@ bool MParManager::parseSource()
         size_t pos = 0, pos2 = 0;
 
         // check if comment or empty line
-        if (str[0] == '#' or (str.length() == 0 and wn != WNParamCont))
-        {
+        if (str[0] == '#' or (str.length() == 0 and wn != WNParamCont)) {
             continue;
         }
-        // if container mark found, check whether it should be there, e.g. container after param new line is forbidden
+        // if container mark found, check whether it should be there, e.g.
+        // container after param new line is forbidden
         else if (str[0] == '[')
         {
-            if (wn == WNContainer or wn == WNContainerOrParam)
-            {
+            if (wn == WNContainer or wn == WNContainerOrParam) {
                 pos = str.find_first_of(']', 1);
-                cont_name = str.substr(1, pos-1);
-                //printf("Found container %s\n", cont_name.c_str());
+                cont_name = str.substr(1, pos - 1);
+                // printf("Found container %s\n", cont_name.c_str());
 
-                containers.insert(std::pair<std::string, MParContainer *>(cont_name, new MParContainer(cont_name)));
+                containers.insert(std::pair<std::string, MParContainer*>(
+                    cont_name, new MParContainer(cont_name)));
 
                 param_name.clear();
 
@@ -219,16 +215,17 @@ bool MParManager::parseSource()
             }
             else
             {
-                std::cerr << "Didn't expected container here: " << std::endl << str << std::endl;
+                std::cerr << "Didn't expected container here: " << std::endl
+                          << str << std::endl;
                 return false;
             }
         }
         else
         {
             // check if container name
-            if (wn == WNContainer)
-            {
-                std::cerr << "Expected container name here: " << std::endl << str << std::endl;
+            if (wn == WNContainer) {
+                std::cerr << "Expected container name here: " << std::endl
+                          << str << std::endl;
                 return false;
             }
             else if (wn == WNParam or wn == WNContainerOrParam)
@@ -243,42 +240,47 @@ bool MParManager::parseSource()
                 values.clear();
 
                 // find type name
-                pos = str.find_first_not_of(' ', pos+1);
+                pos = str.find_first_not_of(' ', pos + 1);
 
                 // type name must be in the same line like param name
-                if (str[pos] == '\\')
-                {
-                    std::cerr << "No type name detected in the param name line:" << std::endl << str << std::endl;
+                if (str[pos] == '\\') {
+                    std::cerr << "No type name detected in the param name line:"
+                              << std::endl
+                              << str << std::endl;
                     return false;
                 }
-                pos2 = str.find_first_of(' ', pos+1);
+                pos2 = str.find_first_of(' ', pos + 1);
 
-                type_name = str.substr(pos, pos2-pos);
-                if (type_name != "Int_t" and type_name != "Float_t" and type_name != "Double_t")
+                type_name = str.substr(pos, pos2 - pos);
+                if (type_name != "Int_t" and type_name != "Float_t" and
+                    type_name != "Double_t")
                 {
-                    std::cerr << "Invalid param type '" << type_name << "' in line:" << std::endl << str << std::endl;
+                    std::cerr << "Invalid param type '" << type_name
+                              << "' in line:" << std::endl
+                              << str << std::endl;
                     return false;
                 }
 
-//                 printf("Found param=%s with type=%s\n", param_name.c_str(), type_name.c_str());
+                //                 printf("Found param=%s with type=%s\n",
+                //                 param_name.c_str(), type_name.c_str());
 
                 wn = WNParamCont;
             }
 
-            if (wn == WNParamCont)
-            {
-//                 printf("Search for values in %s\n", str.substr(pos2, -1).c_str());
+            if (wn == WNParamCont) {
+                //                 printf("Search for values in %s\n",
+                //                 str.substr(pos2, -1).c_str());
                 wn = parseValues(str.substr(pos2, -1), values);
-                if (wn == WNContainerOrParam)
-                {
-                    if (values.size() == 0)
-                    {
-                        std::cerr << "No values given in line:" << std::endl << str << std::endl;
+                if (wn == WNContainerOrParam) {
+                    if (values.size() == 0) {
+                        std::cerr << "No values given in line:" << std::endl
+                                  << str << std::endl;
                         return false;
                     }
                     else
                     {
-                        containers[cont_name]->initParam(param_name, type_name, values);
+                        containers[cont_name]->initParam(param_name, type_name,
+                                                         values);
                     }
                 }
             }
@@ -294,35 +296,34 @@ bool MParManager::parseSource()
  * \param values vector to store values
  * \return next parsing step
  */
-MParManager::WhatNext MParManager::parseValues(const std::string & str, std::vector<std::string> & values)
+MParManager::WhatNext MParManager::parseValues(const std::string& str,
+                                               std::vector<std::string>& values)
 {
     size_t pos = 0, pos2 = 0;
 
-    while(1)
+    while (1)
     {
         pos = str.find_first_not_of(' ', pos2);
-//         printf("Found %c at %d\n", str[pos], pos);
+        //         printf("Found %c at %d\n", str[pos], pos);
         // if new line detected
-        if (str[pos] == '\\')
-        {
+        if (str[pos] == '\\') {
             return WNParamCont;
         }
 
         // if end of line
-        if (pos == str.npos)
-        {
+        if (pos == str.npos) {
             break;
         }
 
-        pos2 = str.find_first_of(' ', pos+1);
-        std::string match = str.substr(pos, pos2-pos);
-        if (isFloat(match))
-        {
+        pos2 = str.find_first_of(' ', pos + 1);
+        std::string match = str.substr(pos, pos2 - pos);
+        if (isFloat(match)) {
             values.push_back(match);
         }
         else
         {
-            std::cerr << "Value is not a number:" << std::endl << str << std::endl;
+            std::cerr << "Value is not a number:" << std::endl
+                      << str << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -333,17 +334,16 @@ MParManager::WhatNext MParManager::parseValues(const std::string & str, std::vec
  *
  * Needs to be implemented.
  */
-void MParManager::writeDestination() const
-{
-}
+void MParManager::writeDestination() const {}
 
 /** Print containers
  */
 void MParManager::print() const
 {
-     std::map<std::string, MParContainer *>::const_iterator it = containers.begin();
-     for (; it != containers.end(); ++it)
-         it->second->print();
+    std::map<std::string, MParContainer*>::const_iterator it =
+        containers.begin();
+    for (; it != containers.end(); ++it)
+        it->second->print();
 }
 
 /** Add new parameter container.
@@ -352,20 +352,21 @@ void MParManager::print() const
  * \param parcont container object
  * \return success
  */
-bool MParManager::addParameterContainer(const std::string& cont_name, MPar* parcont)
+bool MParManager::addParameterContainer(const std::string& cont_name,
+                                        MPar* parcont)
 {
-    MParContainer * pc = containers[cont_name];
-    if (!pc)
-    {
-        std::cerr << "Container " << cont_name << " doesn't exists!" << std::endl;
+    MParContainer* pc = containers[cont_name];
+    if (!pc) {
+        std::cerr << "Container " << cont_name << " doesn't exists!"
+                  << std::endl;
         exit(EXIT_FAILURE);
     }
 
     parcont->clear();
     bool ret = parcont->getParams(pc);
-    if (!ret)
-    {
-        std::cerr << "Initialization of " << cont_name << " param container failed!" << std::endl;
+    if (!ret) {
+        std::cerr << "Initialization of " << cont_name
+                  << " param container failed!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -378,7 +379,7 @@ bool MParManager::addParameterContainer(const std::string& cont_name, MPar* parc
  * \param cont_name container name
  * \return pointer to container
  */
-MPar * MParManager::getParameterContainer(const std::string& cont_name)
+MPar* MParManager::getParameterContainer(const std::string& cont_name)
 {
     return parconts[cont_name];
 }

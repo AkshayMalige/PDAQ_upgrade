@@ -34,7 +34,8 @@ parameters in the container and write to param file.
 /** Constructor
  * \param container container name
  */
-MParContainer::MParContainer(const std::string& container) : container(container)
+MParContainer::MParContainer(const std::string& container)
+    : container(container)
 {
 }
 
@@ -44,7 +45,7 @@ MParContainer::MParContainer(const std::string& container) : container(container
  * \param val value
  * \return success
  */
-bool MParContainer::add(const std::string & name, Int_t val)
+bool MParContainer::add(const std::string& name, Int_t val)
 {
     std::stringstream buff;
     buff << "  " << val;
@@ -61,7 +62,7 @@ bool MParContainer::add(const std::string & name, Int_t val)
  * \param val value
  * \return success
  */
-bool MParContainer::add(const std::string & name, Float_t val)
+bool MParContainer::add(const std::string& name, Float_t val)
 {
     std::stringstream buff;
     buff << "  " << val;
@@ -78,7 +79,7 @@ bool MParContainer::add(const std::string & name, Float_t val)
  * \param val value
  * \return success
  */
-bool MParContainer::add(const std::string & name, Double_t val)
+bool MParContainer::add(const std::string& name, Double_t val)
 {
     std::stringstream buff;
     buff << "  " << val;
@@ -95,7 +96,7 @@ bool MParContainer::add(const std::string & name, Double_t val)
  * \param val value
  * \return success
  */
-bool MParContainer::add(const std::string & name, const TArrayI & val)
+bool MParContainer::add(const std::string& name, const TArrayI& val)
 {
     std::stringstream buff;
     std::vector<std::string> v;
@@ -115,10 +116,10 @@ bool MParContainer::add(const std::string & name, const TArrayI & val)
  * \param val value
  * \return success
  */
-bool MParContainer::add(const std::string & name, const TArrayF & val)
+bool MParContainer::add(const std::string& name, const TArrayF& val)
 {
-   std::stringstream buff;
-   std::vector<std::string> v;
+    std::stringstream buff;
+    std::vector<std::string> v;
     for (int i = 0; i < val.GetSize(); ++i)
     {
         buff << "  " << val[i];
@@ -135,7 +136,7 @@ bool MParContainer::add(const std::string & name, const TArrayF & val)
  * \param val value
  * \return success
  */
-bool MParContainer::add(const std::string & name, const TArrayD & val)
+bool MParContainer::add(const std::string& name, const TArrayD& val)
 {
     std::stringstream buff;
     std::vector<std::string> v;
@@ -155,16 +156,15 @@ bool MParContainer::add(const std::string & name, const TArrayD & val)
  * \param val value
  * \return success
  */
-bool MParContainer::fill(const std::string & name, Int_t& val)
+bool MParContainer::fill(const std::string& name, Int_t& val)
 {
     ParMap::const_iterator it = parameters.find(name);
-    if (it == parameters.end())
-    {
-        std::cerr << "Parameter name " << name << " doesn't exists in the container!!" << std::endl;
+    if (it == parameters.end()) {
+        std::cerr << "Parameter name " << name
+                  << " doesn't exists in the container!!" << std::endl;
         return false;
     }
-    if (it->second.first != "Int_t")
-    {
+    if (it->second.first != "Int_t") {
         std::cerr << "Incorrect type for parameter name " << name << std::endl;
         return false;
     }
@@ -181,17 +181,16 @@ bool MParContainer::fill(const std::string & name, Int_t& val)
  * \param val value
  * \return success
  */
-bool MParContainer::fill(const std::string & name, Float_t& val)
+bool MParContainer::fill(const std::string& name, Float_t& val)
 {
     ParMap::const_iterator it = parameters.find(name);
 
-    if (it == parameters.end())
-    {
-        std::cerr << "Parameter name " << name << " doesn't exists in the container!" << std::endl;
+    if (it == parameters.end()) {
+        std::cerr << "Parameter name " << name
+                  << " doesn't exists in the container!" << std::endl;
         return false;
     }
-    if (it->second.first != "Float_t")
-    {
+    if (it->second.first != "Float_t") {
         std::cerr << "Incorrect type for parameter name " << name << std::endl;
         return false;
     }
@@ -208,17 +207,16 @@ bool MParContainer::fill(const std::string & name, Float_t& val)
  * \param val value
  * \return success
  */
-bool MParContainer::fill(const std::string & name, Double_t& val)
+bool MParContainer::fill(const std::string& name, Double_t& val)
 {
     ParMap::const_iterator it = parameters.find(name);
 
-    if (it == parameters.end())
-    {
-        std::cerr << "Parameter name " << name << " doesn't exists in the container!" << std::endl;
+    if (it == parameters.end()) {
+        std::cerr << "Parameter name " << name
+                  << " doesn't exists in the container!" << std::endl;
         return false;
     }
-    if (it->second.first != "Double_t")
-    {
+    if (it->second.first != "Double_t") {
         std::cerr << "Incorrect type for parameter name " << name << std::endl;
         return false;
     }
@@ -235,17 +233,16 @@ bool MParContainer::fill(const std::string & name, Double_t& val)
  * \param val value
  * \return success
  */
-bool MParContainer::fill(const std::string & name, TArrayI& val)
+bool MParContainer::fill(const std::string& name, TArrayI& val)
 {
     ParMap::const_iterator it = parameters.find(name);
 
-    if (it == parameters.end())
-    {
-        std::cerr << "Parameter name " << name << " doesn't exists in the container!" << std::endl;
+    if (it == parameters.end()) {
+        std::cerr << "Parameter name " << name
+                  << " doesn't exists in the container!" << std::endl;
         return false;
     }
-    if (it->second.first != "Int_t")
-    {
+    if (it->second.first != "Int_t") {
         std::cerr << "Incorrect type for parameter name " << name << std::endl;
         return false;
     }
@@ -262,17 +259,16 @@ bool MParContainer::fill(const std::string & name, TArrayI& val)
  * \param val value
  * \return success
  */
-bool MParContainer::fill(const std::string & name, TArrayF& val)
+bool MParContainer::fill(const std::string& name, TArrayF& val)
 {
     ParMap::const_iterator it = parameters.find(name);
 
-    if (it == parameters.end())
-    {
-        std::cerr << "Parameter name " << name << " doesn't exists in the container!" << std::endl;
+    if (it == parameters.end()) {
+        std::cerr << "Parameter name " << name
+                  << " doesn't exists in the container!" << std::endl;
         return false;
     }
-    if (it->second.first != "Float_t")
-    {
+    if (it->second.first != "Float_t") {
         std::cerr << "Incorrect type for parameter name " << name << std::endl;
         return false;
     }
@@ -289,17 +285,16 @@ bool MParContainer::fill(const std::string & name, TArrayF& val)
  * \param val value
  * \return success
  */
-bool MParContainer::fill(const std::string & name, TArrayD& val)
+bool MParContainer::fill(const std::string& name, TArrayD& val)
 {
     ParMap::const_iterator it = parameters.find(name);
 
-    if (it == parameters.end())
-    {
-        std::cerr << "Parameter name " << name << " doesn't exists in the container!" << std::endl;
+    if (it == parameters.end()) {
+        std::cerr << "Parameter name " << name
+                  << " doesn't exists in the container!" << std::endl;
         return false;
     }
-    if (it->second.first != "Double_t")
-    {
+    if (it->second.first != "Double_t") {
         std::cerr << "Incorrect type for parameter name " << name << std::endl;
         return false;
     }
@@ -334,7 +329,8 @@ void MParContainer::print()
  * \param values key values
  * \return success
  */
-bool MParContainer::initParam(const std::string& name, const std::string& type, const std::vector<std::string> & values)
+bool MParContainer::initParam(const std::string& name, const std::string& type,
+                              const std::vector<std::string>& values)
 {
     parameters[name] = TypeDataField(type, values);
 }

@@ -3,13 +3,12 @@
 
 ClassImp(PandaSubsystemEMC)
 
-PandaSubsystemEMC::PandaSubsystemEMC() {
+    PandaSubsystemEMC::PandaSubsystemEMC()
+{
 
     subsystem_name = "EMC";
 
-    //emc_raw = new EmcEvent();
+    // emc_raw = new EmcEvent();
 }
 
-PandaSubsystemEMC::~PandaSubsystemEMC() {
-
-}
+PandaSubsystemEMC::~PandaSubsystemEMC() {}

@@ -3,13 +3,12 @@
 
 ClassImp(PandaSubsystemSTT)
 
-PandaSubsystemSTT::PandaSubsystemSTT() {
+    PandaSubsystemSTT::PandaSubsystemSTT()
+{
 
     subsystem_name = "STT";
 
-    //stt_raw = new SttEvent();
+    // stt_raw = new SttEvent();
 }
 
-PandaSubsystemSTT::~PandaSubsystemSTT() {
-
-}
+PandaSubsystemSTT::~PandaSubsystemSTT() {}

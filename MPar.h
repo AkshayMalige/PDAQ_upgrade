@@ -18,12 +18,12 @@ class MParContainer;
 
 class MPar
 {
-    friend class MParManager;       ///< MParManager is friend
-protected:
+    friend class MParManager; ///< MParManager is friend
+  protected:
     // members
-    MParContainer * parcont;        ///< Pointer to object of parameter container
+    MParContainer* parcont; ///< Pointer to object of parameter container
 
-public:
+  public:
     // constructor
     MPar();
     // destructor
@@ -34,15 +34,15 @@ public:
     virtual void clear() = 0;
     virtual void print() const;
 
-protected:
+  protected:
     /// Get parameters from container
     /// \param parcont pointer to container object
     /// \return success
-    virtual bool getParams(MParContainer * parcont) = 0;
+    virtual bool getParams(MParContainer* parcont) = 0;
     /// Put parameters into container
     /// \param parcont pointer to container object
     /// \return success
-    virtual bool putParams(MParContainer * parcont) const = 0;
+    virtual bool putParams(MParContainer* parcont) const = 0;
 };
 
 #endif // MPAR_H

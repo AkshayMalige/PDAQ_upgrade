@@ -3,10 +3,8 @@
 
 ClassImp(PandaSubsystem)
 
-PandaSubsystem::PandaSubsystem() {
-
+    PandaSubsystem::PandaSubsystem()
+{
 }
 
-PandaSubsystem::~PandaSubsystem() {
-
-}
+PandaSubsystem::~PandaSubsystem() {}

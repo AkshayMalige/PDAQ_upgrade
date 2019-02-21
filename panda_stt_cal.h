@@ -3,22 +3,21 @@
 
 #include "panda_subsystem.h"
 //#include "SttEvent.h"
-#include "string.h"
 #include "Stt_Cal_Event.h"
+#include "string.h"
 
-class PandaSttCal : public PandaSubsystem {
+class PandaSttCal : public PandaSubsystem
+{
 
-    public:
-    //SttEvent stt_track_can;
+  public:
+    // SttEvent stt_track_can;
 
     Stt_Cal_Event stt_cal;
-        
+
     PandaSttCal();
     ~PandaSttCal();
 
-	ClassDef(PandaSttCal, 1)
+    ClassDef(PandaSttCal, 1)
 };
 
 #endif
-
-

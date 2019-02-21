@@ -12,12 +12,12 @@
 #ifndef MLOOKUPCONTAINER_H
 #define MLOOKUPCONTAINER_H
 
-#include <TArrayI.h>
-#include <TArrayF.h>
 #include <TArrayD.h>
+#include <TArrayF.h>
+#include <TArrayI.h>
 
-#include <vector>
 #include <map>
+#include <vector>
 
 //#include "MMAPTManager.h"
 
@@ -25,19 +25,19 @@ typedef std::vector<std::string> LookupVector;
 
 class MLookupContainer
 {
-protected:
+  protected:
     // members
-    std::string container;      ///< container name
+    std::string container; ///< container name
     LookupVector lv;
 
-public:
+  public:
     // constructor
-    MLookupContainer(const std::string & container);
+    MLookupContainer(const std::string& container);
     // destructor
     virtual ~MLookupContainer() {}
 
-    void addLine(const std::string & line) { lv.push_back(line); }
-    const LookupVector & getLines() const { return lv; }
+    void addLine(const std::string& line) { lv.push_back(line); }
+    const LookupVector& getLines() const { return lv; }
 
     void print();
 };

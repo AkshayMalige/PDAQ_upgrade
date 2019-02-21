@@ -1,29 +1,29 @@
 #ifndef H_SCI_EVENT
 #define H_SCI_EVENT
 
-#include <TObject.h>
-#include <TClonesArray.h>
 #include "SciHit.h"
+#include <TClonesArray.h>
+#include <TObject.h>
 
-class SciEvent : public TObject {
-public:
+class SciEvent : public TObject
+{
+  public:
+    TClonesArray* adc_hits;
+    // TClonesArray* adc_parms;
 
-	TClonesArray* adc_hits; 
-	//TClonesArray* adc_parms; 
+    int totalNTDCHits;
+    // int totalNADCHits;
 
-	int totalNTDCHits;
-	//int totalNADCHits;
-	
-	SciEvent();
-	virtual ~SciEvent() { Clear(); } 
+    SciEvent();
+    virtual ~SciEvent() { Clear(); }
 
-	void Clear(Option_t * opt = 0);
+    void Clear(Option_t* opt = 0);
 
-	SciHit* AddSciHit();
+    SciHit* AddSciHit();
 
-	//EmcHit* AddParm();
+    // EmcHit* AddParm();
 
-	ClassDef(SciEvent, 1)
+    ClassDef(SciEvent, 1)
 };
 
 #endif

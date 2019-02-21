@@ -40,48 +40,54 @@ class MLookup;
 
 class MLookupManager
 {
-protected:
-    std::string source;             ///< Parameters source file
-    std::string destination;        ///< Parameters destination file
+  protected:
+    std::string source;      ///< Parameters source file
+    std::string destination; ///< Parameters destination file
 
-    std::map<std::string, MLookupContainer *> containers;  ///< Containers
+    std::map<std::string, MLookupContainer*> containers; ///< Containers
 
-    static MLookupManager * lm;        ///< Instance of the MLookupManager
+    static MLookupManager* lm; ///< Instance of the MLookupManager
 
-private:
+  private:
     // constructors
     MLookupManager();
-    MLookupManager(MLookupManager const &) {}
+    MLookupManager(MLookupManager const&) {}
 
     // methods
     /// Assignment operator
     /// \return this object
-    MLookupManager & operator=(MLookupManager const &) { return *this; }
+    MLookupManager& operator=(MLookupManager const&) { return *this; }
 
-public:
+  public:
     // instance method
-    static MLookupManager * instance();
+    static MLookupManager* instance();
     // destructor
     ~MLookupManager();
 
     // methods
     /// Set parameters source
     /// \param source source file name
-    void setSource(const std::string & source) { this->source = source; }
+    void setSource(const std::string& source) { this->source = source; }
 
     bool parseSource();
 
-    bool addLookupContainer(const std::string & cont_name, MLookupContainer * lookupcont);
-    MLookupContainer * getLookupContainer(const std::string & cont_name);
+    bool addLookupContainer(const std::string& cont_name,
+                            MLookupContainer* lookupcont);
+    MLookupContainer* getLookupContainer(const std::string& cont_name);
 
     void print() const;
 
-private:
+  private:
     /// Parser stepes
-    enum WhatNext { WNContainer, WNContainerOrParam, WNParam, WNParamCont };
-
+    enum WhatNext
+    {
+        WNContainer,
+        WNContainerOrParam,
+        WNParam,
+        WNParamCont
+    };
 };
 
-extern MLookupManager * lm();
+extern MLookupManager* lm();
 
 #endif // MLOOKUPMANAGER_H

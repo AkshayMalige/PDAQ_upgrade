@@ -3,13 +3,12 @@
 
 ClassImp(PandaSttCal)
 
-PandaSttCal::PandaSttCal() {
+    PandaSttCal::PandaSttCal()
+{
 
     subsystem_name = "STT_CAL";
 
-    //stt_raw = new SttEvent();
+    // stt_raw = new SttEvent();
 }
 
-PandaSttCal::~PandaSttCal() {
-
-}
+PandaSttCal::~PandaSttCal() {}

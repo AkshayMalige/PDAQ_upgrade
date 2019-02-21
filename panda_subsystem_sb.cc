@@ -3,10 +3,9 @@
 
 ClassImp(PandaSubsystemSB)
 
-PandaSubsystemSB::PandaSubsystemSB() {
+    PandaSubsystemSB::PandaSubsystemSB()
+{
     subsystem_name = "SB";
 }
 
-PandaSubsystemSB::~PandaSubsystemSB() {
-
-}
+PandaSubsystemSB::~PandaSubsystemSB() {}

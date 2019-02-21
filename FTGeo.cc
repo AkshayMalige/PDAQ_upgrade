@@ -13,7 +13,6 @@
 
 #include "FTGeo.h"
 
-
 #include "MParContainer.h"
 
 /** \class MFTGeomPar
@@ -27,30 +26,24 @@ A container for Fibers Stack geometry parameters
 using namespace std;
 /** Constructor
  */
-MFTGeomPar::MFTGeomPar() : MPar(), mods(nullptr)
-{
-}
+MFTGeomPar::MFTGeomPar() : MPar(), mods(nullptr) {}
 
 /** Destructor
  */
-MFTGeomPar::~MFTGeomPar()
-{
-    delete [] mods;
-}
+MFTGeomPar::~MFTGeomPar() { delete[] mods; }
 
 /** Clear parameters
  */
 void MFTGeomPar::clear()
 {
-    delete [] mods;
+    delete[] mods;
     mods = nullptr;
     nModules = 0;
-    
-    nTrack_min_size =0;
-    nleadtime_window =0.0;
-    ncluster_limit =0;
-    ndrift_time_offset =0.0;
-    
+
+    nTrack_min_size = 0;
+    nleadtime_window = 0.0;
+    ncluster_limit = 0;
+    ndrift_time_offset = 0.0;
 
     for (Int_t i = 0; i < FWDET_STRAW_MAX_MODULES; ++i)
     {
@@ -63,7 +56,7 @@ void MFTGeomPar::clear()
         sm_mods[i].fStrawPitch = 0.0;
         sm_mods[i].fOffsetZ = 0.0;
         sm_mods[i].fOffsetX = 0.0;
-		sm_mods[i].fOffsetY = 0.0;
+        sm_mods[i].fOffsetY = 0.0;
         sm_mods[i].fLayerRotation = 0;
     }
 }
@@ -110,15 +103,13 @@ Float_t MFTGeomPar::getDTOffset() const
     return ndrift_time_offset;
 }
 
-
-
 Int_t MFTGeomPar::getLayers(Int_t m) const
 {
     // return number of layers in module 'm'
     // m -- module number
     if (m < getModules())
         //{cout<<"first layer "<<sm_mods[m].nLayers<<endl;
-        return sm_mods[m].nLayers;//}
+        return sm_mods[m].nLayers; //}
     else
         return -1;
 }
@@ -128,7 +119,7 @@ Int_t MFTGeomPar::getStraws(Int_t m) const
     // return number of straws in single layer of module 'm'
     // l -- layer number
     if (m < getModules())
-        return sm_mods[m].nStraws;//[_off_straws[l][d][b]];
+        return sm_mods[m].nStraws; //[_off_straws[l][d][b]];
     else
         return -1;
 }
@@ -138,7 +129,7 @@ Int_t MFTGeomPar::getShortWidth(Int_t m) const
     // return number of straws in single layer of module 'm'
     // l -- layer number
     if (m < getModules())
-        return sm_mods[m].nShortWidth;//[_off_straws[l][d][b]];
+        return sm_mods[m].nShortWidth; //[_off_straws[l][d][b]];
     else
         return -1;
 }
@@ -153,17 +144,15 @@ Float_t MFTGeomPar::getLayerRotation(Int_t m, Int_t l) const
         return -1;
 }
 
-
 Int_t MFTGeomPar::getShortOffset(Int_t m) const
 {
     // return number of straws in single layer of module 'm'
     // l -- layer number
     if (m < getModules())
-        return sm_mods[m].nShortOffset;//[_off_straws[l][d][b]];
+        return sm_mods[m].nShortOffset; //[_off_straws[l][d][b]];
     else
         return -1;
 }
-
 
 Float_t MFTGeomPar::getOffsetX(Int_t m, Int_t l, Int_t p) const
 {
@@ -176,7 +165,6 @@ Float_t MFTGeomPar::getOffsetX(Int_t m, Int_t l, Int_t p) const
     else
         return -1;
 }
-
 
 Float_t MFTGeomPar::getStrawRadius(Int_t m) const
 {
@@ -206,11 +194,10 @@ Float_t MFTGeomPar::getOffsetZ(Int_t m, Int_t l, Int_t p) const
     // s -- sublayer number
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
         //{cout<<"first offset z "<<sm_mods[m].fOffsetZ[l][p]<<endl;
-        return sm_mods[m].fOffsetZ[l][p];//}
+        return sm_mods[m].fOffsetZ[l][p]; //}
     else
         return -1;
 }
-
 
 Float_t MFTGeomPar::getOffsetY(Int_t m, Int_t l, Int_t p) const
 {
@@ -220,43 +207,39 @@ Float_t MFTGeomPar::getOffsetY(Int_t m, Int_t l, Int_t p) const
     // s -- sublayer number
     if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
         //{cout<<"first offset z "<<sm_mods[m].fOffsetZ[l][p]<<endl;
-        return sm_mods[m].fOffsetY[l][p];//}
+        return sm_mods[m].fOffsetY[l][p]; //}
     else
         return -1;
 }
 
 void MFTGeomPar::setModules(int m)
 {
-    if (m <= FWDET_STRAW_MAX_MODULES)
-        nModules = m;
+    if (m <= FWDET_STRAW_MAX_MODULES) nModules = m;
 }
 
 void MFTGeomPar::setTrackMinSize(int t)
 {
-    //if (m <= FWDET_STRAW_MAX_MODULES)
-        nTrack_min_size = t;
+    // if (m <= FWDET_STRAW_MAX_MODULES)
+    nTrack_min_size = t;
 }
 
 void MFTGeomPar::setLeadtimeWindow(float lt)
 {
-    //if (m <= FWDET_STRAW_MAX_MODULES)
-        nleadtime_window = lt;
+    // if (m <= FWDET_STRAW_MAX_MODULES)
+    nleadtime_window = lt;
 }
 
 void MFTGeomPar::setClusterLimit(int c)
 {
-    //if (m <= FWDET_STRAW_MAX_MODULES)
-        ncluster_limit = c;
+    // if (m <= FWDET_STRAW_MAX_MODULES)
+    ncluster_limit = c;
 }
 
 void MFTGeomPar::setDTOffset(float d)
 {
-    //if (m <= FWDET_STRAW_MAX_MODULES)
-        ndrift_time_offset = d;
+    // if (m <= FWDET_STRAW_MAX_MODULES)
+    ndrift_time_offset = d;
 }
-
-
-
 
 void MFTGeomPar::setLayers(Int_t m, Int_t l)
 {
@@ -267,7 +250,6 @@ void MFTGeomPar::setLayers(Int_t m, Int_t l)
     sm_mods[m].fOffsetZ.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
     sm_mods[m].fOffsetX.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
     sm_mods[m].fOffsetY.ResizeTo(l, FWDET_STRAW_MAX_PLANES);
-
 }
 
 void MFTGeomPar::setStraws(Int_t m, Int_t s)
@@ -275,8 +257,7 @@ void MFTGeomPar::setStraws(Int_t m, Int_t s)
     // set number of straws for moduke 'm'
     // m -- module number
     // s -- number of straws
-    if (m < getModules())
-    {
+    if (m < getModules()) {
         sm_mods[m].nStraws = s;
     }
 }
@@ -286,8 +267,7 @@ void MFTGeomPar::setShortOffset(Int_t m, Int_t o)
     // set number of straws for moduke 'm'
     // m -- module number
     // o -- offset of short starw
-    if (m < getModules())
-    {
+    if (m < getModules()) {
         sm_mods[m].nShortOffset = o;
     }
 }
@@ -297,8 +277,7 @@ void MFTGeomPar::setShortWidth(Int_t m, Int_t w)
     // set number of straws for moduke 'm'
     // m -- module number
     // w -- width of short straws section
-    if (m < getModules())
-    {
+    if (m < getModules()) {
         sm_mods[m].nShortWidth = w;
     }
 }
@@ -308,8 +287,7 @@ void MFTGeomPar::setStrawRadius(Int_t m, Float_t r)
     // set straw radius in each sublayer of layer 'l'
     // l -- layer number
     // r -- straw radius
-    if (m < getModules())
-    {
+    if (m < getModules()) {
         sm_mods[m].fStrawRadius = r;
     }
 }
@@ -319,8 +297,7 @@ void MFTGeomPar::setStrawPitch(Int_t m, Float_t p)
     // set straws pitch in each sublayer of layer 'l'
     // l -- layer number
     // p -- straws pitch
-    if (m < getModules())
-    {
+    if (m < getModules()) {
         sm_mods[m].fStrawPitch = p;
     }
 }
@@ -331,8 +308,7 @@ void MFTGeomPar::setOffsetZ(Int_t m, Int_t l, Int_t p, Float_t z)
     // l -- layer number
     // s -- sublater number
     // z -- z-coordinate
-    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
-    {
+    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES) {
         sm_mods[m].fOffsetZ[l][p] = z;
     }
 }
@@ -343,8 +319,7 @@ void MFTGeomPar::setOffsetX(Int_t m, Int_t l, Int_t p, Float_t x)
     // l -- layer number
     // s -- sublater number
     // x -- z-coordinate
-    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
-    {
+    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES) {
         sm_mods[m].fOffsetX[l][p] = x;
     }
 }
@@ -355,8 +330,7 @@ void MFTGeomPar::setOffsetY(Int_t m, Int_t l, Int_t p, Float_t y)
     // l -- layer number
     // s -- sublater number
     // y -- y-coordinate
-    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES)
-    {
+    if (m < getModules() && l < getLayers(m) && p < FWDET_STRAW_MAX_PLANES) {
         sm_mods[m].fOffsetY[l][p] = y;
     }
 }
@@ -365,24 +339,22 @@ void MFTGeomPar::setLayerRotation(Int_t m, Int_t l, Float_t r)
     // set lab transform for later 'l'
     // l -- layer number
     // lt -- lab transformation matrix [3x3 rot., 3-x transl.]
-    if (m < getModules() && l < getLayers(m))
-    {
+    if (m < getModules() && l < getLayers(m)) {
         sm_mods[m].fLayerRotation[l] = r;
     }
 }
 
-
 bool MFTGeomPar::putParams(MParContainer* parcont) const
 {
-     if (!parcont) return 0;
+    if (!parcont) return 0;
 
-      Int_t total_layers = 0;
+    Int_t total_layers = 0;
 
     // first find total number of layers
     for (Int_t i = 0; i < nModules; ++i)
     {
         total_layers += getLayers(i);
-    }  
+    }
 
     TArrayI par_layers(nModules);
     TArrayI par_straws(nModules);
@@ -398,7 +370,7 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
 
     TArrayF par_layerRotation(total_layers);
 
-    Int_t cnt_layers = 0; 
+    Int_t cnt_layers = 0;
 
     for (Int_t i = 0; i < nModules; ++i)
     {
@@ -416,10 +388,12 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
         {
             for (Int_t s = 0; s < FWDET_STRAW_MAX_PLANES; ++s)
             {
-                par_offsetZ.SetAt(getOffsetZ(i, l, s), 2*(cnt_layers+l) + s);
-                par_offsetX.SetAt(getOffsetX(i, l, s), 2*(cnt_layers+l) + s);
-		par_offsetY.SetAt(getOffsetY(i, l, s), 2*(cnt_layers+l) + s);
-
+                par_offsetZ.SetAt(getOffsetZ(i, l, s),
+                                  2 * (cnt_layers + l) + s);
+                par_offsetX.SetAt(getOffsetX(i, l, s),
+                                  2 * (cnt_layers + l) + s);
+                par_offsetY.SetAt(getOffsetY(i, l, s),
+                                  2 * (cnt_layers + l) + s);
             }
 
             par_layerRotation.SetAt(getLayerRotation(i, l), cnt_layers + l);
@@ -434,122 +408,107 @@ bool MFTGeomPar::putParams(MParContainer* parcont) const
         cnt_layers += layers;
     }
 
-    parcont->add("nModules",       nModules);
-    parcont->add("nLayers",        par_layers);
-    parcont->add("nStraws",        par_straws);
-    parcont->add("nShortOffset",   par_shorto);
-    parcont->add("nShortWidth",    par_shortw);
-    parcont->add("fOffsetZ",       par_offsetZ);
-    parcont->add("fOffsetY",       par_offsetY);
-    parcont->add("fOffsetX",       par_offsetX);
-    parcont->add("fStrawRadius",   par_strawR);
-    parcont->add("fStrawPitch",    par_strawP);
+    parcont->add("nModules", nModules);
+    parcont->add("nLayers", par_layers);
+    parcont->add("nStraws", par_straws);
+    parcont->add("nShortOffset", par_shorto);
+    parcont->add("nShortWidth", par_shortw);
+    parcont->add("fOffsetZ", par_offsetZ);
+    parcont->add("fOffsetY", par_offsetY);
+    parcont->add("fOffsetX", par_offsetX);
+    parcont->add("fStrawRadius", par_strawR);
+    parcont->add("fStrawPitch", par_strawP);
     parcont->add("fLayerRotation", par_layerRotation);
-    
-    parcont->add("nTrack_min_size",       nTrack_min_size);
-    parcont->add("nleadtime_window",       nleadtime_window);
-    parcont->add("ncluster_limit",       ncluster_limit);
-    parcont->add("ndrift_time_offset",       ndrift_time_offset);
 
+    parcont->add("nTrack_min_size", nTrack_min_size);
+    parcont->add("nleadtime_window", nleadtime_window);
+    parcont->add("ncluster_limit", ncluster_limit);
+    parcont->add("ndrift_time_offset", ndrift_time_offset);
 }
-
 
 bool MFTGeomPar::getParams(MParContainer* parcont)
 {
-// gets the parameters from the list (read from input)
+    // gets the parameters from the list (read from input)
     if (!parcont) return false;
 
     Int_t par_modules;
-    
+
     Int_t par_track_min_size;
     Float_t par_leadtime_window;
     Int_t par_cluster_limit;
     Float_t par_drift_time_offset;
-    
-    if (!parcont->fill("nModules", par_modules))
-        return false;
-    
-    
-    if (!parcont->fill("nTrack_min_size", par_track_min_size))
-        return false;
-    if (!parcont->fill("nleadtime_window", par_leadtime_window))
-        return false;
-    if (!parcont->fill("ncluster_limit", par_cluster_limit))
-        return false;
+
+    if (!parcont->fill("nModules", par_modules)) return false;
+
+    if (!parcont->fill("nTrack_min_size", par_track_min_size)) return false;
+    if (!parcont->fill("nleadtime_window", par_leadtime_window)) return false;
+    if (!parcont->fill("ncluster_limit", par_cluster_limit)) return false;
     if (!parcont->fill("ndrift_time_offset", par_drift_time_offset))
         return false;
 
     TArrayI par_layers(par_modules);
-    if (!parcont->fill("nLayers", par_layers))
-        return false;
+    if (!parcont->fill("nLayers", par_layers)) return false;
 
-    if (par_layers.GetSize() != par_modules)
-    {
+    if (par_layers.GetSize() != par_modules) {
         Error("HFwDetStrawGeomPar::getParams(MFTGeomPar* parcont)",
               "Array size of layers does not fit to number of detectors");
         return false;
     }
 
-
     Int_t total_layers = 0;
-    
+
     for (Int_t d = 0; d < par_modules; ++d)
     {
         total_layers += par_layers[d];
     }
 
     TArrayI par_straws(par_modules);
-    if (!parcont->fill("nStraws", par_straws))
-        return false;
+    if (!parcont->fill("nStraws", par_straws)) return false;
 
-    if (par_straws.GetSize() != par_modules)
-    {
+    if (par_straws.GetSize() != par_modules) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
               "Array size of straws does not fit to number of detectors");
         return false;
     }
 
     TArrayI par_shorto(par_modules);
-    if (!parcont->fill("nShortOffset", par_shorto))
-        return false;
+    if (!parcont->fill("nShortOffset", par_shorto)) return false;
 
-    if (par_shorto.GetSize() != par_modules)
-    {
+    if (par_shorto.GetSize() != par_modules) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of short straws offset does not fit to number of detectors");
+              "Array size of short straws offset does not fit to number of "
+              "detectors");
         return false;
     }
 
     TArrayI par_shortw(par_modules);
-    if (!parcont->fill("nShortWidth", par_shortw))
-        return false;
+    if (!parcont->fill("nShortWidth", par_shortw)) return false;
 
-    if (par_shortw.GetSize() != par_modules)
-    {
+    if (par_shortw.GetSize() != par_modules) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of short straws section width does not fit to number of detectors");
+              "Array size of short straws section width does not fit to number "
+              "of detectors");
         return false;
     }
 
     TArrayF par_strawRadius(par_modules);
-    if (!parcont->fill("fStrawRadius", par_strawRadius))
-        return false;
+    if (!parcont->fill("fStrawRadius", par_strawRadius)) return false;
 
-    if (par_strawRadius.GetSize() != par_modules)
-    {
-        Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of strawRadius=%d does not fit to number of layers=%d", par_strawRadius.GetSize(), par_modules);
+    if (par_strawRadius.GetSize() != par_modules) {
+        Error(
+            "HFwDetStrawGeomPar::getParams(HParamList* l)",
+            "Array size of strawRadius=%d does not fit to number of layers=%d",
+            par_strawRadius.GetSize(), par_modules);
         return false;
     }
 
     TArrayF par_strawPitch(par_modules);
-    if (!parcont->fill("fStrawPitch", par_strawPitch))
-        return false;
+    if (!parcont->fill("fStrawPitch", par_strawPitch)) return false;
 
-    if (par_strawPitch.GetSize() != par_modules)
-    {
+    if (par_strawPitch.GetSize() != par_modules) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of strawPitch=%d does not fit to number of layers=%d", par_strawPitch.GetSize(), par_modules);
+              "Array size of strawPitch=%d does not fit to number of layers=%d",
+              par_strawPitch.GetSize(), par_modules);
         return false;
     }
 
@@ -562,61 +521,58 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
     const Int_t cnt_planes = cnt_layers * FWDET_STRAW_MAX_PLANES;
 
     TArrayF par_offsetZ(cnt_planes);
-    if (!parcont->fill("fOffsetZ", par_offsetZ))
-        return false;
+    if (!parcont->fill("fOffsetZ", par_offsetZ)) return false;
 
-    if (par_offsetZ.GetSize() != cnt_planes)
-    {
+    if (par_offsetZ.GetSize() != cnt_planes) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of planeZ=%d does not fit to number of planes=%d", par_offsetZ.GetSize(), cnt_planes);
+              "Array size of planeZ=%d does not fit to number of planes=%d",
+              par_offsetZ.GetSize(), cnt_planes);
         return false;
     }
 
     TArrayF par_offsetX(cnt_planes);
-    if (!parcont->fill("fOffsetX", par_offsetX))
-        return false;
+    if (!parcont->fill("fOffsetX", par_offsetX)) return false;
 
-    if (par_offsetX.GetSize() != cnt_planes)
-    {
+    if (par_offsetX.GetSize() != cnt_planes) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of planeX=%d does not fit to number of planes=%d", par_offsetX.GetSize(), cnt_planes);
+              "Array size of planeX=%d does not fit to number of planes=%d",
+              par_offsetX.GetSize(), cnt_planes);
         return false;
     }
-    
-    TArrayF par_offsetY(cnt_planes);
-    if (!parcont->fill("fOffsetY", par_offsetY))
-        return false;
 
-    if (par_offsetY.GetSize() != cnt_planes)
-    {
+    TArrayF par_offsetY(cnt_planes);
+    if (!parcont->fill("fOffsetY", par_offsetY)) return false;
+
+    if (par_offsetY.GetSize() != cnt_planes) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of planeY=%d does not fit to number of planes=%d", par_offsetY.GetSize(), cnt_planes);
+              "Array size of planeY=%d does not fit to number of planes=%d",
+              par_offsetY.GetSize(), cnt_planes);
         return false;
     }
 
     TArrayF par_layerRotation(total_layers);
-    if (!parcont->fill("fLayerRotation", par_layerRotation))
-        return false;
+    if (!parcont->fill("fLayerRotation", par_layerRotation)) return false;
 
-    if (par_layerRotation.GetSize() != (Int_t)(total_layers))
-    {
+    if (par_layerRotation.GetSize() != (Int_t)(total_layers)) {
         Error("HFwDetStrawGeomPar::getParams(HParamList* l)",
-              "Array size of layerRotation=%d does not fit to number of layers=%d", par_layerRotation.GetSize(), total_layers);
+              "Array size of layerRotation=%d does not fit to number of "
+              "layers=%d",
+              par_layerRotation.GetSize(), total_layers);
         return false;
     }
 
-     cnt_layers = 0;
+    cnt_layers = 0;
 
-     setModules(par_modules);
-     
-     setTrackMinSize(par_track_min_size);
-     setLeadtimeWindow(par_leadtime_window);
-     setClusterLimit(par_cluster_limit);
-     setDTOffset(par_drift_time_offset);
-     
+    setModules(par_modules);
+
+    setTrackMinSize(par_track_min_size);
+    setLeadtimeWindow(par_leadtime_window);
+    setClusterLimit(par_cluster_limit);
+    setDTOffset(par_drift_time_offset);
+
     for (Int_t i = 0; i < par_modules; ++i)
     {
-    //     // get number of layers
+        //     // get number of layers
         Int_t layers = par_layers[i];
 
         // set number of layers
@@ -629,10 +585,9 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
         {
             for (Int_t s = 0; s < FWDET_STRAW_MAX_PLANES; ++s)
             {
-                setOffsetZ(i, l, s, par_offsetZ[2*(cnt_layers + l) + s]);
-                setOffsetX(i, l, s, par_offsetX[2*(cnt_layers + l) + s]);
-				setOffsetY(i, l, s, par_offsetY[2*(cnt_layers + l) + s]);
-
+                setOffsetZ(i, l, s, par_offsetZ[2 * (cnt_layers + l) + s]);
+                setOffsetX(i, l, s, par_offsetX[2 * (cnt_layers + l) + s]);
+                setOffsetY(i, l, s, par_offsetY[2 * (cnt_layers + l) + s]);
             }
             setLayerRotation(i, l, par_layerRotation[cnt_layers + l]);
         }
@@ -655,7 +610,6 @@ bool MFTGeomPar::getParams(MParContainer* parcont)
  * \return success
  */
 
-
 /** Print parameters
  */
 void MFTGeomPar::print() const
@@ -664,7 +618,7 @@ void MFTGeomPar::print() const
     for (int m = 0; m < nModules; ++m)
     {
         printf(" +++\n layers = %d\n", sm_mods[m].nLayers);
-//        printf(" +++\n layers = %d\n", mods[m].layers);
+        //        printf(" +++\n layers = %d\n", mods[m].layers);
         printf(" Straws:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
             printf(" %2d", sm_mods[m].nStraws);
@@ -675,18 +629,30 @@ void MFTGeomPar::print() const
 
         printf("\n  off x:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            {for (int p=0; p< FWDET_STRAW_MAX_PLANES; ++p)
-            {printf(" %2.3f", sm_mods[m].fOffsetX[l][p]);}}
+        {
+            for (int p = 0; p < FWDET_STRAW_MAX_PLANES; ++p)
+            {
+                printf(" %2.3f", sm_mods[m].fOffsetX[l][p]);
+            }
+        }
 
         printf("\n  off Z:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
-                {printf(" %2.3f", sm_mods[m].fOffsetZ[l][p]);}}
-                
+        {
+            for (int p = 0; p < FWDET_STRAW_MAX_PLANES; ++p)
+            {
+                printf(" %2.3f", sm_mods[m].fOffsetZ[l][p]);
+            }
+        }
+
         printf("\n  off Y:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
-            {for (int p =0; p< FWDET_STRAW_MAX_PLANES; ++p)
-                {printf(" %2.3f", sm_mods[m].fOffsetY[l][p]);}}
+        {
+            for (int p = 0; p < FWDET_STRAW_MAX_PLANES; ++p)
+            {
+                printf(" %2.3f", sm_mods[m].fOffsetY[l][p]);
+            }
+        }
 
         printf("\n  short offset:");
         for (int l = 0; l < sm_mods[m].nLayers; ++l)
@@ -709,5 +675,3 @@ void MFTGeomPar::print() const
     printf("Clusterfinder intake limit = %d\n", ncluster_limit);
     printf("Drift time offset = %2.1f\n\n\n", ndrift_time_offset);
 }
-
-

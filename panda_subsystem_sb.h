@@ -4,17 +4,17 @@
 #include "panda_subsystem.h"
 #include "string.h"
 
-class PandaSubsystemSB : public PandaSubsystem {
+class PandaSubsystemSB : public PandaSubsystem
+{
 
-    public:
-
+  public:
     int SB_number;
     int Header_Status;
-    
+
     PandaSubsystemSB();
     ~PandaSubsystemSB();
 
-	ClassDef(PandaSubsystemSB, 1)
+    ClassDef(PandaSubsystemSB, 1)
 };
 
 #endif

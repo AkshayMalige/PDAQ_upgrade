@@ -3,26 +3,22 @@
 
 #include <TObject.h>
 
-class SciHit : public TObject {
-public:
-	
-	double leadTime;
-	double trailTime;
-	int channel;
-	UInt_t tdcid;
+class SciHit : public TObject
+{
+  public:
+    double leadTime;
+    double trailTime;
+    int channel;
+    UInt_t tdcid;
 
-	UInt_t sci_tdc_event_sizes;
+    UInt_t sci_tdc_event_sizes;
 
+    bool isRef;
 
-	bool isRef;
+    SciHit();
 
-	SciHit();
+    virtual ~SciHit() {}
 
-	virtual ~SciHit() { }
-
-	ClassDef(SciHit, 1)
-
+    ClassDef(SciHit, 1)
 };
 #endif
-
-

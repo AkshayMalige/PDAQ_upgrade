@@ -36,59 +36,64 @@
 //#include "MMAPTManager.h"
 
 class MParContainer;
-class MPar;	
-
+class MPar;
 
 class MParManager
 {
-protected:
-    std::string source;             ///< Parameters source file
-    std::string destination;        ///< Parameters destination file
+  protected:
+    std::string source;      ///< Parameters source file
+    std::string destination; ///< Parameters destination file
 
-    std::map<std::string, MParContainer *> containers;  ///< Containers
-    std::map<std::string, MPar *> parconts;             ///< Parameters
+    std::map<std::string, MParContainer*> containers; ///< Containers
+    std::map<std::string, MPar*> parconts;            ///< Parameters
 
-    static MParManager * pm;        ///< Instance of the MParManager
+    static MParManager* pm; ///< Instance of the MParManager
 
-private:
+  private:
     // constructors
     MParManager();
-    MParManager(MParManager const &) {}
+    MParManager(MParManager const&) {}
 
     // methods
     /// Assignment operator
     /// \return this object
-    MParManager & operator=(MParManager const &) { return *this; }
+    MParManager& operator=(MParManager const&) { return *this; }
 
-public:
+  public:
     // instance method
-    static MParManager * instance();
+    static MParManager* instance();
     // destructor
     ~MParManager();
 
     // methods
     /// Set parameters source
     /// \param source source file name
-    void setParamSource(const std::string & source) { this->source = source; }
+    void setParamSource(const std::string& source) { this->source = source; }
     /// Set parameters destination
     /// \param dest destination file name
-    void setParamDest(const std::string & dest) { this->destination = dest; }
+    void setParamDest(const std::string& dest) { this->destination = dest; }
 
     bool parseSource();
     void writeDestination() const;
 
-    bool addParameterContainer(const std::string & cont_name, MPar * parcont);
-    MPar * getParameterContainer(const std::string & cont_name);
+    bool addParameterContainer(const std::string& cont_name, MPar* parcont);
+    MPar* getParameterContainer(const std::string& cont_name);
 
     void print() const;
 
-private:
+  private:
     /// Parser stepes
-    enum WhatNext { WNContainer, WNContainerOrParam, WNParam, WNParamCont };
-    WhatNext parseValues(const std::string & str, std::vector<std::string> & values);
-
+    enum WhatNext
+    {
+        WNContainer,
+        WNContainerOrParam,
+        WNParam,
+        WNParamCont
+    };
+    WhatNext parseValues(const std::string& str,
+                         std::vector<std::string>& values);
 };
 
-extern MParManager * pm();
+extern MParManager* pm();
 
 #endif // MPARMANAGER_H

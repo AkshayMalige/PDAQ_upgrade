@@ -4,16 +4,16 @@
 #include "TObject.h"
 #include "string.h"
 using namespace std;
-class PandaSubsystem : public TObject {
+class PandaSubsystem : public TObject
+{
 
-    public:
-
+  public:
     std::string subsystem_name;
 
     PandaSubsystem();
     ~PandaSubsystem();
 
-	ClassDef(PandaSubsystem, 1)
+    ClassDef(PandaSubsystem, 1)
 };
 
 #endif
