@@ -301,7 +301,7 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
 
                                             bool doubleHit = false;
 
-                                            for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++ ) {
+                                           /* for ( Int_t ui=0; ui<stt_event->totalNTDCHits; ui++ ) {
                                                 //cout<<"totalNTDCHits "<<stt_event->totalNTDCHits<<"\t"<<endl;
                                                 if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->channel == channel_nr + stt_channel_offsets[tdc_id] ) {
                                                     //if ( ( ( SttRawHit* ) stt_event->tdc_hits->ConstructedAt ( ui ) )->leadTime == lastRise ) {
@@ -312,7 +312,7 @@ void PDAQ_RawDecoder_HADES ( char *in_file_name,char *out_file_name=0, int maxEv
                                                 //}
 
                                                 doubleCntr1++;
-                                            }
+                                            }*/
 					   /* if (tdc_id == 0x6500 && channel_nr ==1)
 					    {
 					      SciHit* s = sci_event->AddSciHit();

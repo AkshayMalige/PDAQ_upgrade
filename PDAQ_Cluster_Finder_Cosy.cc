@@ -57,13 +57,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 
     TH1F* h_straw_mean_straw = new TH1F ( "h_straw_mean_straw", "h_straw_mean_straw", 800, -100, 700 );
 
-    TH1F* h_Front = new TH1F ( "h_Front", "h_Front", 600, 0, 600 );
+    TH1F* h_STT_Hit_Diff = new TH1F ( "h_STT_Hit_Diff", "h_STT_Hit_Diff", 10000, 0, 10000 );
     TH1F* h_FrontNO = new TH1F ( "h_FrontNO", "h_FrontNO", 20, 0, 20 );
 
     TH1F* h_Fee[18];
-
-    Double_t repeat =0;
-    Double_t All_repeat =0;
 
     Int_t iev = ( Int_t ) tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl
@@ -111,10 +108,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
       MAX_FT_TOTAL_LAYERS = ftGeomPar->getLayers(0);
     }
     
+    double repeat =0;
+    double All_repeat =0;  
         
     SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][500];
 
     for ( Int_t i = 0; i < iev; i++ ) {
+      
+
            
 	event_counter++;
 
@@ -193,21 +194,43 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 
                 {
                     vec_leadTime.push_back ( hitOnLayer[l][h] );
+		    
+		    cout<<"Initial : "<<hitOnLayer[l][h]->layer<<"\t"<<hitOnLayer[l][h]->channel<<"\t"<<hitOnLayer[l][h]->leadTime<<endl;
 
                 }
             }
+	    //cout<<"Initial Size: "<<vec_leadTime.size()<<"\t";
 
+       	    //cout<<"Erased Size: "<<vec_leadTime.size()<<endl;
+
+	    //cout<<repeat <<"\t"<<All_repeat<<endl;
+            std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
+            vec_stthits.clear();
+	    
+	    double doublehitdiff =0;
             for ( Int_t je=0; je<vec_leadTime.size()-1; je++ ) {
+                if ( ( vec_leadTime[je+1]->layer ) == ( vec_leadTime[je]->layer ) && ( vec_leadTime[je+1]->channel == vec_leadTime[je]->channel ) ) 
+		{
+		    doublehitdiff = fabs(vec_leadTime[je]->leadTime - vec_leadTime[je+1]->leadTime);
+		    h_STT_Hit_Diff->Fill(doublehitdiff);
+                    if (doublehitdiff<=500)
+		    {
+		      vec_leadTime.erase(vec_leadTime.begin() + je+1);
+		      if (doublehitdiff>0 )
+		      {
+			cout<<"double "<<endl;
+			repeat++;
 
-                if ( ( vec_leadTime[je+1]->leadTime ) == ( vec_leadTime[je]->leadTime ) && ( vec_leadTime[je+1]->channel == vec_leadTime[je]->channel ) ) {
-                    repeat++;
+		      }
+		      //sleep(1);
+		    }
                 }
                 All_repeat++;
             }
-
-            std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
-            vec_stthits.clear();
-   
+	    for ( int ex =0 ; ex<vec_leadTime.size();ex++ )
+	      {
+		    cout<<"Final : "<<vec_leadTime[ex]->layer<<"\t"<<vec_leadTime[ex]->channel<<"\t"<<vec_leadTime[ex]->leadTime<<endl;
+	      }   
 	    if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake )
 	    {
 	      const int minNumber = min_track_hits;
@@ -248,13 +271,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 		  PDAQ_Event_Finder(vec_stthits, i, PDAQ_tree,stt_event, ftGeomPar,SCI_CAL);
 	      }
 	    }
-
 	  }
-	
 
       }//End of loop over events
-
+      h_STT_Hit_Diff->Write();
       PDAQ_tree->Write();
+      printf("Total Hits processed : %f       Repeated Hits in an Event : %f\n\n",All_repeat,repeat);
       printf("In_File: %s 	Out_File:  %s\n",intree,outtree);
       return 0;
 }
