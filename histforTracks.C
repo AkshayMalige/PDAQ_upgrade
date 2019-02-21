@@ -21,6 +21,7 @@
 #include "SttTrackHit.h"
 #include "SttEvent.h"
 #include "SttTrackEvent.h"
+#include "TCanvas.h"
 
                           
 #include "panda_subsystem.h"
@@ -40,9 +41,15 @@ Bool_t histforTracks(void)
   PandaSubsystemSTT* CAL = 0;
   PandaSttCal* STT_CAL = 0;
   PandaSttTrack* STT_TRACK = new PandaSttTrack();
+
+  	Double_t w = 2000; // ToT Canvas width
+    Double_t h = 1000; // ToT Canvas hight
+
+	TCanvas* cToT=new TCanvas("ToT_Canvas","ToT_Canvas", w, h);
+    cToT->Divide(2,2);
   
   
-    TFile * file = TFile::Open("c.root", "READ");
+    TFile * file = TFile::Open("1800clus2.root", "READ");
 
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
@@ -88,9 +95,16 @@ Bool_t histforTracks(void)
     // DR_Tree->Branch("vec_z", &vec_z);
     // DR_Tree->Branch("vec_layer", &vec_layer);
 
-    TH2F* h_track[100];
+    //TH2F* h_track[100];
 
     TH1F* h_x;
+    TH1F* h_STT_Hit_Diff = new TH1F ( "h_STT_Hit_Diff", "h_STT_Hit_Diff", 800, -100, 700 );
+    TH1F* L_STT_Hit_Diff[8];
+	for (int i = 0; i < 8; i++) {
+		L_STT_Hit_Diff[i] = new TH1F(Form("Layer%dSTT_Hit_Diff", i + 1), Form("Layer%dSTT_Hit_Diff", i + 1), 800, -100, 700);
+
+	}
+
     h_x = new TH1F("h_x", "h_x", 16, 0, 16);
     
     Int_t iev = (Int_t)tree->GetEntries();
@@ -99,7 +113,7 @@ Bool_t histforTracks(void)
 	 
 	 cout<<STT_TRACK->stt_track_can.total_track_NTDCHits<<endl;
 	
-    for (Int_t i = 0; i < 100; i++) 
+    for (Int_t i = 0; i < iev; i++) 
     {
         tree->GetEntry(i);
 		if (i%100==0){
@@ -124,7 +138,7 @@ Bool_t histforTracks(void)
 	        //h->Draw();
 
 
-	  		h_track[i] = new TH2F (Form("Track No %d - Straw Vs Layer",i),Form ("Track %d Straw VsLayer; Straw;Layer",i ),18.0,-1.0,17.0,20,0.0,10.0);
+	  		//h_track[i] = new TH2F (Form("Track No %d - Straw Vs Layer",i),Form ("Track %d Straw VsLayer; Straw;Layer",i ),18.0,-1.0,17.0,20,0.0,10.0);
 
 
 		    std::vector<SttHit*> vec_track_can;
@@ -134,6 +148,8 @@ Bool_t histforTracks(void)
 		    	    
 		    for (int t =0; t< vec_track_can.size(); t++)
 		    {
+		    	h_STT_Hit_Diff->Fill(vec_track_can[t]->drifttime);
+		    	L_STT_Hit_Diff[vec_track_can[t]->layer-1]->Fill(vec_track_can[t]->drifttime);
 				// vec_o_test1.push_back(vec_track_can[t]->drifttime);
 				// vec_o_test.push_back(vec_track_can[t]->drifttime);
 				// vec_x.push_back(vec_track_can[t]->x);
@@ -162,7 +178,7 @@ Bool_t histforTracks(void)
 	            //straws->Draw("same");
 
 
-		    	if (vec_track_can[t]->straw%2 ==0)
+		    	/*if (vec_track_can[t]->straw%2 ==0)
 		    	{
 		    		h_track[i]->Fill((floor(vec_track_can[t]->straw)/2)-1,vec_track_can[t]->layer+0.5);
 		    	}
@@ -172,13 +188,12 @@ Bool_t histforTracks(void)
 		    	if (vec_track_can[t]->layer == 1 || vec_track_can[t]->layer == 4 || vec_track_can[t]->layer == 5 || vec_track_can[t]->layer == 8)
 		    		h_x->Fill(vec_track_can[t]->straw/2);
 		    	else
-		    		printf("assasa\n");
+		    		printf("assasa\n");*/
 
 				counterofdt++;		
 	      
 		    }
 
-		    	h_track[i]->Write();
 		 	  //DR_Tree->Fill();
 			  // vec_o_test.clear();
 			  // vec_x.clear();
@@ -191,8 +206,22 @@ Bool_t histforTracks(void)
 
 	  
       }
+    	h_STT_Hit_Diff->Write();
+    	for (int h=0; h<8; h++)
+    	{
+    		L_STT_Hit_Diff[h]->Write();
+    	}
+    	int layer[5] = {0,0,3,4,7};
 
-	h_x->Write();
+    	 	for (int a=1; a<5; a++)
+    	 	{
+    			cToT->cd(a);
+    			L_STT_Hit_Diff[layer[a]]->Draw();
+    		}
+
+    	
+
+	//h_x->Write();
 
     return kTRUE;
     

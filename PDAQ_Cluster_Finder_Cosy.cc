@@ -58,6 +58,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
     TH1F* h_straw_mean_straw = new TH1F ( "h_straw_mean_straw", "h_straw_mean_straw", 800, -100, 700 );
 
     TH1F* h_STT_Hit_Diff = new TH1F ( "h_STT_Hit_Diff", "h_STT_Hit_Diff", 10000, 0, 10000 );
+    TH1F* Lh_STT_Hit_Diff[7];
+
+//     for (int i = 0; i < 8; i++) {
+// 	    Lh_STT_Hit_Diff[i] = new TH1F(Form("Layer%dh_STT_Hit_Diff", i + 1), Form("Layer%dh_STT_Hit_Diff", i + 1), 1000, 0, 1000);
+// 
+//     }
+    
+    
     TH1F* h_FrontNO = new TH1F ( "h_FrontNO", "h_FrontNO", 20, 0, 20 );
 
     TH1F* h_Fee[18];
@@ -195,7 +203,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
                 {
                     vec_leadTime.push_back ( hitOnLayer[l][h] );
 		    
-		    cout<<"Initial : "<<hitOnLayer[l][h]->layer<<"\t"<<hitOnLayer[l][h]->channel<<"\t"<<hitOnLayer[l][h]->leadTime<<endl;
+		    //cout<<"Initial : "<<hitOnLayer[l][h]->layer<<"\t"<<hitOnLayer[l][h]->channel<<"\t"<<hitOnLayer[l][h]->leadTime<<endl;
 
                 }
             }
@@ -218,7 +226,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
 		      vec_leadTime.erase(vec_leadTime.begin() + je+1);
 		      if (doublehitdiff>0 )
 		      {
-			cout<<"double "<<endl;
+			//cout<<"double "<<endl;
 			repeat++;
 
 		      }
@@ -229,7 +237,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents) {
             }
 	    for ( int ex =0 ; ex<vec_leadTime.size();ex++ )
 	      {
-		    cout<<"Final : "<<vec_leadTime[ex]->layer<<"\t"<<vec_leadTime[ex]->channel<<"\t"<<vec_leadTime[ex]->leadTime<<endl;
+		    //cout<<"Final : "<<vec_leadTime[ex]->layer<<"\t"<<vec_leadTime[ex]->channel<<"\t"<<vec_leadTime[ex]->leadTime<<endl;
 	      }   
 	    if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake )
 	    {
