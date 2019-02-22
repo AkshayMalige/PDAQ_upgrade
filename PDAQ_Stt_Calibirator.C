@@ -114,6 +114,7 @@ int PDAQ_Stt_Calibirator(char* intree, char* outtree, int maxEvents)
     // TH2F* h_TotVsChannel = new TH2F("TotVsChannel", "TotVsChannel", 1000,
     // -100, 700, 300, 0, 300);
 
+    Float_t scint_offset = ftGeomPar->getDTOffset();
     for (Long_t e = 0; e < nentries; e++)
     {
         tree->GetEntry(e);
@@ -141,8 +142,8 @@ int PDAQ_Stt_Calibirator(char* intree, char* outtree, int maxEvents)
             SciHit* shit = sci_event->AddSciHit();
             shit->tdcid = scihit->tdcid;
             shit->channel = scihit->channel;
-            shit->leadTime = scihit->leadTime;
-            shit->trailTime = scihit->trailTime;
+            shit->leadTime = scihit->leadTime - scint_offset;
+            shit->trailTime = scihit->trailTime - scint_offset;
             shit->isRef = scihit->isRef;
         }
 

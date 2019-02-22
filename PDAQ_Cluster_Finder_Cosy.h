@@ -189,6 +189,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                        TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL)
 {
+//     printf("*** Event %d\n", i);
     // for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
     // vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - (
     // vec_tracks[tq]->leadTime ) ) ;
@@ -200,10 +201,9 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
     // 	printf("\n*********************\n");
     //}
     int max_cluster_intake = 0;
-    float max_dt_offset = 0;
 
     // max_cluster_intake = ftGeomPar->getClusterLimit();
-    max_dt_offset = ftGeomPar->getDTOffset();
+    //     float max_dt_offset = ftGeomPar->getDTOffset();
     int stations = ftGeomPar->getModules();
     int MAX_FT_TOTAL_LAYERS = 0;
 
@@ -471,7 +471,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         // printf("\n*********************\n");
 
         meanTime = sumLeadTime / vec_tracks.size();
-
+        //printf("mean = %f\n", meanTime);
         // Write Tracks
         stt_event->TrackClear();
 
@@ -486,17 +486,22 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         double scint_time_diffF = 0;
         double scint_time_diffB = 0;
 
+	bool found_pair = false;
         for (int rt = 0; rt < SCI_CAL->sci_raw.totalNTDCHits; rt++)
         {
             SciHit* sh = (SciHit*)SCI_CAL->sci_raw.adc_hits->ConstructedAt(rt);
-            Float_t dt = meanTime - (sh->leadTime - max_dt_offset);
+            Float_t dt = meanTime - sh->leadTime;
             // 	refDiff = (sh->leadTime - meanTime);
             refDiff = dt;
-            refTime = sh->leadTime;
+            refTime = sh->leadTime; // printf("  scint = %f   dt = %f\n",
+                                    // refTime, dt);
             if (dt <= 200 and dt > 0) {
+		found_pair = true;
                 break;
             }
         }
+        if (!found_pair) return false;
+
         if (SCI_CAL->sci_raw.totalNTDCHits > 0)
             for (int ct = 0; ct < SCI_CAL->sci_raw.totalNTDCHits - 1; ct++)
             {
@@ -526,7 +531,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                 }
             }
         // cout<<"Next event"<<endl;
-        if (refDiff <= 500 && scint_time_diffF <= 500 &&
+        if (scint_time_diffF <= 500 &&
             scint_time_diffB <= 500)
         {
             SttTrackHit* b = stt_event->AddTrackHit();
@@ -544,9 +549,9 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                 // vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - (
                 // vec_tracks[tq]->leadTime ) ) ;
                 vec_tracks[tq]->drifttime =
-                    max_dt_offset + (refTime - (vec_tracks[tq]->leadTime));
+                    -(refTime - (vec_tracks[tq]->leadTime));
                 vec_tracks[tq]->meanDriftTime =
-                    max_dt_offset + (meanTime - (vec_tracks[tq]->leadTime));
+                    -(meanTime - (vec_tracks[tq]->leadTime));
                 // printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f
                 // SMDT:%f\n",max_dt_offset,vec_tracks[tq]->leadTime,refTime,meanTime,vec_tracks[tq]->drifttime,vec_tracks[tq]->meanDriftTime);
                 // cout<<max_dt_offset<<"\tLT:\t"<<vec_tracks[tq]->leadTime<<"\tST:\t"<<refTime<<"\tMT:\t"<<meanTime<<"\tDT:\t"<<vec_tracks[tq]->drifttime<<"\tMDT:\t"<<vec_tracks[tq]->meanDriftTime<<endl;

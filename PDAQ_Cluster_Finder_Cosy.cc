@@ -224,6 +224,28 @@ int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents)
             vec_stthits.clear();
 
             double doublehitdiff = 0;
+//             for (Int_t je = 0; je < vec_leadTime.size() - 1; je++)
+//             {
+//                 if ((vec_leadTime[je + 1]->layer) ==
+//                         (vec_leadTime[je]->layer) &&
+//                     (vec_leadTime[je + 1]->channel ==
+//                      vec_leadTime[je]->channel))
+//                 {
+//                     doublehitdiff = fabs(vec_leadTime[je]->leadTime -
+//                                          vec_leadTime[je + 1]->leadTime);
+//                     h_STT_Hit_Diff->Fill(doublehitdiff);
+//                     if (doublehitdiff <= 500) {
+//                         vec_leadTime.erase(vec_leadTime.begin() + je + 1);
+// 			
+//                         if (doublehitdiff > 0) {
+//                             // cout<<"double "<<endl;
+//                             repeat++;
+//                         }
+//                         // sleep(1);
+//                     }
+//                 }
+//                 All_repeat++;
+//             }
             for (Int_t je = 0; je < vec_leadTime.size() - 1; je++)
             {
                 if ((vec_leadTime[je + 1]->layer) ==
@@ -236,6 +258,7 @@ int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents)
                     h_STT_Hit_Diff->Fill(doublehitdiff);
                     if (doublehitdiff <= 500) {
                         vec_leadTime.erase(vec_leadTime.begin() + je + 1);
+			--je;
                         if (doublehitdiff > 0) {
                             // cout<<"double "<<endl;
                             repeat++;
@@ -245,6 +268,28 @@ int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents)
                 }
                 All_repeat++;
             }
+// 	    for (Int_t je = vec_leadTime.size() - 2; je >= 0; --je)
+//             {
+//                 if ((vec_leadTime[je + 1]->layer) ==
+//                         (vec_leadTime[je]->layer) &&
+//                     (vec_leadTime[je + 1]->channel ==
+//                      vec_leadTime[je]->channel))
+//                 {
+//                     doublehitdiff = fabs(vec_leadTime[je]->leadTime -
+//                                          vec_leadTime[je + 1]->leadTime);
+//                     h_STT_Hit_Diff->Fill(doublehitdiff);
+//                     if (doublehitdiff <= 500) {
+//                         vec_leadTime.erase(vec_leadTime.begin() + je + 1);
+// 			
+//                         if (doublehitdiff > 0) {
+//                             // cout<<"double "<<endl;
+//                             repeat++;
+//                         }
+//                         // sleep(1);
+//                     }
+//                 }
+//                 All_repeat++;
+//             }
             for (int ex = 0; ex < vec_leadTime.size(); ex++)
             {
                 // cout<<"Final :

@@ -14,6 +14,8 @@
 
 //#include "MMAPTManager.h"
 
+#include "Rtypes.h"
+
 class MLookupContainer;
 class MLookupTable;
 

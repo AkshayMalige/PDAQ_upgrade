@@ -309,7 +309,7 @@ void PDAQ_RawDecoder_HADES(char* in_file_name, char* out_file_name = 0,
                                 else
                                 {
                                     if (edge == 1) { // rising edge
-                                        lastRise = refTime - time;
+                                        lastRise = time - refTime;
                                         h_stt_tdc_leadTimes->Fill(time -
                                                                   refTime);
                                         if (tdc_id == 0x6500 && channel_nr == 1)
@@ -318,7 +318,7 @@ void PDAQ_RawDecoder_HADES(char* in_file_name, char* out_file_name = 0,
                                             s->tdcid = tdc_id;
                                             s->channel = channel_nr;
                                             s->leadTime = lastRise;
-                                            s->trailTime = (refTime - time);
+                                            s->trailTime = (time - refTime);
                                             s->isRef = false;
                                             // printf("0x6500\n");
                                         }
@@ -372,9 +372,9 @@ void PDAQ_RawDecoder_HADES(char* in_file_name, char* out_file_name = 0,
                                                 stt_event->AddHit(channel_nr);
                                             a->tdcid = tdc_id;
                                             a->leadTime = lastRise;
-                                            a->trailTime = (refTime - time);
+                                            a->trailTime = (time - refTime);
                                             a->tot =
-                                                (a->leadTime - a->trailTime);
+                                                -(a->leadTime - a->trailTime);
                                             a->isRef = false;
                                             // printf("\tHit: %f on channel %d
                                             // on %x on %x\n", a->leadTime,

@@ -11,6 +11,7 @@
 #include <TEllipse.h>
 #include <TGraph.h>
 #include <TH1F.h>
+#include <TH1I.h>
 #include <TH2D.h>
 #include <TLinearFitter.h>
 #include <TMultiGraph.h>
@@ -46,7 +47,10 @@ Bool_t histforTracks(void)
     TCanvas* cToT = new TCanvas("ToT_Canvas", "ToT_Canvas", w, h);
     cToT->Divide(2, 2);
 
-    TFile* file = TFile::Open("1800clus2.root", "READ");
+    TCanvas* cDMult = new TCanvas("DMult_Canvas", "DMult_Canvas", w, h);
+    cDMult->Divide(2, 2);
+
+    TFile* file = TFile::Open("N1800clus.root", "READ");
 
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
@@ -82,26 +86,26 @@ Bool_t histforTracks(void)
     int driftTimeCounter2 = 0;
 
     tree->SetBranchAddress("STT_TRACKS", &STT_TRACK);
-    TFile* ftree = new TFile("histforTracks.root", "RECREATE");
-    // TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
+    TFile* ftree = new TFile("c.root", "RECREATE");
 
-    // DR_Tree->Branch("vec_Driftradius", &vec_o_test);
-    // DR_Tree->Branch("vec_x", &vec_x);
-    // DR_Tree->Branch("vec_y", &vec_y);
-    // DR_Tree->Branch("vec_z", &vec_z);
-    // DR_Tree->Branch("vec_layer", &vec_layer);
-
-    // TH2F* h_track[100];
 
     TH1F* h_x;
     TH1F* h_STT_Hit_Diff =
         new TH1F("h_STT_Hit_Diff", "h_STT_Hit_Diff", 800, -100, 700);
-    TH1F* L_STT_Hit_Diff[8];
+    TH1I* L_STT_Hit_Diff[8];
     for (int i = 0; i < 8; i++)
     {
         L_STT_Hit_Diff[i] =
-            new TH1F(Form("Layer%dSTT_Hit_Diff", i + 1),
+            new TH1I(Form("Layer%dSTT_Hit_Diff", i + 1),
                      Form("Layer%dSTT_Hit_Diff", i + 1), 800, -100, 700);
+    }
+
+	TH1I* L_STT_Hit_Mult[8];
+    for (int i = 0; i < 8; i++)
+    {
+        L_STT_Hit_Mult[i] =
+            new TH1I(Form("Layer%dSTT_Hit_Mult", i + 1),
+                     Form("Layer%dSTT_Hit_Mult", i + 1), 10, -0, 10);
     }
 
     h_x = new TH1F("h_x", "h_x", 16, 0, 16);
@@ -148,8 +152,10 @@ Bool_t histforTracks(void)
                     STT_TRACK->stt_track_can.tdc_track_hits->ConstructedAt(n);
             vec_track_can = track_hit->vec_Track;
 
+            std::map<int, int> layer_mult;
             for (int t = 0; t < vec_track_can.size(); t++)
             {
+            	++layer_mult[vec_track_can[t]->layer - 1];
                 h_STT_Hit_Diff->Fill(vec_track_can[t]->drifttime);
                 L_STT_Hit_Diff[vec_track_can[t]->layer - 1]->Fill(
                     vec_track_can[t]->drifttime);
@@ -202,6 +208,8 @@ Bool_t histforTracks(void)
                 counterofdt++;
             }
 
+            for (int l = 0; l < 8; ++l)
+            L_STT_Hit_Mult[l]->Fill(layer_mult[l]);
             // DR_Tree->Fill();
             // vec_o_test.clear();
             // vec_x.clear();
@@ -213,6 +221,7 @@ Bool_t histforTracks(void)
     for (int h = 0; h < 8; h++)
     {
         L_STT_Hit_Diff[h]->Write();
+        L_STT_Hit_Mult[h]->Write();
     }
     int layer[5] = {0, 0, 3, 4, 7};
 
@@ -220,10 +229,14 @@ Bool_t histforTracks(void)
     {
         cToT->cd(a);
         L_STT_Hit_Diff[layer[a]]->Draw();
+        cDMult->cd(a);
+        L_STT_Hit_Mult[layer[a]]->Draw();
     }
 
     // h_x->Write();
 
+    cToT->Write();
+    cDMult->Write();
     return kTRUE;
 
     ////////////////////
