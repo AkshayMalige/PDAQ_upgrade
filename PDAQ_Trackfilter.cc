@@ -1,56 +1,4 @@
-#ifndef PDAQ_CLUSTER_FINDER_COSY_H
-#define PDAQ_CLUSTER_FINDER_COSY_H
 #include "PDAQ_Trackfilter.h"
-
-
-int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
-
-/*
-#include "TFile.h"
-#include "TH2F.h"
-#include "TTree.h"
-#include <TF1.h>
-#include <TGraph.h>
-#include <TLinearFitter.h>
-#include <TLinearFitter.h>
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <math.h>
-#include <string>
-#include <vector>
-
-#include "SciHit.h"
-#include "SttEvent.h"
-#include "SttHit.h"
-#include "SttRawHit.h"
-#include "SttTrackEvent.h"
-
-#include "panda_stt_cal.h"
-#include "panda_stt_track.h"
-#include "panda_subsystem.h"
-#include "panda_subsystem_sb.h"
-#include "panda_subsystem_sci.h"
-#include "panda_subsystem_stt.h"
-
-#include "FTGeo.h"
-#include <MPar.h>
-#include <MParContainer.h>
-#include <MParManager.h>
-#include <algorithm>
-#include <cctype>
-#include <fstream>
-#include <sstream>
-
-using namespace std;
-//
-template <typename T> struct delete_pointer_element
-{
-    void operator()(T element) const { delete element; }
-};
 
 bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b)
 {
@@ -94,8 +42,43 @@ std::vector<SttHit*> GetPairs(std::vector<SttHit*> vec_get_pairs)
     return vec_fpair_clu;
 }
 
+std::vector<std::vector<SttHit*>> clusterfinder(std::vector<SttHit*> vec_flayer);
+
+
+void add_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors,
+                std::size_t pos, std::vector<std::vector<SttHit*>> prefix,
+                std::vector<std::vector<std::vector<SttHit*>>>& result)
+{
+    if (pos == vectors.size()) {
+        result.push_back(prefix);
+    }
+    else if (vectors[pos].empty())
+    {
+        add_tuples(vectors, pos + 1, prefix,
+                   result); // note: skip empty vectors
+    }
+    else
+    {
+        for (std::vector<SttHit*> v : vectors[pos])
+        {
+            prefix.push_back(v);
+            add_tuples(vectors, pos + 1, prefix, result);
+            prefix.pop_back();
+        }
+    }
+}
+
+std::vector<std::vector<std::vector<SttHit*>>>
+make_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors)
+{
+    std::vector<std::vector<std::vector<SttHit*>>> result;
+    add_tuples(vectors, 0, {}, result);
+    return result;
+}
+
 std::vector<std::vector<SttHit*>> clusterfinder(std::vector<SttHit*> vec_flayer)
 {
+    // clusterfinder ( std::vector<SttHit*> vec_flayer ) {
     std::vector<std::vector<SttHit*>> vec_Cl;
     std::vector<SttHit*> clusterPointer;
 
@@ -157,52 +140,19 @@ std::vector<std::vector<SttHit*>> clusterfinder(std::vector<SttHit*> vec_flayer)
     }
 }
 
-void add_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors,
-                std::size_t pos, std::vector<std::vector<SttHit*>> prefix,
-                std::vector<std::vector<std::vector<SttHit*>>>& result)
-{
-    if (pos == vectors.size()) {
-        result.push_back(prefix);
-    }
-    else if (vectors[pos].empty())
-    {
-        add_tuples(vectors, pos + 1, prefix,
-                   result); // note: skip empty vectors
-    }
-    else
-    {
-        for (std::vector<SttHit*> v : vectors[pos])
-        {
-            prefix.push_back(v);
-            add_tuples(vectors, pos + 1, prefix, result);
-            prefix.pop_back();
-        }
-    }
-}
-
-std::vector<std::vector<std::vector<SttHit*>>>
-make_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors)
-{
-    std::vector<std::vector<std::vector<SttHit*>>> result;
-    add_tuples(vectors, 0, {}, result);
-    return result;
-}
-
-int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
-
 bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                        TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL)
 {
-//     printf("*** Event %d\n", i);
+    //     printf("*** Event %d\n", i);
     // for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
     // vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - (
     // vec_tracks[tq]->leadTime ) ) ;
-//     for (int ac=0; ac< vec_stthits.size(); ac++)
-//     {
-//       printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid,
-//     vec_stthits[ac]->layer,vec_stthits[ac]->straw);
-//     }
+    /*for (int ac=0; ac< vec_stthits.size(); ac++)
+    {
+      printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid,
+    vec_stthits[ac]->layer,vec_stthits[ac]->straw);
+    }*/
     // 	printf("\n*********************\n");
     //}
     int max_cluster_intake = 0;
@@ -346,9 +296,8 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                 {
                     vec_ClustersX.push_back(vec_Clusters[ya]);
                     loneCounterX++;
-                    // printf("Y : TDC :%x , Layer -%d , Straw -%d
-                    // \n",vec_Clusters[ya]->tdcid,
-                    // vec_Clusters[ya]->layer,vec_Clusters[ya]->straw);
+                    // printf("X : TDC :%x , Layer : %d , Straw : %d , X :
+                    // %lf\n",vec_Clusters[ya]->tdcid,vec_Clusters[ya]->layer,vec_Clusters[ya]->straw,vec_Clusters[ya]->x);
                 }
                 // printf("*****************\n\n");
             }
@@ -365,6 +314,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
             {
                 clusterArrayX[yb] = vec_ClustersX[yb]->x;
                 clusterArrayZx[yb] = vec_ClustersX[yb]->z;
+                // cout<<yb<<"\t"<<vec_ClustersX[yb]->x<<endl;
             }
 
             for (Int_t yc = 0; yc < vec_ClustersY.size(); yc++)
@@ -374,7 +324,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
             }
 
             TF1* f1 = new TF1("f1", "pol1");
-            // TF1* f2 = new TF1 ( "f2", "pol1" );
+            TF1* f2 = new TF1("f2", "pol1");
             TGraph* chiX =
                 new TGraph(vec_ClustersX.size(), clusterArrayX, clusterArrayZx);
             chiX->Fit(f1, "q");
@@ -387,21 +337,21 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
             vec_P0.push_back(p0);
             vec_P1.push_back(p1);
 
-            // 	  TGraph* chiY = new TGraph ( vec_ClustersY.size(),
-            // clusterArrayY, clusterArrayZy );
-            // 	  chiY->Fit ( f2,"q" );
-            // 	  chi_valueY = f2->GetChisquare();
-            // 	  vec_Chi2y.push_back ( chi_valueY );
-            // 	  Double_t pp0 = f2->GetParameter ( 0 );
-            // 	  Double_t pp1 = f2->GetParameter ( 1 );
+            TGraph* chiY =
+                new TGraph(vec_ClustersY.size(), clusterArrayY, clusterArrayZy);
+            chiY->Fit(f2, "q");
+            chi_valueY = f2->GetChisquare();
+            vec_Chi2y.push_back(chi_valueY);
+            Double_t pp0 = f2->GetParameter(0);
+            Double_t pp1 = f2->GetParameter(1);
 
-            // 	  vec_PP0.push_back ( pp0 );
-            // 	  vec_PP1.push_back ( pp1 );
+            vec_PP0.push_back(pp0);
+            vec_PP1.push_back(pp1);
 
             delete f1;
-            //	  delete f2;
+            delete f2;
             delete chiX;
-            // 	  delete chiY;
+            delete chiY;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////
@@ -431,25 +381,26 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         }
         // printf("smallest chix :%2.3f\n", smallestX);
 
-        //     Float_t smallestY = vec_Chi2y[0];
-        //     Float_t smallestPP0 = vec_PP0[0];
-        //     Float_t smallestPP1 = vec_PP1[0];
-        //
-        //     Int_t chi_indexY = 0;
-        //
-        //     for ( Int_t cj = 0; cj < vec_Chi2y.size(); cj++ ) {
-        //
-        // 	if ( smallestY > vec_Chi2y[cj] ) {
-        // 	    smallestY = vec_Chi2y[cj];
-        // 	    chi_indexY = cj;
-        // 	}
-        // 	if ( smallestPP0 > vec_PP0[cj] ) {
-        // 	    smallestPP0 = vec_PP0[cj];
-        // 	}
-        // 	if ( smallestPP1 > vec_PP1[cj] ) {
-        // 	    smallestPP1 = vec_PP1[cj];
-        // 	}
-        //     }
+        Float_t smallestY = vec_Chi2y[0];
+        Float_t smallestPP0 = vec_PP0[0];
+        Float_t smallestPP1 = vec_PP1[0];
+
+        Int_t chi_indexY = 0;
+
+        for (Int_t cj = 0; cj < vec_Chi2y.size(); cj++)
+        {
+
+            if (smallestY > vec_Chi2y[cj]) {
+                smallestY = vec_Chi2y[cj];
+                chi_indexY = cj;
+            }
+            if (smallestPP0 > vec_PP0[cj]) {
+                smallestPP0 = vec_PP0[cj];
+            }
+            if (smallestPP1 > vec_PP1[cj]) {
+                smallestPP1 = vec_PP1[cj];
+            }
+        }
 
         for (Int_t ck = 0; ck < vec_All_X.at(chi_indexX).size(); ck++)
         {
@@ -461,10 +412,10 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         }
         // printf("\n$$$$$$$$$$$$$$$$$$$$$$$$$\n");
 
-        //     for ( Int_t cl = 0; cl < vec_All_Y.at ( chi_indexY ).size(); cl++
-        //     ) {
-        // 	vec_tracks.push_back ( vec_All_Y.at ( chi_indexY ).at ( cl ) );
-        //     }
+        for (Int_t cl = 0; cl < vec_All_Y.at(chi_indexY).size(); cl++)
+        {
+            vec_tracks.push_back(vec_All_Y.at(chi_indexY).at(cl));
+        }
 
         double sumLeadTime = 0;
         double meanTime = 0;
@@ -476,7 +427,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         // printf("\n*********************\n");
 
         meanTime = sumLeadTime / vec_tracks.size();
-        //printf("mean = %f\n", meanTime);
+        // printf("mean = %f\n", meanTime);
         // Write Tracks
         stt_event->TrackClear();
 
@@ -491,7 +442,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         double scint_time_diffF = 0;
         double scint_time_diffB = 0;
 
-	bool found_pair = false;
+        bool found_pair = false;
         for (int rt = 0; rt < SCI_CAL->sci_raw.totalNTDCHits; rt++)
         {
             SciHit* sh = (SciHit*)SCI_CAL->sci_raw.adc_hits->ConstructedAt(rt);
@@ -501,7 +452,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
             refTime = sh->leadTime; // printf("  scint = %f   dt = %f\n",
                                     // refTime, dt);
             if (dt <= 200 and dt > 0) {
-		found_pair = true;
+                found_pair = true;
                 break;
             }
         }
@@ -536,9 +487,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                 }
             }
         // cout<<"Next event"<<endl;
-        if (scint_time_diffF <= 500 &&
-            scint_time_diffB <= 500)
-        {
+        if (scint_time_diffF <= 500 && scint_time_diffB <= 500) {
             SttTrackHit* b = stt_event->AddTrackHit();
             b->vec_Track = vec_tracks;
             b->trackId = i;
@@ -577,8 +526,8 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         vec_P0.clear();
         vec_P1.clear();
 
-        //     vec_PP0.clear();
-        //     vec_PP1.clear();
+            vec_PP0.clear();
+            vec_PP1.clear();
 
         PDAQ_tree->Fill();
 
@@ -586,5 +535,3 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
     }
     return false;
 }
-*/
-#endif

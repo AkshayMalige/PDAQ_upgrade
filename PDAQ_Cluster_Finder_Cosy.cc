@@ -1,6 +1,4 @@
 #include "PDAQ_Cluster_Finder_Cosy.h"
-#include "SciHit.h"
-#include "panda_subsystem_sci.h"
 
 using namespace std;
 
