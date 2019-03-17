@@ -11,7 +11,7 @@ Bool_t PDAQ_Drift_Cal(void)
     PandaSttCal* STT_CAL = 0;
     PandaSttTrack* STT_TRACK = new PandaSttTrack();
 
-    TFile* file = TFile::Open("c.root", "READ");
+    TFile* file = TFile::Open("dabc_19050103455_raw.root_TRACK220.root","READ");
 
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
@@ -47,10 +47,10 @@ Bool_t PDAQ_Drift_Cal(void)
     int driftTimeCounter2 = 0;
 
     tree->SetBranchAddress("STT_TRACKS", &STT_TRACK);
-    TFile* ftree = new TFile("Drift_Radius_test100k.root", "RECREATE");
+    TFile* ftree = new TFile("DT200.root", "RECREATE");
     TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
 
-    DR_Tree->Branch("vec_Driftradius", &vec_o_test);
+    DR_Tree->Branch("vec_Drifttime", &vec_o_test);
     DR_Tree->Branch("vec_x", &vec_x);
     DR_Tree->Branch("vec_y", &vec_y);
     DR_Tree->Branch("vec_z", &vec_z);
@@ -61,7 +61,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
 
-    for (Int_t i = 0; i < iev; i++)
+    for (Int_t i = 0; i < 20000; i++)
     {
         tree->GetEntry(i);
         if (i % 100 == 0) {
@@ -107,7 +107,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     for (int r = 0; r < vec_o_test1.size(); r++)
     {
-        if (vec_o_test1[r] <= 550) {
+        if (vec_o_test1[r] <= 220) {
             vec_test.push_back(vec_o_test1[r]);
             driftTimeCounter2++;
         }

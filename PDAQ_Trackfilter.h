@@ -1,4 +1,3 @@
-
 #ifndef PDAQ_TRACK_FILTER_H
 #define PDAQ_TRACK_FILTER_H
 

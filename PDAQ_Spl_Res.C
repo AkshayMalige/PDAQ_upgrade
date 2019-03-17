@@ -1,41 +1,41 @@
 #include "PDAQ_Spl_Res.h"
 using namespace std;
 
-Bool_t PDAQ_Spl_Res(void)
+Bool_t PDAQ_Spl_Res ( void )
 {
 
     cout << "Opened" << endl;
 
-    TFile* file = TFile::Open("Drift_Radius_test100k.root", "READ");
+    TFile* file = TFile::Open ( "DT200.root", "READ" );
     TTree* tree = 0;
-    file->GetObject("DR_Tree", tree);
+    file->GetObject ( "DR_Tree", tree );
 
     //     TFile * file = TFile::Open("PDAQ_Stt_Tracks.root", "READ");
     //     TTree* tree = 0;
     //     file->GetObject("PDAQ_EMC_STT_cluster_analysis", tree);
-    if (!tree) {
+    if ( !tree ) {
         std::cerr << "Tree doesn't exists" << std::endl;
         return 1;
     }
     tree->Print();
 
-    TF1* f1 = new TF1("f1", "pol1");
-    TF1* f2 = new TF1("f2", "pol1");
-    TF1* f3 = new TF1("f3", "pol1");
-    TF1* f4 = new TF1("f4", "pol1");
+    TF1* f1 = new TF1 ( "f1", "pol1" );
+//     TF1* f2 = new TF1 ( "f2", "pol1" );
+//     TF1* f3 = new TF1 ( "f3", "pol1" );
+//     TF1* f4 = new TF1 ( "f4", "pol1" );
 
-    TFile* driftfile1 = new TFile("XYZ_Coordinates100k.root", "RECREATE");
+    TFile* driftfile1 = new TFile ( "XYZ_Coordinates100k.root", "RECREATE" );
     // TFile* driftfile2 = new TFile("Y_Coordinates.root", "RECREATE");
     Double_t theta_X = 0;
 
-    TH1F* hx = new TH1F("hx", "dummy_resolutionX", 500, -1, 4);
-    TH1F* hy = new TH1F("hy", "dummy_resolutionY", 500, -1, 4);
-    TH1F* DR = new TH1F("dr", "drift_radius", 350, 0, 350);
-    TH2F* h_theeta_X = new TH2F("h_theeta_X", "h_theeta_X", 50, 0, 5, 20, 0, 2);
+    TH1F* hx = new TH1F ( "hx", "dummy_resolutionX", 500, -1, 4 );
+    TH1F* hy = new TH1F ( "hy", "dummy_resolutionY", 500, -1, 4 );
+    TH1F* DR = new TH1F ( "dr", "drift_radius", 350, 0, 350 );
+    TH2F* h_theeta_X = new TH2F ( "h_theeta_X", "h_theeta_X", 50, 0, 5, 20, 0, 2 );
 
-    TH1F* Z_value = new TH1F("Z_value", "dummy", 5, 0, 5);
+    TH1F* Z_value = new TH1F ( "Z_value", "dummy", 5, 0, 5 );
 
-    std::vector<double>* vec_Driftradius = 0;
+    std::vector<double>* vec_Drifttime = 0;
     std::vector<double>* vec_x = 0;
     std::vector<double>* vec_y = 0;
     std::vector<double>* vec_z = 0;
@@ -73,21 +73,21 @@ Bool_t PDAQ_Spl_Res(void)
 
     Int_t array_length = 8;
     Int_t pair_length = 2;
-    Int_t total_pairs = (array_length / pair_length);
-    Int_t no_of_pairs = (total_pairs * total_pairs);
+    Int_t total_pairs = ( array_length / pair_length );
+    Int_t no_of_pairs = ( total_pairs * total_pairs );
 
-    tree->SetBranchAddress("vec_Driftradius", &vec_Driftradius);
-    tree->SetBranchAddress("vec_x", &vec_x);
-    tree->SetBranchAddress("vec_y", &vec_y);
-    tree->SetBranchAddress("vec_z", &vec_z);
-    tree->SetBranchAddress("vec_layer", &vec_layer);
+    tree->SetBranchAddress ( "vec_Drifttime", &vec_Drifttime );
+    tree->SetBranchAddress ( "vec_x", &vec_x );
+    tree->SetBranchAddress ( "vec_y", &vec_y );
+    tree->SetBranchAddress ( "vec_z", &vec_z );
+    tree->SetBranchAddress ( "vec_layer", &vec_layer );
     //     tree->SetBranchAddress("vec_module", &vec_module);
     //     tree->SetBranchAddress("vec_fee", &vec_fee);
     //     tree->SetBranchAddress("vec_fee_ch", &vec_fee_ch);
     //     tree->SetBranchAddress("vec_tdc_ch", &vec_tdc_ch);
     //
-    TGraph* gDR = new TGraph(220, a1, b1);
-    gDR = (TGraph*)file->Get("PDAQ_DR");
+    TGraph* gDR = new TGraph ( 220, a1, b1 );
+    gDR = ( TGraph* ) file->Get ( "PDAQ_DR" );
 
     // Double_t strawY[8];
     // Double_t strawZ[8];
@@ -97,7 +97,7 @@ Bool_t PDAQ_Spl_Res(void)
     SttHit* new_y1 = 0;
     SttHit* new_y2 = 0;
 
-    Int_t iev = (Int_t)tree->GetEntries();
+    Int_t iev = ( Int_t ) tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl << endl;
 
     vector<SttHit*> vec_hits;
@@ -107,50 +107,45 @@ Bool_t PDAQ_Spl_Res(void)
     vec_emcY.clear();
     // loop over all the vectors in the tree.
 
-    for (Int_t i = 0; i < iev; i++)
-    {
+    for ( Int_t i = 0; i < 2000; i++ ) {
         Int_t count = 0;
         Int_t count1 = 0;
 
-        tree->GetEntry(i);
+        tree->GetEntry ( i );
         cout << endl;
         cout << "Track No. " << i << endl;
-        Int_t oiv = vec_Driftradius->size();
+        Int_t oiv = vec_Drifttime->size();
         // cout << "vecsize  :" << oiv << endl;
 
-        if (vec_Driftradius->size() > 8) {
-            cout << "SIZE GREATER THAN 8" << endl;
+        if ( vec_Drifttime->size() > 16 ) {
+            cout << "SIZE GREATER THAN 16" << endl;
         }
 
-        for (int w = 0; w < 2; w++)
-        {
-            for (int v = 0; v < vec_dr_xaxis[0].size(); v++)
-            {
-                delete (vec_dr_xaxis[w][v]);
-                delete (vec_dr_yaxis[w][v]);
+        for ( int w = 0; w < 2; w++ ) {
+            vec_dr_xaxis[w].clear();
+            vec_dr_yaxis[w].clear();
+            for ( int v = 0; v < vec_dr_xaxis[0].size(); v++ ) {
+                delete ( vec_dr_xaxis[w][v] );
+                delete ( vec_dr_yaxis[w][v] );
             }
         }
 
         // vector<SttHit*> vec_hits;
         vec_hits.clear();
         vec_hits_new.clear();
-        vec_dr_xaxis[0].clear();
-        vec_dr_xaxis[1].clear();
-        vec_dr_yaxis[0].clear();
-        vec_dr_yaxis[1].clear();
 
         Int_t oc_count = 0;
 
         char buff[200];
-        sprintf(buff, "can_%d", i);
-        TCanvas* c1 = new TCanvas(buff);
-        sprintf(buff, "h_%d", i);
+        sprintf ( buff, "can_%d", i );
+        TCanvas* c1 = new TCanvas ( buff );
+        sprintf ( buff, "h_%d", i );
         int x_min = -10;
         int x_max = 90;
-        int x_bins = (x_max - x_min) * 5;
+        int x_bins = ( x_max - x_min ) * 5;
         int z_min = -10;
         int z_max = 80;
-        int z_bins = (z_max - z_min) * 5;
+        int z_bins = ( z_max - z_min ) * 5;
         //
         //         TH2I* h = new TH2I(buff, "h;x,y [cm];z [cm]", x_bins, x_min,
         //         x_max, z_bins, z_min, z_max);
@@ -163,28 +158,28 @@ Bool_t PDAQ_Spl_Res(void)
         //
         //
         //
-        for (int n = 0; n < oiv; n++)
-        {
-            SttHit* a = new SttHit();
 
-            a->drifttime = vec_Driftradius->at(n);
-            a->x = vec_x->at(n);
-            a->y = vec_y->at(n);
-            a->z = vec_z->at(n);
-            a->layer = vec_layer->at(n);
+        for ( int n = 0; n < oiv; n++ ) {
+            SttHit* a = new SttHit();
+            a->drifttime = vec_Drifttime->at ( n );
+            a->x = vec_x->at ( n );
+            a->y = vec_y->at ( n );
+            a->z = vec_z->at ( n );
+            a->layer = vec_layer->at ( n );
             //             a->module = vec_module->at(n);
             //             a->fee = vec_fee->at(n);
             //             a->fee_channel = vec_fee_ch->at(n);
             //             a->channel = vec_tdc_ch->at(n);
 
-            vec_hits.push_back(a);
+            vec_hits.push_back ( a );
 
             float uuu = 0.0;
-            bool is_y = (a->layer % 2 == 0);
-            if (is_y)
+            bool is_y = ( a->layer % 2 == 0 );
+            if ( is_y ) {
                 uuu = a->y;
-            else
+            } else {
                 uuu = a->x;
+            }
             //
             //             straws = new TEllipse(uuu, vec_z->at(n), 0.505,
             //             0.505);
@@ -205,13 +200,12 @@ Bool_t PDAQ_Spl_Res(void)
 
         // Filter to get only the sets having unique Z values
 
-        if (vec_hits.size() > 0) {
-            for (Int_t u = 0; u < vec_hits.size() - 1; u++)
-            {
-                for (Int_t uu = u + 1; uu < vec_hits.size(); uu++)
-                {
-                    if (fabs(vec_hits[u]->z - vec_hits[uu]->z) < 0.5)
+        if ( vec_hits.size() > 0 ) {
+            for ( Int_t u = 0; u < vec_hits.size() - 1; u++ ) {
+                for ( Int_t uu = u + 1; uu < vec_hits.size(); uu++ ) {
+                    if ( fabs ( vec_hits[u]->z - vec_hits[uu]->z ) < 0.5 ) {
                         oc_count++;
+                    }
 
                     // cout<<vec_hits[u]->z<<"\t"<<vec_hits[uu]->z<<endl;
                 }
@@ -231,22 +225,21 @@ Bool_t PDAQ_Spl_Res(void)
             std::vector<double> vec_strawZx;
             std::vector<double> vec_strawZy;
 
-            Z_value->Fill(3);
+            Z_value->Fill ( oc_count );
 
             // Take only the events having unique Z coordinate
 
-            if (oc_count >= 0) {
+            if ( oc_count >= 0 ) {
                 // cout << "oc_count :";
                 // cout<<oc_count<<"\t"<<vec_hits.size()<<endl;
                 vec_hits_new = vec_hits;
                 // cout<<vec_hits_new.size()<<endl;;
-                Z_value->Fill(1);
+                //Z_value->Fill(1);
             }
 
-            else
-            {
+            else {
 
-                Z_value->Fill(2);
+                //Z_value->Fill(2);
 
                 continue;
             }
@@ -258,14 +251,13 @@ Bool_t PDAQ_Spl_Res(void)
             vec_strawY.clear();
             vec_strawZx.clear();
             vec_strawZy.clear();
-            for (Int_t j = 0; j < vec_hits_new.size(); j++)
-            {
+            for ( Int_t j = 0; j < vec_hits_new.size(); j++ ) {
                 //
                 //                 //cout<<"THIS IS Z
                 //                 :"<<vec_hits_new[j]->z<<endl;
-                //                /* strawX[j] = vec_hits_new[j]->x;
+                //                 strawX[j] = vec_hits_new[j]->x;
                 //                 strawY[j] = vec_hits_new[j]->y;
-                //                 strawZ[j] = vec_hits_new[j]->z;*/
+                //                 strawZ[j] = vec_hits_new[j]->z;
                 //
                 //                 float uuu = 0.0;
                 //                 bool is_y = (vec_hits_new[j]->layer % 2 ==
@@ -288,14 +280,13 @@ Bool_t PDAQ_Spl_Res(void)
                 //                 // Get the drift radius for the corresponding
                 //                 drift time for the hits having x-coordinates
 
-                if (vec_hits_new[j]->layer == 1 || vec_hits_new[j]->layer == 3)
-                {
+                if ( vec_hits_new[j]->layer == 1 || vec_hits_new[j]->layer == 4 ||vec_hits_new[j]->layer == 5 || vec_hits_new[j]->layer == 8 ) {
 
-                    Double_t dr1 = gDR->Eval(vec_hits_new[j]->drifttime);
+                    Double_t dr1 = gDR->Eval ( vec_hits_new[j]->drifttime );
                     SttHit* new_x1 = new SttHit();
                     SttHit* new_x2 = new SttHit();
 
-                    vec_driftradius.push_back(dr1);
+                    vec_driftradius.push_back ( dr1 );
 
                     new_x1->x = vec_hits_new[j]->x + dr1;
                     new_x1->y = vec_hits_new[j]->y;
@@ -307,8 +298,8 @@ Bool_t PDAQ_Spl_Res(void)
                     //                     new_x1->fee_channel =
                     //                     vec_hits_new[j]->fee_channel;
 
-                    vec_strawX.push_back(vec_hits_new[j]->x);
-                    vec_strawZx.push_back(vec_hits_new[j]->z);
+                    vec_strawX.push_back ( vec_hits_new[j]->x );
+                    vec_strawZx.push_back ( vec_hits_new[j]->z );
 
                     new_x2->x = vec_hits_new[j]->x - dr1;
                     new_x2->y = vec_hits_new[j]->y;
@@ -320,8 +311,8 @@ Bool_t PDAQ_Spl_Res(void)
                     //                     new_x2->fee_channel =
                     //                     vec_hits_new[j]->fee_channel;
                     //
-                    vec_dr_xaxis[0].push_back(new_x1);
-                    vec_dr_xaxis[1].push_back(new_x2);
+                    vec_dr_xaxis[0].push_back ( new_x1 );
+                    vec_dr_xaxis[1].push_back ( new_x2 );
                     // zaxis[j]= vec_hits[j]->z;
 
                     // cout<< "Xaxis :
@@ -332,10 +323,9 @@ Bool_t PDAQ_Spl_Res(void)
                 // Get the drift radius for the corresponding drift time for the
                 // hits having y-coordinates
 
-                if (vec_hits_new[j]->layer == 2 || vec_hits_new[j]->layer == 4)
-                {
+                if ( vec_hits_new[j]->layer == 2 || vec_hits_new[j]->layer == 3 || vec_hits_new[j]->layer == 6 || vec_hits_new[j]->layer == 7 ) {
 
-                    Double_t dr2 = gDR->Eval(vec_hits_new[j]->drifttime);
+                    Double_t dr2 = gDR->Eval ( vec_hits_new[j]->drifttime );
 
                     SttHit* new_y1 = new SttHit();
                     SttHit* new_y2 = new SttHit();
@@ -350,13 +340,13 @@ Bool_t PDAQ_Spl_Res(void)
                     //                     new_y1->fee_channel =
                     //                     vec_hits_new[j]->fee_channel;
                     //
-                    /*if (vec_hits_new[j]->y >0)
-                    {
-                    strawY[j] = vec_hits_new[j]->y;
-                    }*/
+//                     if (vec_hits_new[j]->y >0)
+//                     {
+//                     strawY[j] = vec_hits_new[j]->y;
+//                     }
                     // cout<< "CHECK ::  "<<vec_hits_new[j]->y<<endl;
-                    vec_strawY.push_back(vec_hits_new[j]->y);
-                    vec_strawZy.push_back(vec_hits_new[j]->z);
+                    vec_strawY.push_back ( vec_hits_new[j]->y );
+                    vec_strawZy.push_back ( vec_hits_new[j]->z );
 
                     new_y2->y = vec_hits_new[j]->y - dr2;
                     new_y2->z = vec_hits_new[j]->z;
@@ -370,8 +360,8 @@ Bool_t PDAQ_Spl_Res(void)
 
                     // SttHit* new_y1=vec_hits[j]->y+dr2;
                     // SttHit* new_y2=vec_hits[j]->y-dr2;
-                    vec_dr_yaxis[0].push_back(new_y1);
-                    vec_dr_yaxis[1].push_back(new_y2);
+                    vec_dr_yaxis[0].push_back ( new_y1 );
+                    vec_dr_yaxis[1].push_back ( new_y2 );
 
                     // yperfectmean[j] = dr2;
                     // zaxis[j]= vec_hits[j]->z;
@@ -385,11 +375,11 @@ Bool_t PDAQ_Spl_Res(void)
                 }
             }
 
-            /*for (Int_t jx=0; jx<4; jx++)
-            {
-                 cout <<"Y here  :"<<" "<<strawY[jx]<<endl;
-
-            }*/
+//             for (Int_t jx=0; jx<4; jx++)
+//             {
+//                  cout <<"Y here  :"<<" "<<strawY[jx]<<endl;
+//
+//             }
 
             /////////////////////////////////////////FIND THE BEST
             /// COMBINATION//////////////////////////////////////////////////////
@@ -408,54 +398,56 @@ Bool_t PDAQ_Spl_Res(void)
             Double_t X_perpX = 0;
             Double_t X_perpY = 0;
             Double_t X_short = 0;
-            int no_comb_x = pow(2, count);
-            chiX_array.resize(no_comb_x);
+            Double_t centerTotrack = 0;//from the center of the straw as a perpendicular
+            Double_t theeta =0;
+            Double_t dradius = 0;
+            Double_t rotatedX =0;
+            Double_t rotatedY =0;
 
-            for (Int_t co = 0; co < no_comb_x; co++)
-            {
-                /*                cout<<no_comb_x<<endl;
-                cout<<"{"*/;
+            int no_comb_x = pow ( 2, count );
+            chiX_array.resize ( no_comb_x );
+
+            for ( Int_t co = 0; co < no_comb_x; co++ ) {
+//                 cout<<no_comb_x<<endl;
+//                 cout<<"{";
 
                 vector<Double_t> vt;
                 vt.clear();
 
-                for (Int_t coo = 0; coo < count; coo++)
-                {
+                for ( Int_t coo = 0; coo < count; coo++ ) {
 
-                    int bit_idx = (1 << coo);
-                    int comb_idx = (co & bit_idx) ? 1 : 0;
+                    int bit_idx = ( 1 << coo );
+                    int comb_idx = ( co & bit_idx ) ? 1 : 0;
 
                     A1[coo] = vec_dr_xaxis[comb_idx][coo]->x;
                     A2[coo] = vec_dr_xaxis[comb_idx][coo]->z;
 
-                    // cout<<"   STRAW_LOC
-                    // @@@@@@@@@@@@@@@@&&&&&&&&&:"<<vec_dr_xaxis[comb_idx][coo]->x<<"
-                    // ";
+//                     cout<<"   STRAW_LOC@@@@@@@@@@@@@@@@&&&&&&&&&:"<<vec_dr_xaxis[comb_idx][coo]->x<<"   " ;
 
-                    vt.push_back(vec_dr_xaxis[comb_idx][coo]->x);
+                    vt.push_back ( vec_dr_xaxis[comb_idx][coo]->x );
                 }
 
-                myCombination.push_back(vt);
+                myCombination.push_back ( vt );
 
-                // cout<<"}";
-                // cout << "\n";
-
-                // cout <<"size1 A1 :"<<(sizeof(A1))/8<<endl;
-                // cout <<"size2 A2:"<<(sizeof(A2))/8<<endl;
+//                 cout<<"}";
+//                 cout << "\n";
+//
+//                 cout <<"size1 A1 :"<< ( sizeof ( A1 ) ) /8<<endl;
+//                 cout <<"size2 A2:"<< ( sizeof ( A2 ) ) /8<<endl;
                 // cout <<"size3 xperfect2:"<<(sizeof(xperfect2))/8<<endl;
 
-                /*   for (Int_t cooo=0; cooo< myCombination;cooo++)
-               {
-                   for( Int_t cro=0; cro < vt.size(); cro++)
-                   {
-                       cout << "Hello"<< " ";
-                   }
-               }*/
+//                   for (Int_t cooo=0; cooo< myCombination;cooo++)
+//                {
+//                    for( Int_t cro=0; cro < vt.size(); cro++)
+//                    {
+//                        cout << "Hello"<< " ";
+//                    }
+//                }
                 // cout<<"\n"<<endl;
 
-                TGraph* chiX = new TGraph(vt.size(), A1, A2);
-                chiX->Fit(f3, "q");
-                chi_value = f3->GetChisquare();
+                TGraph* chiX = new TGraph ( vt.size(), A1, A2 );
+                chiX->Fit ( f1, "q" );
+                chi_value = f1->GetChisquare();
                 // cout<<"\nX chi value"<<chi_value<<endl;
 
                 chiX_array[co] = chi_value;
@@ -466,11 +458,10 @@ Bool_t PDAQ_Spl_Res(void)
             Double_t smallest = chiX_array[0];
 
             Int_t chi_index = 0;
-            for (Int_t ci = 0; ci < no_comb_x; ci++)
-            {
+            for ( Int_t ci = 0; ci < no_comb_x; ci++ ) {
                 // cout << "chiSquare  :" << chiX_array[ci] << endl;
 
-                if (smallest > chiX_array[ci]) {
+                if ( smallest > chiX_array[ci] ) {
                     smallest = chiX_array[ci];
                     chi_index = ci;
                 }
@@ -480,20 +471,17 @@ Bool_t PDAQ_Spl_Res(void)
 
             // cout << "\n\n"
             //   << "BEST COMBINATION  :";
-            for (Int_t gdd = 0; gdd < count; gdd++)
-            {
+            for ( Int_t gdd = 0; gdd < count; gdd++ ) {
                 // cout << "\t " << myCombination.at(chi_index).at(gdd) << " ";
-                Ex[gdd] = myCombination.at(chi_index).at(gdd);
+                Ex[gdd] = myCombination.at ( chi_index ).at ( gdd );
             }
             // cout << "\n\n\n" << endl;
 
-            // cout << "\n SMALLEST ChiSquar  :" << smallest << "(" << chi_index
-            // << ")" << endl;
+            //cout << "\n SMALLEST ChiSquar  :" << smallest << "(" << chi_index<< ")" << endl;
 
-            for (Int_t coo = 0; coo < count; coo++)
-            {
-                int bit_idx = (1 << coo);
-                int comb_idx = (chi_index & bit_idx) ? 1 : 0;
+            for ( Int_t coo = 0; coo < count; coo++ ) {
+                int bit_idx = ( 1 << coo );
+                int comb_idx = ( chi_index & bit_idx ) ? 1 : 0;
 
                 A1[coo] = vec_dr_xaxis[comb_idx][coo]->x;
                 A2[coo] = vec_dr_xaxis[comb_idx][coo]->z;
@@ -508,65 +496,67 @@ Bool_t PDAQ_Spl_Res(void)
 
             // Plot X vs Z coordinate and fit the points
 
-            if (vec_dr_xaxis[0].size() != 0) {
+            if ( vec_dr_xaxis[0].size() != 0 ) {
 
-                xfit = new TGraph(count, Ex, A2);
-                xfit1 = new TGraph(vec_hits_new.size(), strawX, strawZ);
+                xfit = new TGraph ( count, Ex, A2 );
+                xfit1 = new TGraph ( vec_hits_new.size(), strawX, strawZ );
 
-                xfit->GetXaxis()->SetLimits(x_min, x_max);
-                xfit->GetYaxis()->SetLimits(z_min, z_max);
+                xfit->GetXaxis()->SetLimits ( x_min, x_max );
+                xfit->GetYaxis()->SetLimits ( z_min, z_max );
 
-                xfit->GetXaxis()->SetTitle("X Axix [cm]");
-                xfit->GetYaxis()->SetTitle("Z Axix [cm]");
-                xfit->SetTitle("X-Coordinates");
+                xfit->GetXaxis()->SetTitle ( "X Axix [cm]" );
+                xfit->GetYaxis()->SetTitle ( "Z Axix [cm]" );
+                xfit->SetTitle ( "X-Coordinates" );
 
-                xfit->SetMarkerStyle(7);
-                xfit->SetMarkerSize(1);
-                xfit->SetMarkerColor(kRed + 2);
-                xfit->SetLineColor(0);
-                xfit->SetLineWidth(2);
+                xfit->SetMarkerStyle ( 7 );
+                xfit->SetMarkerSize ( 1 );
+                xfit->SetMarkerColor ( kRed + 2 );
+                xfit->SetLineColor ( 0 );
+                xfit->SetLineWidth ( 2 );
 
-                xfit1->SetLineColor(0);
+                xfit1->SetLineColor ( 0 );
 
-                xfit1->SetMarkerStyle(24);
-                xfit1->SetMarkerSize(2);
-                xfit1->SetMarkerColor(kRed + 2);
+                xfit1->SetMarkerStyle ( 24 );
+                xfit1->SetMarkerSize ( 2 );
+                xfit1->SetMarkerColor ( kRed + 2 );
                 // xfit1->SetLineColor(kRed-10);
                 // xfit1->SetLineWidth(2);
 
-                xfit->Fit(f1, "q");
+                xfit->Fit ( f1, "q" );
 
-                f1 = xfit->GetFunction("f1");
-                Double_t p0 = f1->GetParameter(0);
-                Double_t p1 = f1->GetParameter(1);
-                theta_X = atan(p1);
+                f1 = xfit->GetFunction ( "f1" );
+                Double_t p0 = f1->GetParameter ( 0 );
+                Double_t p1 = f1->GetParameter ( 1 );
+                theta_X = atan ( p1 );
                 // cout<< " THETA X  : "<< theta_X <<endl;
                 // emcX_arry[i] = (70 - p0) / p1;
-                vec_emcX.push_back((70 - p0) / p1);
+                vec_emcX.push_back ( ( 70 - p0 ) / p1 );
 
-                for (Int_t k = 0; k < count; k++)
-                {
+                for ( Int_t k = 0; k < count; k++ ) {
 
-                    xperfect3[k] = (A2[k] - p0) / p1;
+                    xperfect3[k] = ( A2[k] - p0 ) / p1;
 
-                    // cout << "SPACE X  :" << fabs(A1[k] - xperfect3[k]) <<
-                    // endl;
+                    //cout << "SPACE X  :" <<"\t" <<A1[k] <<"\t" <<xperfect3[k]<< "\t"<<(A1[k] - xperfect3[k]) << endl;
 
-                    dSlope0 = -(1 / p1);
-                    dConst0 = vec_strawZx[k] + (vec_strawX[k] / p1);
-                    X_perpX = (dConst0 - p0) / (p1 + (1 / p1));
-                    X_perpY = (dSlope0 * X_perpX) + dConst0;
-                    X_short = (fabs(sqrt(((vec_strawX[k] - X_perpX) *
-                                          (vec_strawX[k] - X_perpX)) +
-                                         ((vec_strawZx[k] - X_perpY) *
-                                          (vec_strawZx[k] - X_perpY))))) -
-                              (fabs(vec_strawX[k] - A1[k]));
+                    dSlope0 = - ( 1 / p1 ); //gives the slope of the perp line
+                    dConst0 = vec_strawZx[k] + ( vec_strawX[k] / p1 ); //get the constant c in y=mx+c
+                    //X_perpX = ( dConst0 - p0 ) / ( p1 + ( 1 / p1 ) ); // 
+                    X_perpX = (p0 - dConst0) / (p1 - dSlope0); // at the point where the perpendicular meets the track, the equation of lines becomes the same hence x = (c2 - c1)/(m1-m2)
+	      X_perpY = ( dSlope0 * X_perpX ) + dConst0; // y coordinate at the point where the perpendicular meets the track line.
+                    centerTotrack = fabs (sqrt( ((vec_strawX[k] -X_perpX)*(vec_strawX[k] -X_perpX)) + (( vec_strawZx[k] - X_perpY )*( vec_strawZx[k] - X_perpY )) ));
+//                    X_short = ( fabs ( sqrt ( ( ( vec_strawX[k] - X_perpX ) *  ( vec_strawX[k] - X_perpX ) ) + ( ( vec_strawZx[k] - X_perpY ) *( vec_strawZx[k] - X_perpY ) ) ) ) ) -( fabs ( vec_strawX[k] - A1[k] ) );
+                    dradius = fabs(vec_strawX[k] - A1[k]);
+	      theeta = atan((dSlope0-p1)/(1+(dSlope0*p1)));
+	      rotatedX =A1[k]+(dradius* sin(theeta)); 
+	      rotatedY = A2[k] - (dradius*(1-cos(theeta)));
+	      X_short = (fabs(centerTotrack -   vec_strawX[k])) - rotatedX  ;
+	cout<<"DR_co :"<<rotatedX<<" vec_strawX :"<<vec_strawX[k]<<" dSlope0 : "<<dSlope0 <<" dConst0 :"<<dConst0 <<" X_perpX : "<< X_perpX<<" centerTotrack : "<< centerTotrack<<" X_short : "<<X_short<<endl;
+                    //hx->Fill ( X_short );
+                    hx->Fill (X_short );
+	      h_theeta_X->Fill ( theta_X, X_short );
 
-                    hx->Fill(X_short);
-                    h_theeta_X->Fill(theta_X, X_short);
-
-                    vec_Xtheta.push_back(theta_X);
-                    vec_Xsr.push_back(X_short);
+                    vec_Xtheta.push_back ( theta_X );
+                    vec_Xsr.push_back ( X_short );
                 }
                 // cout << "\n\n" << endl;
             }
@@ -575,165 +565,166 @@ Bool_t PDAQ_Spl_Res(void)
             // COMBINATIONS to get least Y
             // ChiSquar2############################################
 
-            Int_t e_index1 = 0;
-            std::vector<Double_t> chiY_array;
-            Double_t chi_value1;
-
-            Double_t dSlope = 0;
-            Double_t dConst = 0;
-            Double_t Y_perpX = 0;
-            Double_t Y_perpY = 0;
-            Double_t Y_short = 0;
-
-            vector<vector<Double_t>> myCombination1;
-            myCombination1.clear();
-
-            int no_comb_y = pow(2, count1);
-            chiY_array.resize(no_comb_y);
-            for (Int_t co = 0; co < no_comb_y; co++)
-            {
-
-                vector<Double_t> vt1;
-                vt1.clear();
-
-                for (Int_t coo = 0; coo < count1; coo++)
-                {
-                    int bit_idx = (1 << coo);
-                    int comb_idx = (co & bit_idx) ? 1 : 0;
-
-                    B1[coo] = vec_dr_yaxis[comb_idx][coo]->y;
-                    B2[coo] = vec_dr_yaxis[comb_idx][coo]->z;
-                    vt1.push_back(vec_dr_yaxis[comb_idx][coo]->y);
-                }
-
-                myCombination1.push_back(vt1);
-
-                // cout<<"}";
-                // cout << "\n";
-
-                // cout << "size1 B1 :" << (sizeof(B1)) / 8 << endl;
-                // cout << "size2 B2:" << (sizeof(B2)) / 8 << endl;
-                //                cout << "size3 yperfect2:" <<
-                //                (sizeof(yperfect2)) / 8 << endl;
-
-                //                 for (Int_t coooq = 0; coooq < total_pairs;
-                //                 coooq++) {
-                //                     cout << "\t\t" << B1[coooq] << "\t";
-                //                 }
-                // cout << "\n" << endl;
-
-                TGraph* chiY = new TGraph(vt1.size(), B1, B2);
-                chiY->Fit(f4, "q");
-                chi_value1 = f4->GetChisquare();
-                //	cout<<"\n\n@#$@#$@#$@#$@#$"<<chi_value<<endl;
-
-                chiY_array[co] = chi_value1;
-
-                delete chiY;
-            }
-
-            Double_t smallest1 = chiY_array[0];
-
-            Int_t chi_index1 = 0;
-            for (Int_t ciq = 0; ciq < no_comb_y; ciq++)
-            {
-                // cout << "chiSquareY  :" << chiY_array[ciq] << endl;
-
-                if (smallest1 > chiY_array[ciq]) {
-                    smallest1 = chiY_array[ciq];
-                    chi_index1 = ciq;
-                }
-            }
-
-            Double_t Why[50];
-
-            //             cout << "\n"
-            //                  << "BEST COMBINATION 2 :";
-            for (Int_t gddq = 0; gddq < count1; gddq++)
-            {
-                // cout << "\t " << myCombination1.at(chi_index1).at(gddq) << "
-                // ";
-                Why[gddq] = myCombination1.at(chi_index1).at(gddq);
-            }
-            // cout << "\n\n\n" << endl;
-
-            // cout << "\n SMALLEST ChiSquar 2 :" << smallest1 << "(" <<
-            // chi_index1 << ")" << endl;
-
-            for (Int_t coo = 0; coo < count1; coo++)
-            {
-                int bit_idx = (1 << coo);
-                int comb_idx = (chi_index & bit_idx) ? 1 : 0;
-
-                B1[coo] = vec_dr_yaxis[comb_idx][coo]->y;
-                B2[coo] = vec_dr_yaxis[comb_idx][coo]->z;
-            }
-
-            if (vec_dr_yaxis[0].size() != 0) {
-
-                yfit = new TGraph(count1, Why, B2);
-                yfit1 = new TGraph(vec_hits_new.size(), strawY, strawZ);
-
-                //				yfit->GetXaxis()->SetLimits(40,100);
-
-                // TGraph* yfit2 = new
-                // TGraph(vt1.size(),yperfectmean,yperfect2);
-
-                yfit->GetXaxis()->SetTitle("Y Axix [cm]");
-                yfit->GetYaxis()->SetTitle("Z Axix [cm]");
-                yfit->SetTitle("Y-Coordinates");
-
-                yfit->SetMarkerStyle(7);
-                yfit->SetMarkerSize(2);
-                yfit->SetMarkerColor(kBlue + 2);
-                yfit->SetLineColor(0);
-                yfit->SetLineWidth(2);
-
-                yfit1->SetMarkerStyle(24);
-                yfit1->SetMarkerSize(2);
-                yfit1->SetMarkerColor(kBlue + 2);
-                yfit1->SetLineColor(0);
-
-                yfit->Fit(f2, "q");
-
-                f2 = yfit->GetFunction("f2");
-                Double_t pp0 = f2->GetParameter(0);
-                Double_t pp1 = f2->GetParameter(1);
-                // emcY_arry[i] = (70 - pp0) / pp1;
-                vec_emcY.push_back((70 - pp0) / pp1);
-
-                // cout << " EMC   :   Y "<< ((70 - pp0) / pp1)<<endl;
-
-                // yfit->SetPoint(1, 10,10);
-
-                for (Int_t kk = 0; kk < count1; kk++)
-                {
-
-                    yperfect3[kk] = (B2[kk] - pp0) / pp1;
-                    // cout << "SPACE Y  :" << fabs(B1[kk] - yperfect3[kk]) <<
-                    // endl;
-                    // hy->Fill(fabs(B1[kk] - yperfect3[kk]));
-
-                    // cout << "Double Check Y :"<< vec_strawY[kk]<<endl;
-
-                    dSlope = -(1 / pp1);
-                    dConst = vec_strawZy[kk] + (vec_strawY[kk] / pp1);
-                    Y_perpX = (dConst - pp0) / (pp1 + (1 / pp1));
-                    Y_perpY = (dSlope * Y_perpX) + dConst;
-                    Y_short = (fabs(sqrt(((vec_strawY[kk] - Y_perpX) *
-                                          (vec_strawY[kk] - Y_perpX)) +
-                                         ((vec_strawZy[kk] - Y_perpY) *
-                                          (vec_strawZy[kk] - Y_perpY))))) -
-                              (fabs(vec_strawY[kk] - B1[kk]));
-
-                    hy->Fill(Y_short);
-
-                    // cout << "Y Real Check  :  " << vec_strawY[kk] << "\t" <<
-                    // vec_strawZy[kk] <<"\t" << Y_perpX <<"\t" <<Y_perpY<<"\t
-                    // PERP : "<<Y_short << endl;
-                }
-            }
-
+//             Int_t e_index1 = 0;
+//             std::vector<Double_t> chiY_array;
+//             Double_t chi_value1;
+//
+//             Double_t dSlope = 0;
+//             Double_t dConst = 0;
+//             Double_t Y_perpX = 0;
+//             Double_t Y_perpY = 0;
+//             Double_t Y_short = 0;
+//
+//             vector<vector<Double_t>> myCombination1;
+//             myCombination1.clear();
+//
+//             int no_comb_y = pow(2, count1);
+//             chiY_array.resize(no_comb_y);
+//             for (Int_t co = 0; co < no_comb_y; co++)
+//             {
+//
+//                 vector<Double_t> vt1;
+//                 vt1.clear();
+//
+//                 for (Int_t coo = 0; coo < count1; coo++)
+//                 {
+//                     int bit_idx = (1 << coo);
+//                     int comb_idx = (co & bit_idx) ? 1 : 0;
+//
+//                     B1[coo] = vec_dr_yaxis[comb_idx][coo]->y;
+//                     B2[coo] = vec_dr_yaxis[comb_idx][coo]->z;
+//                     vt1.push_back(vec_dr_yaxis[comb_idx][coo]->y);
+//                 }
+//
+//                 myCombination1.push_back(vt1);
+//
+//                 // cout<<"}";
+//                 // cout << "\n";
+//
+//                 // cout << "size1 B1 :" << (sizeof(B1)) / 8 << endl;
+//                 // cout << "size2 B2:" << (sizeof(B2)) / 8 << endl;
+//                 //                cout << "size3 yperfect2:" <<
+//                 //                (sizeof(yperfect2)) / 8 << endl;
+//
+//                 //                 for (Int_t coooq = 0; coooq < total_pairs;
+//                 //                 coooq++) {
+//                 //                     cout << "\t\t" << B1[coooq] << "\t";
+//                 //                 }
+//                 // cout << "\n" << endl;
+//
+//                 TGraph* chiY = new TGraph(vt1.size(), B1, B2);
+//                 chiY->Fit(f4, "q");
+//                 chi_value1 = f4->GetChisquare();
+//                 //	cout<<"\n\n@#$@#$@#$@#$@#$"<<chi_value<<endl;
+//
+//                 chiY_array[co] = chi_value1;
+//
+//                 delete chiY;
+//             }
+//
+//             Double_t smallest1 = chiY_array[0];
+//
+//             Int_t chi_index1 = 0;
+//             for (Int_t ciq = 0; ciq < no_comb_y; ciq++)
+//             {
+//                 // cout << "chiSquareY  :" << chiY_array[ciq] << endl;
+//
+//                 if (smallest1 > chiY_array[ciq]) {
+//                     smallest1 = chiY_array[ciq];
+//                     chi_index1 = ciq;
+//                 }
+//             }
+//
+//             Double_t Why[50];
+//
+//             //             cout << "\n"
+//             //                  << "BEST COMBINATION 2 :";
+//             for (Int_t gddq = 0; gddq < count1; gddq++)
+//             {
+//                 // cout << "\t " << myCombination1.at(chi_index1).at(gddq) << "
+//                 // ";
+//                 Why[gddq] = myCombination1.at(chi_index1).at(gddq);
+//             }
+//             // cout << "\n\n\n" << endl;
+//
+//             // cout << "\n SMALLEST ChiSquar 2 :" << smallest1 << "(" <<
+//             // chi_index1 << ")" << endl;
+//
+//             for (Int_t coo = 0; coo < count1; coo++)
+//             {
+//                 int bit_idx = (1 << coo);
+//                 int comb_idx = (chi_index & bit_idx) ? 1 : 0;
+//
+//                 B1[coo] = vec_dr_yaxis[comb_idx][coo]->y;
+//                 B2[coo] = vec_dr_yaxis[comb_idx][coo]->z;
+//             }
+//
+//             if (vec_dr_yaxis[0].size() != 0) {
+//
+//                 yfit = new TGraph(count1, Why, B2);
+//                 yfit1 = new TGraph(vec_hits_new.size(), strawY, strawZ);
+//
+//                 //				yfit->GetXaxis()->SetLimits(40,100);
+//
+//                 // TGraph* yfit2 = new
+//                 // TGraph(vt1.size(),yperfectmean,yperfect2);
+//
+//                 yfit->GetXaxis()->SetTitle("Y Axix [cm]");
+//                 yfit->GetYaxis()->SetTitle("Z Axix [cm]");
+//                 yfit->SetTitle("Y-Coordinates");
+//
+//                 yfit->SetMarkerStyle(7);
+//                 yfit->SetMarkerSize(2);
+//                 yfit->SetMarkerColor(kBlue + 2);
+//                 yfit->SetLineColor(0);
+//                 yfit->SetLineWidth(2);
+//
+//                 yfit1->SetMarkerStyle(24);
+//                 yfit1->SetMarkerSize(2);
+//                 yfit1->SetMarkerColor(kBlue + 2);
+//                 yfit1->SetLineColor(0);
+//
+//                 yfit->Fit(f2, "q");
+//
+//                 f2 = yfit->GetFunction("f2");
+//                 Double_t pp0 = f2->GetParameter(0);
+//                 Double_t pp1 = f2->GetParameter(1);
+//                 // emcY_arry[i] = (70 - pp0) / pp1;
+//                 vec_emcY.push_back((70 - pp0) / pp1);
+//
+//                 // cout << " EMC   :   Y "<< ((70 - pp0) / pp1)<<endl;
+//
+//                 // yfit->SetPoint(1, 10,10);
+//
+//                 for (Int_t kk = 0; kk < count1; kk++)
+//                 {
+//
+//                     yperfect3[kk] = (B2[kk] - pp0) / pp1;
+//                     // cout << "SPACE Y  :" << fabs(B1[kk] - yperfect3[kk]) <<
+//                     // endl;
+//                     // hy->Fill(fabs(B1[kk] - yperfect3[kk]));
+//
+//                     // cout << "Double Check Y :"<< vec_strawY[kk]<<endl;
+//
+//                     dSlope = -(1 / pp1);
+//                     dConst = vec_strawZy[kk] + (vec_strawY[kk] / pp1);
+//                     Y_perpX = (dConst - pp0) / (pp1 + (1 / pp1));
+//                     Y_perpY = (dSlope * Y_perpX) + dConst;
+//                     Y_short = (fabs(sqrt(((vec_strawY[kk] - Y_perpX) *
+//                                           (vec_strawY[kk] - Y_perpX)) +
+//                                          ((vec_strawZy[kk] - Y_perpY) *
+//                                           (vec_strawZy[kk] - Y_perpY))))) -
+//                               (fabs(vec_strawY[kk] - B1[kk]));
+//
+//                     hy->Fill(Y_short);
+//
+//                     // cout << "Y Real Check  :  " << vec_strawY[kk] << "\t" <<
+//                     // vec_strawZy[kk] <<"\t" << Y_perpX <<"\t" <<Y_perpY<<"\t
+//                     // PERP : "<<Y_short << endl;
+//                 }
+//             }
+       // }
+   // }/*
             //  cout << "\nEMC XYZ   :     "<< emcX << " - "<< emcY<<endl;
             //
             //             //mg->Add(yfit);
@@ -741,12 +732,12 @@ Bool_t PDAQ_Spl_Res(void)
             //             //xfit1->Draw("AP");
             //             //mg->Add(yfit);
             //
-            //             /*mg->Add(xfit);
+            //             mg->Add(xfit);
             // 		mg->Add(xfit1);
             // 		mg->Write("X");
             // 		mg1->Add(yfit);
             // 		mg1->Add(yfit1);
-            // 		mg1->Write("Y");*/
+            // 		mg1->Write("Y");
             //
             //             xfit->Draw("same,P");
             //             xfit->Write("X");
@@ -772,50 +763,51 @@ Bool_t PDAQ_Spl_Res(void)
         //         c1->Write();
         //         c1->Close();
     }
-    Double_t emcX_arry[vec_emcX.size()];
-    Double_t emcY_arry[vec_emcX.size()];
-    cout << "Total hits   :" << vec_driftradius.size() << endl;
-    // cout<<"vec_emcX size :"<<vec_emcX.size()<<endl;
-    for (Int_t ev = 0; ev < vec_emcX.size(); ev++)
-    {
-        emcX_arry[ev] = vec_emcX[ev];
-        emcY_arry[ev] = vec_emcY[ev];
-    }
-    // cout << "\n\n SIZES   :   " << vec_emcX.size()<< "  -  "<<
-    // vec_emcX.size()<<endl;
-    // cout << "\n\n\n SIZES   :   " << emcX_arry.length<< "  -  "<<
-    // emcY_arry.length<<endl;
-    /*  for ( Int_t abc = 0; abc < vec_emcX.size(); abc++)
-     {
-         cout << "\n\n\nEMC COORDINATES : "<< emcX_arry[abc] << "  -  "<<
-     emcY_arry[abc]<< endl;
-     }  */
-    TGraph* emc = new TGraph(vec_emcX.size(), emcX_arry, emcY_arry);
-    emc->SetMarkerStyle(3);
-    emc->SetMarkerSize(1);
-    emc->SetMarkerColor(2);
-    emc->SetLineColor(0);
-    // emc->SetLineWidth(2);
-    hx->Write();
-    hy->Write();
-    h_theeta_X->Write();
+    
+      Double_t emcX_arry[vec_emcX.size()];
+      //Double_t emcY_arry[vec_emcX.size()];
+      cout << "Total hits   :" << vec_driftradius.size() << endl;
+      // cout<<"vec_emcX size :"<<vec_emcX.size()<<endl;
+//       for (Int_t ev = 0; ev < vec_emcX.size(); ev++)
+//       {
+//           emcX_arry[ev] = vec_emcX[ev];
+//           emcY_arry[ev] = vec_emcY[ev];
+//       }
+      // cout << "\n\n SIZES   :   " << vec_emcX.size()<< "  -  "<<
+      // vec_emcX.size()<<endl;
+      // cout << "\n\n\n SIZES   :   " << emcX_arry.length<< "  -  "<<
+      // emcY_arry.length<<endl;
+    //      for ( Int_t abc = 0; abc < vec_emcX.size(); abc++)
+    //      {
+    //          cout << "\n\n\nEMC COORDINATES : "<< emcX_arry[abc] << "  -  "<<
+    //      emcY_arry[abc]<< endl;
+    //      }
+//       TGraph* emc = new TGraph(vec_emcX.size(), emcX_arry, emcY_arry);
+//       emc->SetMarkerStyle(3);
+//       emc->SetMarkerSize(1);
+//       emc->SetMarkerColor(2);
+//       emc->SetLineColor(0);
+      // emc->SetLineWidth(2);
+      hx->Write();
+      //hy->Write();
+      h_theeta_X->Write();
 
-    // cout <<"THETA SIZE : "<<vec_Xsr.size()<<"  "<<vec_Xtheta.size()<<endl;
+      // cout <<"THETA SIZE : "<<vec_Xsr.size()<<"  "<<vec_Xtheta.size()<<endl;
 
-    Double_t arr_Xt[vec_Xtheta.size()];
-    Double_t arr_Xsr[vec_Xtheta.size()];
+      Double_t arr_Xt[vec_Xtheta.size()];
+      Double_t arr_Xsr[vec_Xtheta.size()];
 
-    for (int tt = 0; tt < vec_Xtheta.size(); tt++)
-    {
-        arr_Xt[tt] = vec_Xtheta[tt];
-        arr_Xsr[tt] = vec_Xsr[tt];
-    }
-    TGraph* theta_SR = new TGraph(vec_Xtheta.size(), arr_Xt, arr_Xsr);
+      for (int tt = 0; tt < vec_Xtheta.size(); tt++)
+      {
+          arr_Xt[tt] = vec_Xtheta[tt];
+          arr_Xsr[tt] = vec_Xsr[tt];
+      }
+      TGraph* theta_SR = new TGraph(vec_Xtheta.size(), arr_Xt, arr_Xsr);
 
-    theta_SR->Write("P");
+      theta_SR->Write("P");
+//       emc->Draw("P");
+//       emc->Write();
     Z_value->Write();
-    emc->Draw("P");
-    emc->Write();
     // emc->Write();
     // DR->Draw();
     // cout<<"count in Layer1+layer3 : "<< count<<"\t"<<"count in Layer2+layer4
@@ -823,4 +815,10 @@ Bool_t PDAQ_Spl_Res(void)
     return kTRUE;
 }
 
-int main() { return PDAQ_Spl_Res(); }
+int main()
+{
+    return PDAQ_Spl_Res();
+}
+
+
+
