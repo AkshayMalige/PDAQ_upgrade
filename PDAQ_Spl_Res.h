@@ -24,7 +24,8 @@
 #include "TCanvas.h"
 #include <TChain.h>
 #include <TROOT.h>
-
+#include "TObject.h"
+#include "TEllipse.h"
 using namespace std;
 
 Bool_t PDAQ_Spl_Res(void);

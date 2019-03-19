@@ -39,6 +39,11 @@
 
 using namespace std;
 
+struct histograms{
+    TH1F* h_filtered_cluster_size = new TH1F(
+        "h_filtered_cluster_size", "h_filtered_cluster_size", 110, -10, 100);
+};
+
 bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b);
 
 bool f_sttHitCompareCell(SttHit* a, SttHit* b);
@@ -58,6 +63,6 @@ make_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors);
 
 bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                        TTree* PDAQ_tree, Stt_Track_Event* stt_event,
-                       MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL);
+                       MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h);
 
 #endif

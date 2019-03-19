@@ -11,8 +11,8 @@ Bool_t PDAQ_Drift_Cal(void)
     PandaSttCal* STT_CAL = 0;
     PandaSttTrack* STT_TRACK = new PandaSttTrack();
 
-    TFile* file = TFile::Open("dabc_19050103455_raw.root_TRACK220.root","READ");
-
+    TFile* file = TFile::Open("c.root","READ");
+	TH1F* DR = new TH1F ( "DR", "DRX", 1000,-0.1, 0.6 );
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
     if (!tree) {
@@ -39,7 +39,7 @@ Bool_t PDAQ_Drift_Cal(void)
     std::vector<double> vec_z;
     std::vector<double> vec_layer;
     std::vector<double> vec_module;
-    std::vector<double> vec_fee;
+    std::vector<double> vec_straw;
     std::vector<double> vec_fee_ch;
     std::vector<double> vec_tdc_ch;
 
@@ -47,7 +47,7 @@ Bool_t PDAQ_Drift_Cal(void)
     int driftTimeCounter2 = 0;
 
     tree->SetBranchAddress("STT_TRACKS", &STT_TRACK);
-    TFile* ftree = new TFile("DT200.root", "RECREATE");
+    TFile* ftree = new TFile("DT500.root", "RECREATE");
     TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
 
     DR_Tree->Branch("vec_Drifttime", &vec_o_test);
@@ -55,6 +55,7 @@ Bool_t PDAQ_Drift_Cal(void)
     DR_Tree->Branch("vec_y", &vec_y);
     DR_Tree->Branch("vec_z", &vec_z);
     DR_Tree->Branch("vec_layer", &vec_layer);
+    DR_Tree->Branch("vec_straw", &vec_straw);
 
     Int_t iev = (Int_t)tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl << endl;
@@ -87,6 +88,7 @@ Bool_t PDAQ_Drift_Cal(void)
                 vec_y.push_back(vec_track_can[t]->y);
                 vec_z.push_back(vec_track_can[t]->z);
                 vec_layer.push_back(vec_track_can[t]->layer);
+                vec_straw.push_back(vec_track_can[t]->straw);
 
                 counterofdt++;
             }
@@ -96,7 +98,10 @@ Bool_t PDAQ_Drift_Cal(void)
             vec_x.clear();
             vec_y.clear();
             vec_z.clear();
-        }
+            vec_straw.clear();
+
+	        
+}
     }
     cout << "Number of drifttimes :  " << counterofdt << endl;
 
@@ -181,7 +186,7 @@ Bool_t PDAQ_Drift_Cal(void)
     {
         // cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l]
         // << endl;
-
+	DR->Fill(vec_drift_radius[l]);
         a1[l] = vec_pos_DT[l];
         b1[l] = vec_drift_radius[l];
     }
@@ -191,7 +196,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     gDriftRadius->Write();
     DR_Tree->Write();
-
+	DR->Write();
     return kTRUE;
 
     ////////////////////
