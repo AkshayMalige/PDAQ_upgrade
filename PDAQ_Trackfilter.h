@@ -69,6 +69,8 @@ struct histograms{
     TH2F* h_drifttimevsplane = new TH2F("h_drifttimevsplane", "h_drifttimevsplane;Drift Time [ns];Layer", 360, -10, 350,20,0,10);
     
     TH1F* h_scint_mult = new TH1F("h_scint_mult", "h_scint_mult;Number of hits", 11, -1, 10);
+        TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 5010, -10, 5000);
+
 };
 
 bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b);

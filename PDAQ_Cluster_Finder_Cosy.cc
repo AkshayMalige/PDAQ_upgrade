@@ -353,6 +353,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     
     h->h_scint_mult->Write();
     
+    h->h_scint_timediff->Write();
     leg1->Draw();
     h->TimeOverThreshold->Write();
     
