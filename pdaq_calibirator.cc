@@ -17,7 +17,7 @@ int main(int argc, char** argv)
                    "file name.\n");
             // atoi(argv[3]) == 1000;
             sleep(2);
-            PDAQ_Stt_Calibirator(argv[1], argv[2], 1000000);
+            PDAQ_Stt_Calibirator(argv[1], argv[2], 1000000000);
         }
         else
             PDAQ_Stt_Calibirator(argv[1], argv[2], atoi(argv[3]));

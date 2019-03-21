@@ -117,7 +117,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         PDAQ_tree->Branch ( "STT_CAL", "PandaSttCal", &CAL, 64000, 99 );
         PDAQ_tree->Branch ( "SCI_CAL", "PandaSubsystemSCI", &SCI_CAL, 64000, 99 );
 
-        TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 100000, 400000, 500000 );
+        TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 600000, 400000, 1000000 );
 
 
         Long_t global_cnt = 0;
@@ -134,6 +134,13 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 double trb1_ref =0;
                 double trb2_ref =0;
                 double trb_diff =0;
+                double tdc1 =0;
+                double tdc2 =0;
+                double tdc3 =0;
+                double tdc4 =0;
+                double tdc5 =0;
+                double tdc6 =0;
+                double tdc7 =0;
                 bool trb1 = false;
                 bool trb2 = false;
 
@@ -178,10 +185,36 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                                 trb2 = true;
                                 //printf ( "ref 2:%lf\n",trb2_ref );
                         }
+                        if ( r_hit->tdcid == 0x6410 && r_hit->channel ==0 ) {
+                                tdc2 = r_hit->leadTime;
+
+                                //printf ( "ref 2:%lf\n",trb2_ref );
+                        }
+                        if ( r_hit->tdcid == 0x6411 && r_hit->channel ==0 ) {
+                                tdc3 = r_hit->leadTime;
+
+                                //printf ( "ref 2:%lf\n",trb2_ref );
+                        }
+                        if ( r_hit->tdcid == 0x6430 && r_hit->channel ==0 ) {
+                                tdc4 = r_hit->leadTime;
+
+                                //printf ( "ref 2:%lf\n",trb2_ref );
+                        }
+                        if ( r_hit->tdcid == 0x6431 && r_hit->channel ==0 ) {
+                                tdc5 = r_hit->leadTime;
+
+                                //printf ( "ref 2:%lf\n",trb2_ref );
+                        }
+                        if ( r_hit->tdcid == 0x6500 && r_hit->channel ==0 ) {
+                                tdc6 = r_hit->leadTime;
+
+                                //printf ( "ref 2:%lf\n",trb2_ref );
+                        }
+
                 }
 
                 trb_diff = trb1_ref - trb2_ref;
-                h_TRB_ref_diff->Fill(trb_diff);
+                h_TRB_ref_diff->Fill ( trb_diff );
                 //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",trb1_ref,trb2_ref, trb_diff );
 
                 for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
@@ -216,13 +249,31 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                                 cal_hit->layer = tc->lay;
                                 cal_hit->straw = tc->straw;
                                 cal_hit->station = tc->mod;
-                                if ( cal_hit->tdcid == 0x6400 ||cal_hit->tdcid == 0x6410||cal_hit->tdcid == 0x6411 ) {
-                                        cal_hit->leadTime = hit->leadTime - trb_diff;
-                                        cal_hit->trailTime = hit->trailTime -trb_diff;
-                                } else {
-                                        cal_hit->leadTime = hit->leadTime ;
-                                        cal_hit->trailTime = hit->trailTime;
-                                }
+                                cal_hit->leadTime = hit->leadTime;
+                                cal_hit->trailTime = hit->trailTime;
+                                /*
+                                if ( cal_hit->tdcid == 0x6400  ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
+                                } else if ( cal_hit->tdcid == 0x6410 ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc2)-(trb2_ref - trb1_ref);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc2)-(trb2_ref - trb1_ref);
+                                } else if ( cal_hit->tdcid == 0x6411 ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc3)-(trb2_ref - trb1_ref);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc3)-(trb2_ref - trb1_ref);
+                                } else if ( cal_hit->tdcid == 0x6420 ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - trb2_ref);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - trb2_ref);
+                                } else if ( cal_hit->tdcid == 0x6430 ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc4);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc4);
+                                } else if ( cal_hit->tdcid == 0x6431 ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc5);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc5);
+                                } else if ( cal_hit->tdcid == 0x6500 ) {
+                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc6);
+                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc6);
+                                }*/
 
 
 
@@ -279,7 +330,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 //cout<<"***********\n\n"<<endl;
 
         } // over events
-h_TRB_ref_diff->Write();
+        h_TRB_ref_diff->Write();
         PDAQ_tree->Write();
         cout << "Repeated entries  :" << repeat << "/" << All_repeat << endl;
         cout << "Good Hits : " << good_counter << endl;
@@ -289,5 +340,6 @@ h_TRB_ref_diff->Write();
 
         return 0;
 }
+
 
 
