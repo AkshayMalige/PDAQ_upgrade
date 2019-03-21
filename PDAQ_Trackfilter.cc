@@ -127,14 +127,11 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
     // for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
     // vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - (
     // vec_tracks[tq]->leadTime ) ) ;
-    /*for (int ac=0; ac< vec_stthits.size(); ac++)
-    {
-      printf("TDC :%x , Layer :%d , Straw :%d  \n",vec_stthits[ac]->tdcid,
-    vec_stthits[ac]->layer,vec_stthits[ac]->straw);
-    }*/
+    for ( int ac=0; ac< vec_stthits.size(); ac++ ) {
+        h->h_tot3->Fill ( vec_stthits[ac]->tot );
+    }
     // 	printf("\n*********************\n");
     //}
-    	h->h_filtered_cluster_size->Fill(1);
 
     int max_cluster_intake = 0;
 
@@ -158,6 +155,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
     vec_layer.clear();
     vec_hitlayer.clear();
 
+    //Check to filter out hits with no layer info in any//////
     for ( int s = 1; s < MAX_FT_TOTAL_LAYERS + 1; s++ ) {
         for ( int ss = 0; ss < vec_stthits.size(); ss++ ) {
             if ( vec_stthits[ss]->layer == s ) {
@@ -179,8 +177,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
     std::vector<double> vec_PP0;
     std::vector<double> vec_PP1;
 
-    // // FILTER TO GET ONLY HITS WITH A
-    // PAIR////////////////////////////////////////////////////////////
+    // // FILTER TO GET ONLY HITS WITH A PAIR ////////////////////////////////////////////////////////////
 
     std::vector<SttHit*> vec_pair_clu;
     vec_pair_clu.clear();
@@ -213,6 +210,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
         vec_cluster_layer.push_back ( vec_clayer );
         vec_clayer.clear();
     }
+
     int track_sanity = 0;
     for ( int da = 0; da < vec_cluster_layer.size(); da++ ) {
         if ( vec_cluster_layer[da].size() > 0 ) {
@@ -418,7 +416,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
         if ( !found_pair ) {
             return false;
         }
-
+        h->h_scint_mult->Fill(SCI_CAL->sci_raw.totalNTDCHits);
         if ( SCI_CAL->sci_raw.totalNTDCHits > 0 )
             for ( int ct = 0; ct < SCI_CAL->sci_raw.totalNTDCHits - 1; ct++ ) {
                 SciHit* d1 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( ct );
@@ -431,17 +429,9 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
                 }
 
                 scint_time_diffF = fabs ( d2->leadTime - d1->leadTime );
-                // cout<<d1->leadTime
-                // <<"\t"<<d2->leadTime<<"\t"<<scint_time_diff<<endl;
-                // printf("First:%f,   Second:%f  ,Diff:%f
-                // \n",d1->leadTime,d2->leadTime,scint_time_diff);
-                if ( scint_time_diffF <= 500 ) { //&& scint_time_diffF<=500)
-                    // scintSep == true;
-                    // cout<<"Narrow Sint Hit Diff \n"<<endl;
-                }
             }
-        // cout<<"Next event"<<endl;
-        if ( scint_time_diffF <= 500 && scint_time_diffB <= 500 ) {
+         //cout<<"Scint : "<<scint_time_diffF<<"\t"<<scint_time_diffB<<endl;
+        //if ( scint_time_diffF <= 500 && scint_time_diffB <= 500 ) {
             SttTrackHit* b = stt_event->AddTrackHit();
             b->vec_Track = vec_tracks;
             b->trackId = i;
@@ -455,10 +445,17 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
             for ( Int_t tq = 0; tq < vec_tracks.size(); tq++ ) {
                 // vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - (
                 // vec_tracks[tq]->leadTime ) ) ;
-                vec_tracks[tq]->drifttime =
-                    - ( refTime - ( vec_tracks[tq]->leadTime ) );
-                vec_tracks[tq]->meanDriftTime =
-                    - ( meanTime - ( vec_tracks[tq]->leadTime ) );
+                vec_tracks[tq]->drifttime =  - ( refTime - ( vec_tracks[tq]->leadTime ) );
+                vec_tracks[tq]->meanDriftTime = - ( meanTime - ( vec_tracks[tq]->leadTime ) );
+                h->h_drifttimevstot->Fill ( vec_tracks[tq]->drifttime,vec_tracks[tq]->tot );
+                h->h_tot4->Fill ( vec_tracks[tq]->tot );
+                if ( vec_tracks[tq]->plane==0 ) {
+                    h->h_drifttimevsplane->Fill ( vec_tracks[tq]->drifttime,vec_tracks[tq]->layer );
+                } else {
+                    h->h_drifttimevsplane->Fill ( vec_tracks[tq]->drifttime,vec_tracks[tq]->layer+0.5 );
+                }
+                h->h_drifttime->Fill ( vec_tracks[tq]->drifttime );
+
                 // printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f
                 // SMDT:%f\n",max_dt_offset,vec_tracks[tq]->leadTime,refTime,meanTime,vec_tracks[tq]->drifttime,vec_tracks[tq]->meanDriftTime);
                 // cout<<max_dt_offset<<"\tLT:\t"<<vec_tracks[tq]->leadTime<<"\tST:\t"<<refTime<<"\tMT:\t"<<meanTime<<"\tDT:\t"<<vec_tracks[tq]->drifttime<<"\tMDT:\t"<<vec_tracks[tq]->meanDriftTime<<endl;
@@ -471,7 +468,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
                 // 	}
                 // 	printf("\n*********************\n");
             }
-        }
+        //}
 
         vec_Chi2x.clear();
         vec_Chi2y.clear();
@@ -488,3 +485,4 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
     }
     return false;
 }
+
