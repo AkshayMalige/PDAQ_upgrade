@@ -243,9 +243,9 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                                 cal_hit->leadTime = hit->leadTime;
                                 cal_hit->trailTime = hit->trailTime;
 
-                                cout<<"ref"<<endl;
+                                //cout<<"ref"<<endl;
                         } else {
-                                cout<<"\t\t\thit"<<endl;
+                                //cout<<"\t\t\thit"<<endl;
 
 
 
