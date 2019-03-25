@@ -47,7 +47,7 @@ Bool_t PDAQ_Drift_Cal(void)
     int driftTimeCounter2 = 0;
 
     tree->SetBranchAddress("STT_TRACKS", &STT_TRACK);
-    TFile* ftree = new TFile("DT500.root", "RECREATE");
+    TFile* ftree = new TFile("DT1750.root", "RECREATE");
     TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
 
     DR_Tree->Branch("vec_Drifttime", &vec_o_test);
@@ -62,7 +62,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
 
-    for (Int_t i = 0; i < 20000; i++)
+    for (Int_t i = 0; i < iev; i++)
     {
         tree->GetEntry(i);
         if (i % 100 == 0) {

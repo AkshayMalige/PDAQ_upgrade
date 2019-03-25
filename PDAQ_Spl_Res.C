@@ -6,7 +6,7 @@ Bool_t PDAQ_Spl_Res ( void )
 
     cout << "Opened" << endl;
 
-    TFile* file = TFile::Open ( "DT500.root", "READ" );
+    TFile* file = TFile::Open ( "DT1750.root", "READ" );
     TTree* tree = 0;
     file->GetObject ( "DR_Tree", tree );
 
@@ -117,7 +117,7 @@ Bool_t PDAQ_Spl_Res ( void )
     TH2I* h = new TH2I ( "name", "h;x,y [cm];z [cm]", x_bins, x_min,x_max, z_bins, z_min, z_max );
     //c1->cd();
     h->Draw();
-    for ( Int_t i = 0; i < 3000; i++ ) {
+    for ( Int_t i = 0; i < iev; i++ ) {
         Int_t count = 0;
         Int_t count1 = 0;
 

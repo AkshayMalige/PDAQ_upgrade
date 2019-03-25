@@ -303,6 +303,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                                                 double time =
                                                                         ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
                                                                 time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
+                                                                printf("%lf %x\n", time, tdc_id);
 
                                                                 if ( channel_nr == 0 ) { // ref time
                                                                         refTime = time;
@@ -316,7 +317,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
                                                                         RefTime[tdc_ptr-1] = refTime;
 
-                                //printf("%d %x\n", tdc_ptr, tdc_id);
+                                //printf("%d %x\n", tdc_ptr-1, tdc_id);
 
                                                                         if ( tdc_id == 0x6400 ) {
                                                                                 h_tdc_ref->Fill ( 1 );
@@ -340,7 +341,11 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                                                         // tdc_id, sub_id);
                                                                 } else {
                                                                         if ( edge == 1 ) { // rising edge
+//                                                                                         if(tdc_ptr<4){
+//                                                                                 lastRise = time - refTime;}
+//                                                                                 else {lastRise = time - refTime - (RefTime[0]-RefTime[4]);}
                                                                                 lastRise = time - refTime;
+                                                                                
                                                                                 
                                                                                 if (lastRise <=100000){
                                                                                                 h_currpt->Fill(1);
@@ -348,7 +353,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                                                                 else {
                                                                                                 h_currpt->Fill(2);
                                                                                 }
-                                                                                //printf("%lf %lf %lf\n", time, refTime ,lastRise);
+//                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
                                                                                 
                                                                                 h_stt_tdc_leadTimes->Fill ( time -                                                     refTime );
                                                                                 if ( tdc_id == 0x6500 && channel_nr == 1 ) {
@@ -436,23 +441,27 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         }     // tdc select if
 
                                 } // end of loop over tdcs
-                                h_refTimeTRB1->Fill ( RefTime[1] - RefTime[2] );
-                                h_refTimeTRB1->Fill ( RefTime[1] - RefTime[3] );
-                                h_refTimeTRB1->Fill ( RefTime[0] - RefTime[3] );
+                                
+                                h_refTimeTRB1->Fill ( RefTime[0] - RefTime[1] );
+                                h_refTimeTRB1->Fill ( RefTime[0] - RefTime[2] );
+                                //h_refTimeTRB1->Fill ( RefTime[1] - RefTime[3] );
                                 h_refTimeTRB2->Fill ( RefTime[4] - RefTime[5] );
                                 h_refTimeTRB2->Fill ( RefTime[4] - RefTime[6] );
                                 h_refTimeTRB2->Fill ( RefTime[4] - RefTime[7] );
 
-                                //printf("%lf %lf = %lf\n", RefTime[3], RefTime[4], (RefTime[3] - RefTime[4]) );
+//                                 printf(" 0:%lf  1:%lf  2: %lf  4: %lf  5: %lf 6: %lf\n", RefTime[0], RefTime[1], RefTime[2], RefTime[4], RefTime[5],RefTime[6] );
                                 
                                 h_refTimeTDC[0]->Fill ( RefTime[0] - RefTime[1] );
                                 h_refTimeTDC[1]->Fill ( RefTime[0] - RefTime[2] );
-                                h_refTimeTDC[2]->Fill ( RefTime[0] - RefTime[3] );
+                                //h_refTimeTDC[2]->Fill ( RefTime[1] - RefTime[4] );
                                 h_refTimeTDC[3]->Fill ( RefTime[4] - RefTime[5] );
                                 h_refTimeTDC[4]->Fill ( RefTime[4] - RefTime[6] );
                                 h_refTimeTDC[5]->Fill ( RefTime[4] - RefTime[7] );
+                                
+//                                 printf("0-1:%lf  0-2:%lf  4-5:%lf  4-6:%lf  4-7:%lf  0-4:%lf\n",RefTime[0] - RefTime[1],RefTime[0] - RefTime[2],RefTime[4] - RefTime[5],RefTime[4] - RefTime[6],RefTime[4] - RefTime[7],RefTime[0] - RefTime[4]);
 //                                h_refTimeTDC[6]->Fill ( RefTime[0] - RefTime[4] );
 
+                                
                                 if ( end_of_queue == true ) {
 
                                         // printf("CLOSING EVENT\n");
@@ -516,3 +525,7 @@ int main ( int argc, char** argv )
 
         return 0;
 }
+
+
+
+

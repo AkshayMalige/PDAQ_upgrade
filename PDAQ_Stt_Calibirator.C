@@ -229,103 +229,129 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                         // 	else {
                         // 	  cout<<"Bad TDC Address"<<endl;}
 
-                        //if ( hit->isRef == false ) {
-
-
-
-                        //if ( trb1_ref ==true && trb2_ref==true ) {
-                        //printf ( "tdc : %x ch: %i LT: %lf\n",hit->tdcid,hit->channel, hit->leadTime );
-                        TestChannel* tc = 0;
-                        tc = ( TestChannel* ) t->getAddress ( hit->tdcid, hit->channel );
-                        // cout<<"After"<<endl;
-                        if ( tc == 0 ) {
-                        } else if ( tc->mod == 1 ) {
-
-                                // tc->print("   address");
+                        if ( hit->isRef == true ) {
                                 SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
                                 cal_hit->tdcid = hit->tdcid;
                                 cal_hit->tot = hit->tot;
                                 cal_hit->isRef = hit->isRef;
-                                cal_hit->layer = tc->lay;
-                                cal_hit->straw = tc->straw;
-                                cal_hit->station = tc->mod;
+                                cal_hit->x = 0;
+                                cal_hit->y = 0;
+                                cal_hit->z = 0;
+                                cal_hit->layer = 0;
+                                cal_hit->straw = 0;
+                                cal_hit->station = 0;
                                 cal_hit->leadTime = hit->leadTime;
                                 cal_hit->trailTime = hit->trailTime;
-                                /*
-                                if ( cal_hit->tdcid == 0x6400  ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
-                                } else if ( cal_hit->tdcid == 0x6410 ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc2)-(trb2_ref - trb1_ref);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc2)-(trb2_ref - trb1_ref);
-                                } else if ( cal_hit->tdcid == 0x6411 ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc3)-(trb2_ref - trb1_ref);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc3)-(trb2_ref - trb1_ref);
-                                } else if ( cal_hit->tdcid == 0x6420 ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - trb2_ref);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - trb2_ref);
-                                } else if ( cal_hit->tdcid == 0x6430 ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc4);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc4);
-                                } else if ( cal_hit->tdcid == 0x6431 ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc5);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc5);
-                                } else if ( cal_hit->tdcid == 0x6500 ) {
-                                        cal_hit->leadTime = hit->leadTime-(tdc6 - tdc6);
-                                        cal_hit->trailTime = hit->trailTime-(tdc6 - tdc6);
-                                }*/
+
+                                cout<<"ref"<<endl;
+                        } else {
+                                cout<<"\t\t\thit"<<endl;
 
 
 
-                                /*if ( hit->tdcid == 0x6420 ||hit->tdcid== 0x6430 ||hit->tdcid== 6431 ) {
-                                        cal_hit->leadTime =
-                                }*/
 
-                                if ( tc->straw % 2 == 0 ) {
-                                        cal_hit->plane = 0;
-                                } else {
-                                        cal_hit->plane = 1;
-                                }
+                                //if ( trb1_ref ==true && trb2_ref==true ) {
+                                //printf ( "tdc : %x ch: %i LT: %lf\n",hit->tdcid,hit->channel, hit->leadTime );
+                                TestChannel* tc = 0;
+                                tc = ( TestChannel* ) t->getAddress ( hit->tdcid, hit->channel );
+                                // cout<<"After"<<endl;
+                                if ( tc == 0 ) {
+                                } else if ( tc->mod == 1 ) {
+                                        //printf ( "tdcid %x %i\n",hit->tdcid,hit->channel );
 
-                                if ( hit->tot > 0 ) {
-                                        good_counter++;
-                                }
-                                //cout<<"check 1"<<endl;
+                                        // tc->print("   address");
+                                        SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
+                                        cal_hit->tdcid = hit->tdcid;
+                                        cal_hit->tot = hit->tot;
+                                        cal_hit->isRef = hit->isRef;
+                                        cal_hit->layer = tc->lay;
+                                        cal_hit->straw = tc->straw;
+                                        cal_hit->station = tc->mod;
+//                                 if ( cal_hit->tdcid == 0x6400 ||cal_hit->tdcid == 0x6410||cal_hit->tdcid == 0x6411 ) {
+//                                         cal_hit->leadTime = hit->leadTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
+//                                         cal_hit->trailTime = hit->trailTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
+//                                 } else {
+//                                         cal_hit->leadTime = hit->leadTime ;
+//                                         cal_hit->trailTime = hit->trailTime;
+//                                 }
+                                        cal_hit->leadTime = hit->leadTime ;
+                                        cal_hit->trailTime = hit->trailTime;
 
-                                if ( cal_hit->isRef == false && cal_hit->tdcid != 0xe103 ) {
+                                       /* 
+                                        if ( cal_hit->tdcid == 0x6400  ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 )-(trb2_ref - trb1_ref);
+                                                cal_hit->trailTime = hit->trailTime-(tdc6)-(trb2_ref - trb1_ref);
+                                        } else if ( cal_hit->tdcid == 0x6410 ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 )-(trb2_ref - trb1_ref);
+                                                cal_hit->trailTime = hit->trailTime-(tdc6)-(trb2_ref - trb1_ref);
+                                        } else if ( cal_hit->tdcid == 0x6411 ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 )-(trb2_ref - trb1_ref);
+                                                cal_hit->trailTime = hit->trailTime-(tdc6)-(trb2_ref - trb1_ref);
+                                        } else if ( cal_hit->tdcid == 0x6420 ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
+                                                cal_hit->trailTime = hit->trailTime-(tdc6);
+                                        } else if ( cal_hit->tdcid == 0x6430 ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
+                                                cal_hit->trailTime = hit->trailTime-(tdc6);
+                                        } else if ( cal_hit->tdcid == 0x6431 ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
+                                                cal_hit->trailTime = hit->trailTime-(tdc6);
+                                        } else if ( cal_hit->tdcid == 0x6500 ) {
+                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
+                                                cal_hit->trailTime = hit->trailTime-(tdc6);
+                                        }*/
 
-                                        // printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln:
-                                        // %i X: %.3f Y: %.3f Z: %.3f\n",
-                                        //  cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+//                                 printf("TRB1ref: %lf, TRB2ref:%lf refdiff:%lf  LT:%lf CLT:%lf id:%x\n",trb1_ref,trb2_ref,trb_diff,hit->leadTime,cal_hit->leadTime,cal_hit->tdcid );
 
-                                        //double pit =  ftGeomPar->getStrawPitch ( cal_hit->station - 1 );
-                                        double offX = ftGeomPar->getOffsetX ( cal_hit->station - 1, cal_hit->layer - 1,  0 );
-                                        double offY = ftGeomPar->getOffsetY ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
-                                        double offZ = ftGeomPar->getOffsetZ ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
+                                        /*if ( hit->tdcid == 0x6420 ||hit->tdcid== 0x6430 ||hit->tdcid== 6431 ) {
+                                                cal_hit->leadTime =
+                                        }*/
 
-                                        if ( offX == 0 ) {
+                                        if ( tc->straw % 2 == 0 ) {
+                                                cal_hit->plane = 0;
+                                        } else {
+                                                cal_hit->plane = 1;
+                                        }
+
+                                        if ( hit->tot > 0 ) {
+                                                good_counter++;
+                                        }
+                                        //cout<<"check 1"<<endl;
+
+                                        if ( cal_hit->isRef == false && cal_hit->tdcid != 0xe103 ) {
+
+                                                // printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln:
+                                                // %i X: %.3f Y: %.3f Z: %.3f\n",
+                                                //  cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+
+                                                //double pit =  ftGeomPar->getStrawPitch ( cal_hit->station - 1 );
+                                                double offX = ftGeomPar->getOffsetX ( cal_hit->station - 1, cal_hit->layer - 1,  0 );
+                                                double offY = ftGeomPar->getOffsetY ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
+                                                double offZ = ftGeomPar->getOffsetZ ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
+
+                                                if ( offX == 0 ) {
+                                                        cal_hit->x = 0;
+                                                } else {
+                                                        cal_hit->x = ( offX + ( cal_hit->straw * rad ) );
+                                                }
+                                                if ( offY == 0 ) {
+                                                        cal_hit->y = 0;
+                                                } else {
+                                                        cal_hit->y = ( offY + ( cal_hit->straw * rad ) );
+                                                }
+
+                                                cal_hit->z = offZ;
+
+                                                //printf("TDC: %x Ch: %i Stn: %i Lay: %i Straw: %i Pln: %i X: %.3f Y: %.3f Z: %.3f \n", cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+                                        }
+
+                                        else {
                                                 cal_hit->x = 0;
-                                        } else {
-                                                cal_hit->x = ( offX + ( cal_hit->straw * rad ) );
-                                        }
-                                        if ( offY == 0 ) {
                                                 cal_hit->y = 0;
-                                        } else {
-                                                cal_hit->y = ( offY + ( cal_hit->straw * rad ) );
+                                                cal_hit->z = 0;
                                         }
-
-                                        cal_hit->z = offZ;
-
-                                        //printf("TDC: %x Ch: %i Stn: %i Lay: %i Straw: %i Pln: %i X: %.3f Y: %.3f Z: %.3f \n", cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
-                                }
-
-                                else {
-                                        cal_hit->x = 0;
-                                        cal_hit->y = 0;
-                                        cal_hit->z = 0;
                                 }
                         }
-                        //}
                 }
                 //cout<<"***********\n\n"<<endl;
 
@@ -340,6 +366,10 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
         return 0;
 }
+
+
+
+
 
 
 

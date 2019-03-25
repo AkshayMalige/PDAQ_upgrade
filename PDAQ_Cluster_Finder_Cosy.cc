@@ -128,13 +128,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         hitMultOnLayer[h] = 0;
                 }
                 h->h_hitmultiplicity0->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
-                
+
                 double t1=0;
                 double t2=0;
                 for ( int m = 0; m < STT_CAL->stt_cal.total_cal_NTDCHits; m++ ) {
                         SttHit* cal_ref = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( m );
                         if ( cal_ref->tdcid == 0x6400 && cal_ref->channel ==0 ) {
                                 t1 = cal_ref->leadTime;
+                                printf("Cal_ref : %lf\n",t1);
                         }
                         if ( cal_ref->tdcid == 0x6420 && cal_ref->channel ==0 ) {
                                 t2 = cal_ref->leadTime;
@@ -142,7 +143,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
                 }
-                h->h_TRB_ref_diff->Fill(t1-t2);
+                h->h_TRB_ref_diff->Fill ( t1- (2*t2) );
+                printf ( "%lf\n",t1-t2 );
 
                 // Loop over the vector
                 // elements//////////////////////////////////////////////////////
@@ -154,8 +156,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         h->h_tot0->Fill ( cal_hit->tot );
                         // hit on reference channel
                         if ( cal_hit->isRef == true ) {
-                                // cout<<"Reference Hit  ->
-                                // "<<cal_hit->isRef<<"\t"<<cal_hit->layer<<"\t"<<cal_hit->module<<"\t"<<cal_hit->fee_channel<<"\t"<<cal_hit->straw<<endl;
+                         // cout<<"Reference Hit  -> "<<cal_hit->isRef<<"\t"<<cal_hit->layer<<"\t"<< endl;
                         } else {
                                 if ( cal_hit->layer == 0 ) {
                                         continue;
@@ -374,7 +375,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->TimeOverThreshold->Write();
 
         h->h_raw_leadtimes->Write();
-        
+
         h->h_TRB_ref_diff->Write();
 
         PDAQ_tree->Write();
