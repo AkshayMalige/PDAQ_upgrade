@@ -103,8 +103,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
 
     SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][500];
 
-    for ( Int_t i = 110759; i < iev; i++ ) {
-
+    for ( Int_t i = 49730; i < 49732; i++ ) {
+//cout<<"check1"<<endl;
         event_counter++;
 
         tree->GetEntry ( i );
@@ -149,14 +149,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
 
         // Loop over the vector elements//////////////////////////////////////////////////////
 
-
+//cout<<"check2"<<endl;
         for ( int sn = 0; sn < SCI_CAL->sci_raw.totalNTDCHits; sn++ ) {
             SciHit* sh = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( sn );
-            if ( sh->tdcid ==0x6500 ) {
+            if ( sh->tdcid ==0x6500) {
                 scint = true;
-                printf ( "\n\nscint time: %lf \n",sh->leadTime );
+                //printf ( "\n\nscint time: %lf  channel:%i\n",sh->leadTime,sh->channel );
                 }
-
+//cout<<"check3"<<endl;
 
             for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                 SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
@@ -178,6 +178,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
                     Good_hit_counter++;
                     }
                 }
+ //cout<<"check4"<<endl;                   
 
             bool good_layers = true;
             for ( int c = 0; c < MAX_FT_TOTAL_LAYERS; c++ ) {
@@ -187,12 +188,13 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
                     }
                 }
             int layerCounter = 0;
-
+cout<<"check5"<<endl;
             for ( int m = 0; m < MAX_FT_TOTAL_LAYERS; m++ ) {
                 if ( hitMultOnLayer[m] > 0 ) {
                     layerCounter++;
                     }
                 }
+               cout<<"check6"<<endl;
 
             if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
 
@@ -212,10 +214,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
                         }
                     }
 
+                    
+
                 std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
                 vec_stthits.clear();
                 double doublehitdiff = 0;
-
 
 
 
@@ -247,7 +250,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
                     for ( int e = 0; e < vec_leadTime.size(); e++ ) {
                         //printf("diff %lf\n",vec_leadTime[e]->leadTime - sh->leadTime);
                         if ( sh->leadTime -  vec_leadTime[e]->leadTime <300 ) {
-//                                                 printf ( "Track hit time: %lf diff: %lf (%x %i %i %i)\n",vec_leadTime[e]->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw );
+                                                                 //printf ( "Track hit time: %lf diff: %lf (%x %i %i %i)\n",vec_leadTime[e]->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw );
                             SttHit* s = vec_leadTime.at ( e );
                             s->drifttime=vec_leadTime[e]->leadTime - sh->leadTime;
                             vec_stthits.push_back ( s );
@@ -258,11 +261,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents ) {
 
                     }
                 }
-                    
+
                     if (vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake){
                         //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                     }
-
 
                 /*if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
                     const int minNumber = min_track_hits;
@@ -391,7 +393,7 @@ int main ( int argc, char** argv ) {
                      "file name.\n" );
             // atoi(argv[3]) == 1000;
             sleep ( 2 );
-            PDAQ_Cluster_Finder_Cosy ( argv[1], argv[2], 10000000 );
+   -         PDAQ_Cluster_Finder_Cosy ( argv[1], argv[2], 10000000 );
             }
         else {
             PDAQ_Cluster_Finder_Cosy ( argv[1], argv[2], atoi ( argv[3] ) );

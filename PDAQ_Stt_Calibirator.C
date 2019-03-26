@@ -1,375 +1,331 @@
 #include "PDAQ_Stt_Calibirator.h"
+#include "TH2F.h"
 #include "panda_subsystem_sci.h"
 #include <MLookup.h>
 #include <MLookupContainer.h>
 #include <MLookupManager.cc>
 #include <MLookupManager.h>
-#include "TH2F.h"
 
 using namespace std;
 
 class TestChannel : public MLookupChannel
 {
 public:
-        uint mod, lay, straw, cell;
+    uint mod, lay, straw, cell;
 
-        void setAddress ( const char* address ) {
-                sscanf ( address, "%*s %*s %d %d %d\n", &mod, &lay, &straw, &cell );
-        }
+    void setAddress ( const char* address ) {
+        sscanf ( address, "%*s %*s %d %d %d\n", &mod, &lay, &straw, &cell );
+    }
 
-        void print ( const char* prefix ) {
-                printf ( "%s %d  %d  %d\n", prefix, mod, lay, straw, cell );
-        }
+    void print ( const char* prefix ) {
+        printf ( "%s %d  %d  %d\n", prefix, mod, lay, straw, cell );
+    }
 };
 
 class TestLookupTable : public MLookupTable
 {
 public:
-        TestLookupTable ( const std::string& container, UInt_t addr_min,
-                          UInt_t addr_max, UInt_t channels )
-                : MLookupTable ( container, addr_min, addr_max, channels ) {
-        }
+    TestLookupTable ( const std::string& container, UInt_t addr_min,
+                      UInt_t addr_max, UInt_t channels )
+        : MLookupTable ( container, addr_min, addr_max, channels ) {
+    }
 
-        MLookupChannel* initial() {
-                return new TestChannel();
-        }
+    MLookupChannel* initial() {
+        return new TestChannel();
+    }
 };
 
 bool f_sttHitCompareLeadTime ( SttHit* a, SttHit* b )
 {
-        return ( a->leadTime < b->leadTime );
+    return ( a->leadTime < b->leadTime );
 }
+
+//////////////////////////////////         TDC CALIBRATION FORMULA     /////////////////////////////////////////////////////
+/////  ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );       //
+/////                                                                                                                     //
+/////   ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff ) =  A                           //
+/////   ( tdc_ref[0]+trb_diff ) = B                                                                                       //
+/////   A - B = hit time  - ref time                                                                                      //
+/////   ( tdc_ref[index]-tdc_ref[0] ) -> To shift the TDC ref time to the TRB ref time                                    //
+/////   tdc_ref[index] -> To get hit time from leadtime                                                                   //
+/////   +trb_diff -> To shift the hit time to the reference TRB time                                                      //
+/////   ( tdc_ref[0]+trb_diff ) -> Diff btwn the TRB's                                                                    //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 {
 
+    MLookupManager* lm = MLookupManager::instance();
+    lm->setSource ( "lookup.txt" );
+    lm->parseSource();
+    MLookupTable* t =
+        ( MLookupTable* ) new TestLookupTable ( "TestLookup", 0x6000, 0x6500, 49 );
 
-        MLookupManager* lm = MLookupManager::instance();
-        lm->setSource ( "lookup.txt" );
-        lm->parseSource();
-        MLookupTable* t =
-                ( MLookupTable* ) new TestLookupTable ( "TestLookup", 0x6000, 0x6500, 49 );
+    MParManager* a = MParManager::instance();
+    MFTGeomPar* ftGeomPar = new MFTGeomPar();
+    MPar* d;
 
-        MParManager* a = MParManager::instance();
-        MFTGeomPar* ftGeomPar = new MFTGeomPar();
-        MPar* d;
+    a->setParamSource ( "ftparams.txt" );
+    a->parseSource();
+    pm()->addParameterContainer ( "MFTPar", ftGeomPar );
+    d = pm()->getParameterContainer ( "MFTPar" );
 
-        a->setParamSource ( "ftparams.txt" );
-        a->parseSource();
-        pm()->addParameterContainer ( "MFTPar", ftGeomPar );
-        d = pm()->getParameterContainer ( "MFTPar" );
+    if ( !ftGeomPar ) {
+        std::cerr << "Parameter container 'PFTGeomPar' was not obtained!"
+                  << std::endl;
+    } else {
+        printf ( "*ftGeomPar:%i\n", ftGeomPar );
+    }
 
-        if ( !ftGeomPar ) {
-                std::cerr << "Parameter container 'PFTGeomPar' was not obtained!"
-                          << std::endl;
-        } else {
-                printf ( "*ftGeomPar:%i\n", ftGeomPar );
+    ftGeomPar->print();
+    //     double ax=ftGeomPar->getOffsetX ( 0, 0,  0 );
+    //     double tx = ftGeomPar->getStrawRadius ( 0 );
+    //     double bx=ftGeomPar->getOffsetX ( 0, 0,  1 );
+    //     double cx=ftGeomPar->getOffsetX ( 0, 3,  1 );
+    //     for ( int tr=1; tr<33; tr++ ) {
+    //         double ay = ( ax + ( tr * tx ) );
+    //         cout<<ax<<"\t"<<ay <<endl;
+    //
+    //     }
+    // double offX = ftGeomPar->getOffsetX ( 0, 0,  0 );
+
+    PandaSubsystemSTT* STT = 0;
+    PandaSttCal* CAL = new PandaSttCal();
+    Stt_Cal_Event* stt_event = & ( CAL->stt_cal );
+    SttDetector stt_det;
+    PandaSubsystemSCI* SCI = 0;
+    PandaSubsystemSCI* SCI_CAL = new PandaSubsystemSCI();
+    SciEvent* sci_event = & ( SCI_CAL->sci_raw );
+
+    //     TFile file("Raw3b.root", "READ");
+    //     TTree* tree = (TTree*)file.Get("PDAQ_tree");
+    //     if (!tree) {
+    //         std::cerr << "Tree doesn't exists" << std::endl;
+    //         return 1;
+    //     }
+
+    TFile inFile ( intree );
+    TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
+    if ( !tree ) {
+        std::cerr << "Tree PDAQ_tree was not found\n";
+        std::exit ( 1 );
+    }
+
+    // tree->Print();
+    cout << "tree loading: " << tree->SetBranchAddress ( "STT", &STT ) << endl;
+    cout << "tree loading: " << tree->SetBranchAddress ( "SCI", &SCI ) << endl;
+
+    Double_t repeat = 0;
+    Double_t All_repeat = 0;
+    int good_counter = 0;
+    double percentage = 0.0;
+
+    Int_t nentries = ( Int_t ) tree->GetEntries();
+    std::cout << nentries << "\n";
+
+    TFile* Ttree = new TFile ( outtree, "RECREATE" );
+    TTree* PDAQ_tree = new TTree ( "PDAQ_tree", "PDAQ_tree" );
+    PDAQ_tree->Branch ( "STT_CAL", "PandaSttCal", &CAL, 64000, 99 );
+    PDAQ_tree->Branch ( "SCI_CAL", "PandaSubsystemSCI", &SCI_CAL, 64000, 99 );
+
+    TH1F* h_TRB_ref_diff =
+        new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 600000,
+                   400000, 1000000 );
+
+    Long_t global_cnt = 0;
+    // TH2F* h_TotVsChannel = new TH2F("TotVsChannel", "TotVsChannel", 1000,
+    // -100, 700, 300, 0, 300);
+
+    Float_t scint_offset = ftGeomPar->getDTOffset();
+    double rad = ftGeomPar->getStrawRadius ( 0 );
+
+    for ( Long_t e = 0; e < nentries; e++ ) {
+        tree->GetEntry ( e );
+        int hitsInEvent = 0;
+
+        double trb_diff = 0;
+        double tdc0 = 0;
+        double tdc1 = 0;
+        double tdc2 = 0;
+        double tdc3 = 0;
+        double tdc4 = 0;
+        double tdc5 = 0;
+        double tdc6 = 0;
+
+        UInt_t tdc[7] = {0x6400, 0x6410, 0x6411, 0x6420, 0x6430, 0x6431, 0x6500 };
+        double tdc_ref[7];
+        for ( int a = 0; a < 7; a++ ) {
+            tdc_ref[a] = 0;
         }
 
-        ftGeomPar->print();
-//     double ax=ftGeomPar->getOffsetX ( 0, 0,  0 );
-//     double tx = ftGeomPar->getStrawRadius ( 0 );
-//     double bx=ftGeomPar->getOffsetX ( 0, 0,  1 );
-//     double cx=ftGeomPar->getOffsetX ( 0, 3,  1 );
-//     for ( int tr=1; tr<33; tr++ ) {
-//         double ay = ( ax + ( tr * tx ) );
-//         cout<<ax<<"\t"<<ay <<endl;
-//
-//     }
-        //double offX = ftGeomPar->getOffsetX ( 0, 0,  0 );
+        std::vector<SttHit*> vec_filterLeadTime;
 
-        PandaSubsystemSTT* STT = 0;
-        PandaSttCal* CAL = new PandaSttCal();
-        Stt_Cal_Event* stt_event = & ( CAL->stt_cal );
-        SttDetector stt_det;
-        PandaSubsystemSCI* SCI = 0;
-        PandaSubsystemSCI* SCI_CAL = new PandaSubsystemSCI();
-        SciEvent* sci_event = & ( SCI_CAL->sci_raw );
+        // percentage = (e*100)/nentries;
 
-        //     TFile file("Raw3b.root", "READ");
-        //     TTree* tree = (TTree*)file.Get("PDAQ_tree");
-        //     if (!tree) {
-        //         std::cerr << "Tree doesn't exists" << std::endl;
-        //         return 1;
-        //     }
-
-        TFile inFile ( intree );
-        TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
-        if ( !tree ) {
-                std::cerr << "Tree PDAQ_tree was not found\n";
-                std::exit ( 1 );
+        if ( e % 10000 == 0 ) {
+            printf ( "%d\n", e );
+        }
+        if ( e == maxEvents ) {
+            break;
         }
 
-        // tree->Print();
-        cout << "tree loading: " << tree->SetBranchAddress ( "STT", &STT ) << endl;
-        cout << "tree loading: " << tree->SetBranchAddress ( "SCI", &SCI ) << endl;
+        PDAQ_tree->Fill();
+        stt_event->CalClear();
+        sci_event->Clear();
 
-        Double_t repeat = 0;
-        Double_t All_repeat = 0;
-        int good_counter = 0;
-        double percentage = 0.0;
+        // cout<<"^^^^^^^^^totalNTDCHits :
+        // "<<STT->stt_raw.totalNTDCHits<<"\t^^^^^ Sci
+        // "<<SCI->sci_raw.totalNTDCHits<<endl<<endl;
 
-        Int_t nentries = ( Int_t ) tree->GetEntries();
-        std::cout << nentries << "\n";
-
-        TFile* Ttree = new TFile ( outtree, "RECREATE" );
-        TTree* PDAQ_tree = new TTree ( "PDAQ_tree", "PDAQ_tree" );
-        PDAQ_tree->Branch ( "STT_CAL", "PandaSttCal", &CAL, 64000, 99 );
-        PDAQ_tree->Branch ( "SCI_CAL", "PandaSubsystemSCI", &SCI_CAL, 64000, 99 );
-
-        TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 600000, 400000, 1000000 );
-
-
-        Long_t global_cnt = 0;
-        // TH2F* h_TotVsChannel = new TH2F("TotVsChannel", "TotVsChannel", 1000,
-        // -100, 700, 300, 0, 300);
-
-        Float_t scint_offset = ftGeomPar->getDTOffset();
-        double rad =  ftGeomPar->getStrawRadius ( 0 );
-
-        for ( Long_t e = 0; e < nentries; e++ ) {
-                tree->GetEntry ( e );
-                int hitsInEvent = 0;
-
-                double trb1_ref =0;
-                double trb2_ref =0;
-                double trb_diff =0;
-                double tdc1 =0;
-                double tdc2 =0;
-                double tdc3 =0;
-                double tdc4 =0;
-                double tdc5 =0;
-                double tdc6 =0;
-                double tdc7 =0;
-                bool trb1 = false;
-                bool trb2 = false;
-
-                std::vector<SttHit*> vec_filterLeadTime;
-
-                // percentage = (e*100)/nentries;
-
-                if ( e % 10000 == 0 ) {
-                        printf ( "%d\n", e );
+        for ( int s = 0; s < STT->stt_raw.totalNTDCHits; s++ ) {
+            SttRawHit* s_hit =
+                ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( s );
+            int tdc_index = 0;
+            for ( int t = 0; t < 7; t++ ) {
+                if ( s_hit->tdcid == tdc[t] && s_hit->channel == 0 ) {
+                    tdc_index = t;
+                    tdc_ref[tdc_index] = s_hit->leadTime;
                 }
-                if ( e == maxEvents ) {
-                        break;
+            }
+        }
+        //printf ( "%lf  %lf  %lf\n",tdc_ref[0],tdc_ref[3],tdc_ref[0]- tdc_ref[3] );
+
+        trb_diff = tdc_ref[0]- tdc_ref[3];
+        h_TRB_ref_diff->Fill ( trb_diff );
+
+        for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
+            SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
+            SciHit* shit = sci_event->AddSciHit();
+            shit->tdcid = scihit->tdcid;
+            shit->channel = scihit->channel;
+            shit->leadTime = scihit->leadTime - ( tdc_ref[6] - tdc_ref[3] ) - scint_offset;
+            shit->trailTime = scihit->trailTime - ( tdc_ref[6] - tdc_ref[3] ) - scint_offset;
+            shit->isRef = scihit->isRef;
+        }
+
+          //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",tdc0,tdc3,trb_diff );
+
+        for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
+            SttRawHit* hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( i ); // retrieve particular hit
+            if ( hit->isRef == true ) {
+                SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
+                int index = 0;
+
+                for ( int j = 0; j < 7; j++ ) {
+                    if ( cal_hit->tdcid == tdc[j] ) {
+                        index = j;
+                    }
                 }
+                cal_hit->tdcid = hit->tdcid;
+                cal_hit->tot = hit->tot;
+                cal_hit->isRef = hit->isRef;
+                cal_hit->x = 0;
+                cal_hit->y = 0;
+                cal_hit->z = 0;
+                cal_hit->layer = 0;
+                cal_hit->straw = 0;
+                cal_hit->station = 0;
 
-                PDAQ_tree->Fill();
-                stt_event->CalClear();
-                sci_event->Clear();
+                if ( index < 3 ) {
+                    cal_hit->leadTime = ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
 
-                // cout<<"^^^^^^^^^totalNTDCHits :
-                // "<<STT->stt_raw.totalNTDCHits<<"\t^^^^^ Sci
-                // "<<SCI->sci_raw.totalNTDCHits<<endl<<endl;
+                    cal_hit->trailTime = ( ( ( hit->trailTime- ( tdc_ref[index]-tdc[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
 
-                for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
-                        SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
-                        SciHit* shit = sci_event->AddSciHit();
-                        shit->tdcid = scihit->tdcid;
-                        shit->channel = scihit->channel;
-                        shit->leadTime = scihit->leadTime - scint_offset;
-                        shit->trailTime = scihit->trailTime - scint_offset;
-                        shit->isRef = scihit->isRef;
+                } else {
+                    cal_hit->leadTime = hit->leadTime- ( tdc_ref[index] - tdc_ref[3] );
+                    cal_hit->trailTime = hit->trailTime- ( tdc_ref[index] - tdc_ref[3] );
                 }
+            } else {
 
-                for ( int j = 0; j < STT->stt_raw.totalNTDCHits; j++ ) {
-                        SttRawHit* r_hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( j );
-                        if ( r_hit->tdcid == 0x6400 && r_hit->channel ==0 ) {
-                                trb1_ref = r_hit->leadTime;
-                                //printf ( "ref 1:%lf\t",trb1_ref );
-                                trb1 = true;
+                TestChannel* tc = 0;
+                int index = 0;
+                tc = ( TestChannel* ) t->getAddress ( hit->tdcid, hit->channel );
+                if ( tc == 0 ) {
+                } else if ( tc->mod == 1 ) {
+                    for ( int j = 0; j < 7; j++ ) {
+                        if ( hit->tdcid == tdc[j] ) {
+                            index = j;
                         }
-                        if ( r_hit->tdcid == 0x6420 && r_hit->channel ==0 ) {
-                                trb2_ref = r_hit->leadTime;
-                                trb2 = true;
-                                //printf ( "ref 2:%lf\n",trb2_ref );
-                        }
-                        if ( r_hit->tdcid == 0x6410 && r_hit->channel ==0 ) {
-                                tdc2 = r_hit->leadTime;
+                    }
+                    SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
+                    cal_hit->tdcid = hit->tdcid;
+                    cal_hit->tot = hit->tot;
+                    cal_hit->isRef = hit->isRef;
+                    cal_hit->layer = tc->lay;
+                    cal_hit->straw = tc->straw;
+                    cal_hit->station = tc->mod;
 
-                                //printf ( "ref 2:%lf\n",trb2_ref );
-                        }
-                        if ( r_hit->tdcid == 0x6411 && r_hit->channel ==0 ) {
-                                tdc3 = r_hit->leadTime;
+                    if ( index < 3 ) {
+                        cal_hit->leadTime = ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
 
-                                //printf ( "ref 2:%lf\n",trb2_ref );
-                        }
-                        if ( r_hit->tdcid == 0x6430 && r_hit->channel ==0 ) {
-                                tdc4 = r_hit->leadTime;
+                        cal_hit->trailTime = ( ( ( hit->trailTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
 
-                                //printf ( "ref 2:%lf\n",trb2_ref );
-                        }
-                        if ( r_hit->tdcid == 0x6431 && r_hit->channel ==0 ) {
-                                tdc5 = r_hit->leadTime;
+                    } else {
+                        cal_hit->leadTime = hit->leadTime- ( tdc_ref[index] - tdc_ref[3] );
+                        cal_hit->trailTime = hit->trailTime- ( tdc_ref[index] - tdc_ref[3] );
+                    }
 
-                                //printf ( "ref 2:%lf\n",trb2_ref );
-                        }
-                        if ( r_hit->tdcid == 0x6500 && r_hit->channel ==0 ) {
-                                tdc6 = r_hit->leadTime;
-
-                                //printf ( "ref 2:%lf\n",trb2_ref );
-                        }
-
-                }
-
-                trb_diff = trb1_ref - trb2_ref;
-                h_TRB_ref_diff->Fill ( trb_diff );
-                //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",trb1_ref,trb2_ref, trb_diff );
-
-                for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
-                        // cout<<endl<<endl;
-                        // cout<<"check0 "<<endl;
-                        // printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
+                    //printf ( "TRB1ref: %lf, TRB2ref:%lf refdiff:%lf  LT:%lf CLT:%lf  id:%x\n",tdc0,tdc3,trb_diff,hit->leadTime,cal_hit->leadTime,cal_hit->tdcid );
 
 
-                        SttRawHit* hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( i ); // retrieve particular hit
-                        // 	if ((TestChannel*)t->getAddress(hit->tdcid,
-                        // hit->new_channel)){continue;}
-                        // 	else {
-                        // 	  cout<<"Bad TDC Address"<<endl;}
+                    if ( tc->straw % 2 == 0 ) {
+                        cal_hit->plane = 0;
+                    } else {
+                        cal_hit->plane = 1;
+                    }
 
-                        if ( hit->isRef == true ) {
-                                SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
-                                cal_hit->tdcid = hit->tdcid;
-                                cal_hit->tot = hit->tot;
-                                cal_hit->isRef = hit->isRef;
-                                cal_hit->x = 0;
-                                cal_hit->y = 0;
-                                cal_hit->z = 0;
-                                cal_hit->layer = 0;
-                                cal_hit->straw = 0;
-                                cal_hit->station = 0;
-                                cal_hit->leadTime = hit->leadTime;
-                                cal_hit->trailTime = hit->trailTime;
+                    if ( hit->tot > 0 ) {
+                        good_counter++;
+                    }
+                    // cout<<"check 1"<<endl;
 
-                                //cout<<"ref"<<endl;
+                    if ( cal_hit->isRef == false && cal_hit->tdcid != 0xe103 ) {
+
+
+                        double offX = ftGeomPar->getOffsetX ( cal_hit->station - 1, cal_hit->layer - 1, 0 );
+                        double offY = ftGeomPar->getOffsetY ( cal_hit->station - 1, cal_hit->layer - 1,
+                                                              cal_hit->plane );
+                        double offZ = ftGeomPar->getOffsetZ ( cal_hit->station - 1, cal_hit->layer - 1,
+                                                              cal_hit->plane );
+
+                        if ( offX == 0 ) {
+                            cal_hit->x = 0;
                         } else {
-                                //cout<<"\t\t\thit"<<endl;
-
-
-
-
-                                //if ( trb1_ref ==true && trb2_ref==true ) {
-                                //printf ( "tdc : %x ch: %i LT: %lf\n",hit->tdcid,hit->channel, hit->leadTime );
-                                TestChannel* tc = 0;
-                                tc = ( TestChannel* ) t->getAddress ( hit->tdcid, hit->channel );
-                                // cout<<"After"<<endl;
-                                if ( tc == 0 ) {
-                                } else if ( tc->mod == 1 ) {
-                                        //printf ( "tdcid %x %i\n",hit->tdcid,hit->channel );
-
-                                        // tc->print("   address");
-                                        SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
-                                        cal_hit->tdcid = hit->tdcid;
-                                        cal_hit->tot = hit->tot;
-                                        cal_hit->isRef = hit->isRef;
-                                        cal_hit->layer = tc->lay;
-                                        cal_hit->straw = tc->straw;
-                                        cal_hit->station = tc->mod;
-//                                 if ( cal_hit->tdcid == 0x6400 ||cal_hit->tdcid == 0x6410||cal_hit->tdcid == 0x6411 ) {
-//                                         cal_hit->leadTime = hit->leadTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
-//                                         cal_hit->trailTime = hit->trailTime-(tdc6 - trb1_ref)-(trb2_ref - trb1_ref);
-//                                 } else {
-//                                         cal_hit->leadTime = hit->leadTime ;
-//                                         cal_hit->trailTime = hit->trailTime;
-//                                 }
-                                        cal_hit->leadTime = hit->leadTime ;
-                                        cal_hit->trailTime = hit->trailTime;
-
-                                       /* 
-                                        if ( cal_hit->tdcid == 0x6400  ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 )-(trb2_ref - trb1_ref);
-                                                cal_hit->trailTime = hit->trailTime-(tdc6)-(trb2_ref - trb1_ref);
-                                        } else if ( cal_hit->tdcid == 0x6410 ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 )-(trb2_ref - trb1_ref);
-                                                cal_hit->trailTime = hit->trailTime-(tdc6)-(trb2_ref - trb1_ref);
-                                        } else if ( cal_hit->tdcid == 0x6411 ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 )-(trb2_ref - trb1_ref);
-                                                cal_hit->trailTime = hit->trailTime-(tdc6)-(trb2_ref - trb1_ref);
-                                        } else if ( cal_hit->tdcid == 0x6420 ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
-                                                cal_hit->trailTime = hit->trailTime-(tdc6);
-                                        } else if ( cal_hit->tdcid == 0x6430 ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
-                                                cal_hit->trailTime = hit->trailTime-(tdc6);
-                                        } else if ( cal_hit->tdcid == 0x6431 ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
-                                                cal_hit->trailTime = hit->trailTime-(tdc6);
-                                        } else if ( cal_hit->tdcid == 0x6500 ) {
-                                                cal_hit->leadTime = hit->leadTime-(tdc6 );
-                                                cal_hit->trailTime = hit->trailTime-(tdc6);
-                                        }*/
-
-//                                 printf("TRB1ref: %lf, TRB2ref:%lf refdiff:%lf  LT:%lf CLT:%lf id:%x\n",trb1_ref,trb2_ref,trb_diff,hit->leadTime,cal_hit->leadTime,cal_hit->tdcid );
-
-                                        /*if ( hit->tdcid == 0x6420 ||hit->tdcid== 0x6430 ||hit->tdcid== 6431 ) {
-                                                cal_hit->leadTime =
-                                        }*/
-
-                                        if ( tc->straw % 2 == 0 ) {
-                                                cal_hit->plane = 0;
-                                        } else {
-                                                cal_hit->plane = 1;
-                                        }
-
-                                        if ( hit->tot > 0 ) {
-                                                good_counter++;
-                                        }
-                                        //cout<<"check 1"<<endl;
-
-                                        if ( cal_hit->isRef == false && cal_hit->tdcid != 0xe103 ) {
-
-                                                // printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln:
-                                                // %i X: %.3f Y: %.3f Z: %.3f\n",
-                                                //  cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
-
-                                                //double pit =  ftGeomPar->getStrawPitch ( cal_hit->station - 1 );
-                                                double offX = ftGeomPar->getOffsetX ( cal_hit->station - 1, cal_hit->layer - 1,  0 );
-                                                double offY = ftGeomPar->getOffsetY ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
-                                                double offZ = ftGeomPar->getOffsetZ ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
-
-                                                if ( offX == 0 ) {
-                                                        cal_hit->x = 0;
-                                                } else {
-                                                        cal_hit->x = ( offX + ( cal_hit->straw * rad ) );
-                                                }
-                                                if ( offY == 0 ) {
-                                                        cal_hit->y = 0;
-                                                } else {
-                                                        cal_hit->y = ( offY + ( cal_hit->straw * rad ) );
-                                                }
-
-                                                cal_hit->z = offZ;
-
-                                                //printf("TDC: %x Ch: %i Stn: %i Lay: %i Straw: %i Pln: %i X: %.3f Y: %.3f Z: %.3f \n", cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
-                                        }
-
-                                        else {
-                                                cal_hit->x = 0;
-                                                cal_hit->y = 0;
-                                                cal_hit->z = 0;
-                                        }
-                                }
+                            cal_hit->x = ( offX + ( cal_hit->straw * rad ) );
                         }
+                        if ( offY == 0 ) {
+                            cal_hit->y = 0;
+                        } else {
+                            cal_hit->y = ( offY + ( cal_hit->straw * rad ) );
+                        }
+
+                        cal_hit->z = offZ;
+
+                        // printf("TDC: %x Ch: %i Stn: %i Lay: %i Straw: %i Pln:
+                        // %i X: %.3f Y: %.3f Z: %.3f \n",
+                        // cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+                    }
+
+                    else {
+                        cal_hit->x = 0;
+                        cal_hit->y = 0;
+                        cal_hit->z = 0;
+                    }
                 }
-                //cout<<"***********\n\n"<<endl;
+            }
+        }
+        // cout<<"***********\n\n"<<endl;
 
-        } // over events
-        h_TRB_ref_diff->Write();
-        PDAQ_tree->Write();
-        cout << "Repeated entries  :" << repeat << "/" << All_repeat << endl;
-        cout << "Good Hits : " << good_counter << endl;
-        // if (fp)
-        //     fclose(fp);
-        printf ( "In_File: %s 	Out_File:  %s\n", intree, outtree );
+    } // over events
+    h_TRB_ref_diff->Write();
+    PDAQ_tree->Write();
+    cout << "Repeated entries  :" << repeat << "/" << All_repeat << endl;
+    cout << "Good Hits : " << good_counter << endl;
+    printf ( "In_File: %s   Out_File:  %s\n", intree, outtree );
 
-        return 0;
+    return 0;
 }
-
-
-
-
-
 
 
