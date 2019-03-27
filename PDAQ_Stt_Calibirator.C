@@ -175,47 +175,53 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         stt_event->CalClear();
         sci_event->Clear();
 
-        // cout<<"^^^^^^^^^totalNTDCHits :
-        // "<<STT->stt_raw.totalNTDCHits<<"\t^^^^^ Sci
-        // "<<SCI->sci_raw.totalNTDCHits<<endl<<endl;
-
+///Loop to get TDC Ref's
         for ( int s = 0; s < STT->stt_raw.totalNTDCHits; s++ ) {
-            SttRawHit* s_hit =
-                ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( s );
+            SttRawHit* s_hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( s );
             int tdc_index = 0;
             for ( int t = 0; t < 7; t++ ) {
                 if ( s_hit->tdcid == tdc[t] && s_hit->channel == 0 ) {
                     tdc_index = t;
                     tdc_ref[tdc_index] = s_hit->leadTime;
+                    //printf ( "%i  %x  %x\n",t,tdc[t],s_hit->tdcid );
                 }
             }
         }
+
         //printf ( "%lf  %lf  %lf\n",tdc_ref[0],tdc_ref[3],tdc_ref[0]- tdc_ref[3] );
 
         trb_diff = tdc_ref[0]- tdc_ref[3];
         h_TRB_ref_diff->Fill ( trb_diff );
 
+//Loop over Scintillator data
         for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
             SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
             SciHit* shit = sci_event->AddSciHit();
             shit->tdcid = scihit->tdcid;
             shit->channel = scihit->channel;
-            shit->leadTime = scihit->leadTime - ( tdc_ref[6] - tdc_ref[3] ) - scint_offset;
-            shit->trailTime = scihit->trailTime - ( tdc_ref[6] - tdc_ref[3] ) - scint_offset;
+            shit->leadTime = (scihit->leadTime - ( tdc_ref[6] - tdc_ref[3] ) - scint_offset);
+            shit->trailTime = (scihit->trailTime - ( tdc_ref[6] - tdc_ref[3] ) - scint_offset);
             shit->isRef = scihit->isRef;
+            //printf("scint ref: %i\n",scihit->channel);
+//             if (scihit->channel ==0)
+//             printf("scint ref :%lf \n\n",shit->leadTime);
+//             else
+//               printf("scint hit :%lf\n",shit->leadTime);
+
         }
 
-          //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",tdc0,tdc3,trb_diff );
+        //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",tdc0,tdc3,trb_diff );
 
+//Loop over straw hits
         for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
             SttRawHit* hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( i ); // retrieve particular hit
-            if ( hit->isRef == true ) {
+            if ( hit->isRef == true && hit->tdcid!=0xe103) {
                 SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
                 int index = 0;
-
                 for ( int j = 0; j < 7; j++ ) {
-                    if ( cal_hit->tdcid == tdc[j] ) {
-                        index = j;
+                    if ( hit->tdcid == tdc[j] && hit->channel==0) {
+                    index = j;
+                    //printf("%i  %x  %x\n",j,tdc[j],hit->tdcid);
                     }
                 }
                 cal_hit->tdcid = hit->tdcid;
@@ -229,14 +235,20 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 cal_hit->station = 0;
 
                 if ( index < 3 ) {
-                    cal_hit->leadTime = ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
+                    cal_hit->leadTime = (( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3]));
 
-                    cal_hit->trailTime = ( ( ( hit->trailTime- ( tdc_ref[index]-tdc[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
+                    cal_hit->trailTime = (( hit->trailTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3]));
+
+
+                    //printf("Hit ti:%lf  RefT:%lf  H-R:%lf  Trb1ref:%lf  trb1crr:%lf  trb1cr-trb1:%lf Trb2ref:%lf trb12crr:%lf    crr:%lf  diff:%lf:  trbdiff:%lf: \n\n\n", hit->leadTime,tdc_ref[index],hit->leadTime-tdc_ref[index],tdc_ref[0],( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ),( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )- tdc_ref[0],tdc_ref[3],tdc_ref[3],( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3]),( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3])-tdc_ref[3],tdc_ref[0]-tdc_ref[3]);
+
 
                 } else {
-                    cal_hit->leadTime = hit->leadTime- ( tdc_ref[index] - tdc_ref[3] );
-                    cal_hit->trailTime = hit->trailTime- ( tdc_ref[index] - tdc_ref[3] );
+                    cal_hit->leadTime = (hit->leadTime- ( tdc_ref[index] - tdc_ref[3] ));
+                    cal_hit->trailTime = (hit->trailTime- ( tdc_ref[index] - tdc_ref[3] ));
                 }
+
+
             } else {
 
                 TestChannel* tc = 0;
@@ -258,13 +270,13 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     cal_hit->station = tc->mod;
 
                     if ( index < 3 ) {
-                        cal_hit->leadTime = ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
+                        cal_hit->leadTime = (( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3]));
 
-                        cal_hit->trailTime = ( ( ( hit->trailTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );
+                        cal_hit->trailTime = (( hit->trailTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3]));
 
                     } else {
-                        cal_hit->leadTime = hit->leadTime- ( tdc_ref[index] - tdc_ref[3] );
-                        cal_hit->trailTime = hit->trailTime- ( tdc_ref[index] - tdc_ref[3] );
+                        cal_hit->leadTime = (hit->leadTime- ( tdc_ref[index] - tdc_ref[3] ));
+                        cal_hit->trailTime = (hit->trailTime- ( tdc_ref[index] - tdc_ref[3] ));
                     }
 
                     //printf ( "TRB1ref: %lf, TRB2ref:%lf refdiff:%lf  LT:%lf CLT:%lf  id:%x\n",tdc0,tdc3,trb_diff,hit->leadTime,cal_hit->leadTime,cal_hit->tdcid );

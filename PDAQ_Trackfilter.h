@@ -70,9 +70,9 @@ struct histograms{
     TH2F* h_drifttimevsplane = new TH2F("h_drifttimevsplane", "h_drifttimevsplane;Drift Time [ns];Layer", 360, -10, 350,20,0,10);
     
     TH1F* h_scint_mult = new TH1F("h_scint_mult", "h_scint_mult;Number of hits", 11, -1, 10);
-        TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 5010, -10, 5000);
-            TH1F* h_raw_leadtimes = new TH1F("h_raw_leadtimes", "h_raw_leadtimes;", 100000, -100000, 0);
-                    TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 1000, -5, 5 );
+    TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 5010, -10, 5000);
+    TH1F* h_raw_leadtimes = new TH1F("h_raw_leadtimes", "h_raw_leadtimes;", 100000, -100000, 0);
+    TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 1000, -5, 5 );
 
 
 
@@ -100,6 +100,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h);
 
 #endif
+
 
 
 
