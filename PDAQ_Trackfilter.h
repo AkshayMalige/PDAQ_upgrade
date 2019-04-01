@@ -73,6 +73,9 @@ struct histograms{
     TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 5010, -10, 5000);
     TH1F* h_raw_leadtimes = new TH1F("h_raw_leadtimes", "h_raw_leadtimes;", 100000, -100000, 0);
     TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 1000, -5, 5 );
+    
+    TH1F* h_drifttimeTRB1 = new TH1F("h_drifttimeTRB1", "h_drifttimeTRB1;Drift Time [ns]", 710, -10,700 );
+    TH1F* h_drifttimeTRB2 = new TH1F("h_drifttimeTRB2", "h_drifttimeTRB2;Drift Time [ns]", 710, -10,700 );
 
 
 

@@ -126,9 +126,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         //cout<<"check0  "<<MAX_FT_TOTAL_LAYERS<<endl;
         memset ( hitOnLayer, 0, MAX_FT_TOTAL_LAYERS * 5000 * sizeof ( SttHit* ) );
         int hitMultOnLayer[MAX_FT_TOTAL_LAYERS];
-        
+
         //cout<<"check1"<<endl;
-        
+
         for ( int h = 0; h < MAX_FT_TOTAL_LAYERS; h++ ) {
             hitMultOnLayer[h] = 0;
         }
@@ -155,12 +155,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         // Loop over the vector elements//////////////////////////////////////////////////////
 
-        for ( int sn = 0; sn < SCI_CAL->sci_raw.totalNTDCHits; sn++ ) {
-            SciHit* sh = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( sn );
-            if ( sh->tdcid ==0x6500 && sh->channel==1 ) {
-                scint = true;
-                //printf ( "\n\nscint time: %lf  channel:%i\n",sh->leadTime,sh->channel );
-            }
+//         for ( int sn = 0; sn < SCI_CAL->sci_raw.totalNTDCHits; sn++ ) {
+//             SciHit* sh = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( sn );
+//             if ( sh->tdcid ==0x6500 && sh->channel==1 ) {
+//                 scint = true;
+//                 //printf ( "\n\nscint time: %lf  channel:%i\n",sh->leadTime,sh->channel );
+//             }
 
             for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                 SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
@@ -249,77 +249,85 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                 //cout<<stt<<scint<<endl;
 
-                if ( stt == true && scint==true ) {
+               /* if ( stt == true && scint==true ) {
 
                     if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
                         vec_stthits.clear();
 
                         for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-                            // printf ( "diff %lf\n",vec_leadTime[e]->leadTime - sh->leadTime );
-                          //h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
-                            if ( ( vec_leadTime[e]->leadTime - sh->leadTime >-20 ) && ( vec_leadTime[e]->leadTime - sh->leadTime <350 ) ) {
+
+                            h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
+                            //printf ( "Track hit time: %lf Scint: %lf diff: %lf TOT:%lf (%x %i %i %i| %i)\n",vec_leadTime[e]->leadTime,sh->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tot,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw,sh->channel );
+                           /* if ( ( vec_leadTime[e]->leadTime - sh->leadTime >-20 ) && ( vec_leadTime[e]->leadTime - sh->leadTime <350 ) ) {
                                 //printf ( "diff %lf\n",vec_leadTime[e]->leadTime - sh->leadTime );
 
                                 //h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
 
-                               // printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e]->leadTime,sh->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw,sh->channel );
+                                // printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e]->leadTime,sh->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw,sh->channel );
                                 SttHit* s = vec_leadTime.at ( e );
                                 s->drifttime=vec_leadTime[e]->leadTime - sh->leadTime;
                                 vec_stthits.push_back ( s );
                                 h->h_LTvsLayer1->Fill ( vec_leadTime[e]->layer, vec_leadTime[e]->leadTime );
                                 h->h_tot2->Fill ( vec_leadTime[e]->tot );
                             }
+                            if ( vec_leadTime[e]->tdcid==0x6400 || vec_leadTime[e]->tdcid==0x6410 ||vec_leadTime[e]->tdcid==0x6411 ) {
+                                h->h_drifttimeTRB1->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
+                            }
+                            else 
+                               h->h_drifttimeTRB2->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
+                              
+                              
                         }
 
                     }
                 }
                 //cout<<"\n\n";
 //cout<<"Size :"<<vec_stthits.size()<<endl;
-                h->h_cluster_size->Fill(vec_stthits.size());
+                h->h_cluster_size->Fill ( vec_stthits.size() );
                 if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake ) {
-                   //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
 
-                }
+                }*/
 
-               /* if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
-                    const int minNumber = min_track_hits;
-                    const int maxDifference = max_lead_time_diff - 1;
-                    int currentNumber = 0;
-                    int currentSum = 0;
-                    int numGroups = 0;
-                    double last = vec_leadTime[0]->leadTime - maxDifference - 1;
-                    vec_stthits.clear();
+                 if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
+                     const int minNumber = min_track_hits;
+                     const int maxDifference = max_lead_time_diff - 1;
+                     int currentNumber = 0;
+                     int currentSum = 0;
+                     int numGroups = 0;
+                     double last = vec_leadTime[0]->leadTime - maxDifference - 1;
+                     vec_stthits.clear();
 
-                    for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-                        if ( vec_leadTime[e]->leadTime - last <= maxDifference ) { // Continue with current group
-                            currentNumber++;
-                            SttHit* h = vec_leadTime.at ( e );
-                            vec_stthits.push_back ( h );
+                     for ( int e = 0; e < vec_leadTime.size(); e++ ) {
+                         if ( vec_leadTime[e]->leadTime - last <= maxDifference ) { // Continue with current group
+                             currentNumber++;
+                             SttHit* h = vec_leadTime.at ( e );
+                             vec_stthits.push_back ( h );
 
-                            }
-                        else {   // Finish previous group and start anew
-                            if ( currentNumber >= minNumber ) { // Previous was a valid group
-                                numGroups++;
-                                PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                                h->h_cluster_size->Fill ( currentNumber );
-                                h->h_hitmultiplicity3->Fill ( currentNumber );
-                                }
-                            vec_stthits.clear();
-                            SttHit* h = vec_leadTime.at ( e );
-                            vec_stthits.push_back ( h ); // Start afresh
-                            currentNumber = 1;
-                            }
-                        last = vec_leadTime[e]->leadTime;
-                        }
-                    // Deal with leftovers at the end
-                    if ( currentNumber >= minNumber ) { // Previous was a valid group
-                        numGroups++;
-                        PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                        h->h_cluster_size->Fill ( currentNumber );
-                        h->h_hitmultiplicity3->Fill ( currentNumber );
-                        }
-                    }*/
-            }
+                             }
+                         else {   // Finish previous group and start anew
+                             if ( currentNumber >= minNumber ) { // Previous was a valid group
+                                 numGroups++;
+                                 PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                                 h->h_cluster_size->Fill ( currentNumber );
+                                 h->h_hitmultiplicity3->Fill ( currentNumber );
+                                 }
+                             vec_stthits.clear();
+                             SttHit* h = vec_leadTime.at ( e );
+                             vec_stthits.push_back ( h ); // Start afresh
+                             currentNumber = 1;
+                             }
+                         last = vec_leadTime[e]->leadTime;
+                         }
+                     // Deal with leftovers at the end
+                     if ( currentNumber >= minNumber ) { // Previous was a valid group
+                         numGroups++;
+                         PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                         h->h_cluster_size->Fill ( currentNumber );
+                         h->h_hitmultiplicity3->Fill ( currentNumber );
+                         }
+                     }
+           // }
         }
 
     } // End of loop over events
@@ -389,6 +397,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_raw_leadtimes->Write();
 
     h->h_TRB_ref_diff->Write();
+    
+    h->h_drifttimeTRB1->Write();
+    h->h_drifttimeTRB2->Write();
 
     PDAQ_tree->Write();
     Ttree->Close();

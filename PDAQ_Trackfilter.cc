@@ -399,7 +399,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
         double scint_time_diffB = 0;
 
         bool found_pair = false;
-        /* for ( int rt = 0; rt < SCI_CAL->sci_raw.totalNTDCHits; rt++ ) {
+         for ( int rt = 0; rt < SCI_CAL->sci_raw.totalNTDCHits; rt++ ) {
                  SciHit* sh = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( rt );
                  Float_t dt = meanTime - sh->leadTime;
                  // 	refDiff = (sh->leadTime - meanTime);
@@ -429,7 +429,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
                          scint_time_diffF = fabs ( d2->leadTime - d1->leadTime );
                          h->h_scint_timediff->Fill ( scint_time_diffF );
 
-                 }*/
+                 }
         //cout<<"Scint : "<<scint_time_diffF<<"\t"<<scint_time_diffB<<endl;
         //if ( scint_time_diffF >= 250 && scint_time_diffB >= 250 ) {
         SttTrackHit* b = stt_event->AddTrackHit();
@@ -446,7 +446,7 @@ bool PDAQ_Event_Finder ( std::vector<SttHit*> vec_stthits, int i,
             // vec_tracks[tq]->drifttime =  max_dt_offset+(meanTime - (
             // vec_tracks[tq]->leadTime ) ) ;
           //printf("  scint = %lf   rt = %lf  Dt:%lf\n", refTime, vec_tracks[tq]->leadTime, vec_tracks[tq]->leadTime-refTime);
-            //vec_tracks[tq]->drifttime =  - ( refTime - ( vec_tracks[tq]->leadTime ) );
+            vec_tracks[tq]->drifttime =  - ( refTime - ( vec_tracks[tq]->leadTime ) );
             vec_tracks[tq]->meanDriftTime = - ( meanTime - ( vec_tracks[tq]->leadTime ) );
             h->h_drifttimevstot->Fill ( vec_tracks[tq]->drifttime,vec_tracks[tq]->tot );
             h->h_tot4->Fill ( vec_tracks[tq]->tot );
