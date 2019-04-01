@@ -102,7 +102,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     double repeat = 0;
     double All_repeat = 0;
 
-    SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][500];
+    SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][5000];
 
     for ( Int_t i = 0; i < iev; i++ ) {
 //cout<<"check1"<<endl;
@@ -120,19 +120,24 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             break;
         }
 
-        //if ( i % 1000 == 0 ) {
-        cout << "entry no. " << i << endl;
-        //}
-        memset ( hitOnLayer, 0, MAX_FT_TOTAL_LAYERS * 500 * sizeof ( SttHit* ) );
+        if ( i % 1000 == 0 ) {
+            cout << "entry no. " << i << endl;
+        }
+        //cout<<"check0  "<<MAX_FT_TOTAL_LAYERS<<endl;
+        memset ( hitOnLayer, 0, MAX_FT_TOTAL_LAYERS * 5000 * sizeof ( SttHit* ) );
         int hitMultOnLayer[MAX_FT_TOTAL_LAYERS];
-
+        
+        //cout<<"check1"<<endl;
+        
         for ( int h = 0; h < MAX_FT_TOTAL_LAYERS; h++ ) {
             hitMultOnLayer[h] = 0;
         }
+        //cout<<"check2"<<endl;
         h->h_hitmultiplicity0->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
 
         double t1=0;
         double t2=0;
+        //cout<<"size : "<<STT_CAL->stt_cal.total_cal_NTDCHits<<endl;
         for ( int m = 0; m < STT_CAL->stt_cal.total_cal_NTDCHits; m++ ) {
             SttHit* cal_ref = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( m );
             if ( cal_ref->tdcid == 0x6400 && cal_ref->channel ==0 ) {
@@ -150,14 +155,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         // Loop over the vector elements//////////////////////////////////////////////////////
 
-//cout<<"check2"<<endl;
         for ( int sn = 0; sn < SCI_CAL->sci_raw.totalNTDCHits; sn++ ) {
             SciHit* sh = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( sn );
             if ( sh->tdcid ==0x6500 && sh->channel==1 ) {
                 scint = true;
                 //printf ( "\n\nscint time: %lf  channel:%i\n",sh->leadTime,sh->channel );
             }
-//cout<<"check3"<<endl;
 
             for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                 SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
@@ -172,12 +175,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     if ( cal_hit->layer == 0 ) {
                         continue;
                     }
+                    //printf("%d %d\n", cal_hit->layer - 1, hitMultOnLayer[cal_hit->layer - 1]);
 
                     hitOnLayer[cal_hit->layer - 1][hitMultOnLayer[cal_hit->layer - 1]] = cal_hit;
                     hitMultOnLayer[cal_hit->layer - 1]++;
                     Good_hit_counter++;
                 }
             }
+
 //cout<<"check4"<<endl;
 
             bool good_layers = true;
@@ -241,7 +246,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 }
 
                 h->h_hitmultiplicity2->Fill ( vec_leadTime.size() );
-                
+
                 //cout<<stt<<scint<<endl;
 
                 if ( stt == true && scint==true ) {
@@ -250,12 +255,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         vec_stthits.clear();
 
                         for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-                            if ( vec_leadTime[e]->leadTime - sh->leadTime >0 ) {
+                            // printf ( "diff %lf\n",vec_leadTime[e]->leadTime - sh->leadTime );
+                          //h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
+                            if ( ( vec_leadTime[e]->leadTime - sh->leadTime >-20 ) && ( vec_leadTime[e]->leadTime - sh->leadTime <350 ) ) {
                                 //printf ( "diff %lf\n",vec_leadTime[e]->leadTime - sh->leadTime );
 
-                                h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
+                                //h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
 
-                                //printf ( "Track hit time: %lf diff: %lf (%x %i %i %i)\n",vec_leadTime[e]->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw );
+                               // printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e]->leadTime,sh->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw,sh->channel );
                                 SttHit* s = vec_leadTime.at ( e );
                                 s->drifttime=vec_leadTime[e]->leadTime - sh->leadTime;
                                 vec_stthits.push_back ( s );
@@ -266,12 +273,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                     }
                 }
-
+                //cout<<"\n\n";
+//cout<<"Size :"<<vec_stthits.size()<<endl;
+                h->h_cluster_size->Fill(vec_stthits.size());
                 if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake ) {
-                    //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                   //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+
                 }
 
-                /*if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
+               /* if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
                     const int minNumber = min_track_hits;
                     const int maxDifference = max_lead_time_diff - 1;
                     int currentNumber = 0;
@@ -399,7 +409,7 @@ int main ( int argc, char** argv )
                      "file name.\n" );
             // atoi(argv[3]) == 1000;
             sleep ( 2 );
-            -         PDAQ_Cluster_Finder_Cosy ( argv[1], argv[2], 20000 );
+            -         PDAQ_Cluster_Finder_Cosy ( argv[1], argv[2], 100000000 );
         } else {
             PDAQ_Cluster_Finder_Cosy ( argv[1], argv[2], atoi ( argv[3] ) );
         }

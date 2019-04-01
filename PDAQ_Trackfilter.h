@@ -65,7 +65,7 @@ struct histograms{
     TH1F* h_tot4 = new TH1F("h_tot4", "h_tot4;Time Over Threshold [ns]", 710, -10, 700);
     TH1F* h_double_hit = new TH1F("h_double_hit", "h_double_hit;Number of hits", 5, 0, 5);
     
-    TH1F* h_drifttime = new TH1F("h_drifttime", "h_drifttime;Drift Time [ns]", 710, -10, 700);
+    TH1F* h_drifttime = new TH1F("h_drifttime", "h_drifttime;Drift Time [ns]", 710, -10,700 );
     
     TH2F* h_drifttimevsplane = new TH2F("h_drifttimevsplane", "h_drifttimevsplane;Drift Time [ns];Layer", 360, -10, 350,20,0,10);
     
