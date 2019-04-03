@@ -1,8 +1,9 @@
+
 #include "panda_stt_track.h"
 
 ClassImp(PandaSttTrack)
 
-    PandaSttTrack::PandaSttTrack() : PandaSubsystem()
+    PandaSttTrack::PandaSttTrack()
 {
 
     subsystem_name = "STT_TRACK";
