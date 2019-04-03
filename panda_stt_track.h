@@ -13,7 +13,7 @@ class PandaSttTrack : public PandaSubsystem
     // SttEvent stt_drift_radius;
 
     PandaSttTrack();
-    ~PandaSttTrack();
+    virtual ~PandaSttTrack();
 
     ClassDef(PandaSttTrack, 1)
 };

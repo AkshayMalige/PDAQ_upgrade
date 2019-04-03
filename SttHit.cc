@@ -4,7 +4,7 @@
 
 ClassImp(SttHit)
 
-    SttHit::SttHit()
+    SttHit::SttHit() : SttRawHit()
 {
 
     // stt_tdc_event_sizes =0;

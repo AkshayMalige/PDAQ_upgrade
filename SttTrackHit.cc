@@ -4,7 +4,7 @@
 
 ClassImp(SttTrackHit)
 
-    SttTrackHit::SttTrackHit()
+    SttTrackHit::SttTrackHit() : TObject()
 {
 
     // stt_tdc_event_sizes =0;
@@ -41,4 +41,12 @@ ClassImp(SttTrackHit)
     // z = 0;
 
     // isRef = false;
+}
+
+SttTrackHit::~SttTrackHit()
+{
+//   for (uint i = 0; i < vec_Track.size(); ++i)
+//     delete vec_Track[i];
+  vec_Track.clear();
+
 }

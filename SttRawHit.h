@@ -1,10 +1,10 @@
 #ifndef H_STT_RAW_HIT
 #define H_STT_RAW_HIT
 
-#include <TNamed.h>
+#include <TObject.h>
 //#include <SttHit.h>
 
-class SttRawHit : public TNamed
+class SttRawHit : public TObject
 {
   public:
     int channel; // 0-49

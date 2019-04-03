@@ -6,7 +6,7 @@
 #include <TClonesArray.h>
 #include <TNamed.h>
 
-class SttEvent : public TNamed
+class SttEvent : public TObject
 {
   public:
     TClonesArray* tdc_hits;
@@ -19,9 +19,9 @@ class SttEvent : public TNamed
     // int rawNTDCEvents;
 
     SttEvent();
-    virtual ~SttEvent() { Clear(); }
+    virtual ~SttEvent() { Clear(); delete tdc_hits; }
 
-    void Clear(void);
+    void Clear(Option_t * t = "");
 
     SttRawHit* AddHit(int channel);
     // SttHit* event_size(int stt_tdc_event_sizes);

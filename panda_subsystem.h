@@ -11,7 +11,7 @@ class PandaSubsystem : public TObject
     std::string subsystem_name;
 
     PandaSubsystem();
-    ~PandaSubsystem();
+    virtual ~PandaSubsystem();
 
     ClassDef(PandaSubsystem, 1)
 };

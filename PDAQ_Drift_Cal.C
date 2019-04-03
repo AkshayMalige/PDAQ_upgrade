@@ -72,23 +72,22 @@ Bool_t PDAQ_Drift_Cal(void)
         for (int n = 0; n < STT_TRACK->stt_track_can.total_track_NTDCHits; n++)
         {
 
-            std::vector<SttHit*> vec_track_can;
+//             std::vector<SttHit> vec_track_can;
             // SttHit* cal_hit  =
             // (SttHit*)STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt(n);
-            SttTrackHit* track_hit =
-                (SttTrackHit*)
-                    STT_TRACK->stt_track_can.tdc_track_hits->ConstructedAt(n);
-            vec_track_can = track_hit->vec_Track;
+            SttTrackHit& track_hit =
+                    STT_TRACK->stt_track_can.tdc_track_hits[n];
+            const std::vector<SttHit> & vec_track_can = track_hit.vec_Track;
 
             for (int t = 0; t < vec_track_can.size(); t++)
             {
-                vec_o_test1.push_back(vec_track_can[t]->drifttime);
-                vec_o_test.push_back(vec_track_can[t]->drifttime);
-                vec_x.push_back(vec_track_can[t]->x);
-                vec_y.push_back(vec_track_can[t]->y);
-                vec_z.push_back(vec_track_can[t]->z);
-                vec_layer.push_back(vec_track_can[t]->layer);
-                vec_straw.push_back(vec_track_can[t]->straw);
+                vec_o_test1.push_back(vec_track_can[t].drifttime);
+                vec_o_test.push_back(vec_track_can[t].drifttime);
+                vec_x.push_back(vec_track_can[t].x);
+                vec_y.push_back(vec_track_can[t].y);
+                vec_z.push_back(vec_track_can[t].z);
+                vec_layer.push_back(vec_track_can[t].layer);
+                vec_straw.push_back(vec_track_can[t].straw);
 
                 counterofdt++;
             }
@@ -184,7 +183,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     for (int l = 0; l < vec_pos_DT.size(); l++)
     {
-        // cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l]
+         cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l];
         // << endl;
 	DR->Fill(vec_drift_radius[l]);
         a1[l] = vec_pos_DT[l];

@@ -25,7 +25,7 @@ class SttTrackHit : public TObject
     // double y;
     // double z;
 
-    std::vector<SttHit*> vec_Track;
+    std::vector<SttHit> vec_Track;
 
     double trackId;
     double trackSize;
@@ -44,8 +44,7 @@ class SttTrackHit : public TObject
     // bool isRef;
 
     SttTrackHit();
-
-    ~SttTrackHit() {}
+    virtual ~SttTrackHit();
 
     // void SetChannel(int c) { trackId = c; }
 

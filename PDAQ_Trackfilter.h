@@ -73,29 +73,33 @@ struct histograms{
     TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 5010, -10, 5000);
     TH1F* h_raw_leadtimes = new TH1F("h_raw_leadtimes", "h_raw_leadtimes;", 100000, -100000, 0);
     TH1F* h_TRB_ref_diff = new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 1000, -5, 5 );
+    
+    TH1F* h_drifttimeTRB1 = new TH1F("h_drifttimeTRB1", "h_drifttimeTRB1;Drift Time [ns]", 710, -10,700 );
+    TH1F* h_drifttimeTRB2 = new TH1F("h_drifttimeTRB2", "h_drifttimeTRB2;Drift Time [ns]", 710, -10,700 );
 
 
 
 };
 
-bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b);
+typedef std::vector<SttHit> VecSttHit;
+bool f_sttHitCompareLeadTime(SttHit a, SttHit b);
 
-bool f_sttHitCompareCell(SttHit* a, SttHit* b);
+bool f_sttHitCompareCell(SttHit a, SttHit b);
 
-std::vector<SttHit*> GetPairs(std::vector<SttHit*> vec_get_pairs);
+VecSttHit GetPairs(VecSttHit vec_get_pairs);
 
-std::vector<std::vector<SttHit*>> clusterfinder(std::vector<SttHit*> vec_flayer);
-
-
-void add_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors,
-                std::size_t pos, std::vector<std::vector<SttHit*>> prefix,
-                std::vector<std::vector<std::vector<SttHit*>>>& result);
-
-std::vector<std::vector<std::vector<SttHit*>>>
-make_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors);
+std::vector<VecSttHit> clusterfinder(VecSttHit vec_flayer);
 
 
-bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
+void add_tuples(const std::vector<std::vector<VecSttHit>>& vectors,
+                std::size_t pos, std::vector<VecSttHit> prefix,
+                std::vector<std::vector<VecSttHit>>& result);
+
+std::vector<std::vector<VecSttHit>>
+make_tuples(const std::vector<std::vector<VecSttHit>>& vectors);
+
+
+bool PDAQ_Event_Finder(VecSttHit vec_stthits, int i,
                        TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h);
 

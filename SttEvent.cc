@@ -2,7 +2,7 @@
 
 ClassImp(SttEvent)
 
-    SttEvent::SttEvent()
+    SttEvent::SttEvent() : TObject()
 {
     tdc_hits = new TClonesArray("SttRawHit", 1000);
     // tdc_events = new TClonesArray("SttHit", 1000);
@@ -38,7 +38,7 @@ SttRawHit* SttEvent::AddHit(int channel)
 // 	return trawevents;
 // }
 
-void SttEvent::Clear(void)
+void SttEvent::Clear(Option_t *)
 {
     tdc_hits->Clear("C");
 

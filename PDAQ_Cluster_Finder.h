@@ -389,7 +389,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
 
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        std::vector<SttHit*> vec_tracks;
+        std::vector<SttHit> vec_tracks;
         vec_tracks.clear();
 
         Float_t smallestX = vec_Chi2x[0];
@@ -436,11 +436,11 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
 
         for (Int_t ck = 0; ck < vec_All_X.at(chi_indexX).size(); ck++)
         {
-            vec_tracks.push_back(vec_All_X.at(chi_indexX).at(ck));
+            vec_tracks.push_back(*vec_All_X.at(chi_indexX).at(ck));
         }
         for (Int_t cl = 0; cl < vec_All_Y.at(chi_indexY).size(); cl++)
         {
-            vec_tracks.push_back(vec_All_Y.at(chi_indexY).at(cl));
+            vec_tracks.push_back(*vec_All_Y.at(chi_indexY).at(cl));
         }
 
         double sumLeadTime = 0;
@@ -448,7 +448,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
 
         for (Int_t d = 0; d < vec_tracks.size(); d++)
         {
-            sumLeadTime += vec_tracks.at(d)->leadTime;
+            sumLeadTime += vec_tracks.at(d).leadTime;
         }
 
         meanTime = sumLeadTime / vec_tracks.size();
@@ -457,21 +457,21 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
         // Write Tracks
         stt_event->TrackClear();
 
-        SttTrackHit* b = stt_event->AddTrackHit();
-        b->vec_Track = vec_tracks;
-        b->trackId = i;
-        b->trackSize = vec_tracks.size();
-        b->Px0 = smallestP0;
-        b->Px1 = smallestP1;
-        b->Py0 = smallestPP0;
-        b->Py1 = smallestPP1;
-        b->Chix = smallestX;
-        b->Chiy = smallestY;
+        SttTrackHit& b = stt_event->AddTrackHit();
+        b.vec_Track = vec_tracks;
+        b.trackId = i;
+        b.trackSize = vec_tracks.size();
+        b.Px0 = smallestP0;
+        b.Px1 = smallestP1;
+        b.Py0 = smallestPP0;
+        b.Py1 = smallestPP1;
+        b.Chix = smallestX;
+        b.Chiy = smallestY;
 
         for (Int_t tq = 0; tq < vec_tracks.size(); tq++)
         {
-            vec_tracks[tq]->drifttime =
-                max_dt_offset + (meanTime - (vec_tracks[tq]->leadTime));
+            vec_tracks[tq].drifttime =
+                max_dt_offset + (meanTime - (vec_tracks[tq].leadTime));
             // 	for (int ac=0; ac< vec_tracks.size(); ac++)
             // 	{
             // 	  printf("TDC :%x , Layer -%d , Straw -%d
@@ -494,6 +494,7 @@ bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
 
         return true;
     }
+    return false;
 }
 
 #endif
