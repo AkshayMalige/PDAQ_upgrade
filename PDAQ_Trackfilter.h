@@ -81,24 +81,25 @@ struct histograms{
 
 };
 
-bool f_sttHitCompareLeadTime(SttHit* a, SttHit* b);
+typedef std::vector<SttHit> VecSttHit;
+bool f_sttHitCompareLeadTime(SttHit a, SttHit b);
 
-bool f_sttHitCompareCell(SttHit* a, SttHit* b);
+bool f_sttHitCompareCell(SttHit a, SttHit b);
 
-std::vector<SttHit*> GetPairs(std::vector<SttHit*> vec_get_pairs);
+VecSttHit GetPairs(VecSttHit vec_get_pairs);
 
-std::vector<std::vector<SttHit*>> clusterfinder(std::vector<SttHit*> vec_flayer);
-
-
-void add_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors,
-                std::size_t pos, std::vector<std::vector<SttHit*>> prefix,
-                std::vector<std::vector<std::vector<SttHit*>>>& result);
-
-std::vector<std::vector<std::vector<SttHit*>>>
-make_tuples(const std::vector<std::vector<std::vector<SttHit*>>>& vectors);
+std::vector<VecSttHit> clusterfinder(VecSttHit vec_flayer);
 
 
-bool PDAQ_Event_Finder(std::vector<SttHit*> vec_stthits, int i,
+void add_tuples(const std::vector<std::vector<VecSttHit>>& vectors,
+                std::size_t pos, std::vector<VecSttHit> prefix,
+                std::vector<std::vector<VecSttHit>>& result);
+
+std::vector<std::vector<VecSttHit>>
+make_tuples(const std::vector<std::vector<VecSttHit>>& vectors);
+
+
+bool PDAQ_Event_Finder(VecSttHit vec_stthits, int i,
                        TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h);
 

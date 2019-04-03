@@ -10,7 +10,8 @@
 class Stt_Track_Event : public TObject
 {
   public:
-    TClonesArray* tdc_track_hits;
+//     TClonesArray* tdc_track_hits;
+    std::vector<SttTrackHit> tdc_track_hits;
     int total_track_NTDCHits;
 
     // TClonesArray* tdc_events;
@@ -20,11 +21,11 @@ class Stt_Track_Event : public TObject
     // int rawNTDCEvents;
 
     Stt_Track_Event();
-    ~Stt_Track_Event() { Clear(); }
+    virtual ~Stt_Track_Event();
 
     void TrackClear(void);
 
-    SttTrackHit* AddTrackHit();
+    SttTrackHit& AddTrackHit();
     // SttHit* event_size(int stt_tdc_event_sizes);
 
     // SttRawHit* AddRawHit(int channel);

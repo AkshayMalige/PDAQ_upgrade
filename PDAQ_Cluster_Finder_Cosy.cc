@@ -110,8 +110,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         tree->GetEntry ( i );
 
-        std::vector<SttHit*> vec_stthits;
-        std::vector<SttHit*> vec_stthits2;
+        std::vector<SttHit> vec_stthits;
+        std::vector<SttHit> vec_stthits2;
 
         bool scint = false;
         bool stt = false;
@@ -206,14 +206,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 Layer_eq_4_counter++;
                 stt = true;
 
-                std::vector<SttHit*> vec_leadTime;
+                std::vector<SttHit> vec_leadTime;
                 int filtercnt = 0;
 
                 for ( int l = 0; l < MAX_FT_TOTAL_LAYERS; l++ ) {
                     for ( int r = 0; r < hitMultOnLayer[l]; r++ )
 
                     {
-                        vec_leadTime.push_back ( hitOnLayer[l][r] );
+                        vec_leadTime.push_back ( *hitOnLayer[l][r] );
                         h->h_tot1->Fill ( hitOnLayer[l][r]->tot );
 //                         cout<<"Initial : "<<hitOnLayer[l][r]->layer<<"\t"<<hitOnLayer[l][r]->channel<<"\t"<<hitOnLayer[l][r]->leadTime<<endl;
                     }
@@ -230,8 +230,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 h->h_hitmultiplicity1->Fill ( vec_leadTime.size() );
 
                 for ( Int_t je = 0; je < vec_leadTime.size() - 1; je++ ) {
-                    if ( ( vec_leadTime[je + 1]->layer ) == ( vec_leadTime[je]->layer ) && ( vec_leadTime[je + 1]->channel == vec_leadTime[je]->channel ) ) {
-                        doublehitdiff = fabs ( vec_leadTime[je]->leadTime - vec_leadTime[je + 1]->leadTime );
+                    if ( ( vec_leadTime[je + 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je + 1].channel == vec_leadTime[je].channel ) ) {
+                        doublehitdiff = fabs ( vec_leadTime[je].leadTime - vec_leadTime[je + 1].leadTime );
                         h_STT_Hit_Diff->Fill ( doublehitdiff );
                         if ( doublehitdiff <= 200 ) {
                             vec_leadTime.erase ( vec_leadTime.begin() + je + 1 );
@@ -255,20 +255,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         vec_stthits.clear();
 
                         for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-
-                            h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
-                            //printf ( "Track hit time: %lf Scint: %lf diff: %lf TOT:%lf (%x %i %i %i| %i)\n",vec_leadTime[e]->leadTime,sh->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tot,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw,sh->channel );
-                           /* if ( ( vec_leadTime[e]->leadTime - sh->leadTime >-20 ) && ( vec_leadTime[e]->leadTime - sh->leadTime <350 ) ) {
+                          //h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
                                 //printf ( "diff %lf\n",vec_leadTime[e]->leadTime - sh->leadTime );
 
                                 //h->h_drifttime->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
 
-                                // printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e]->leadTime,sh->leadTime,vec_leadTime[e]->leadTime - sh->leadTime,vec_leadTime[e]->tdcid,vec_leadTime[e]->layer,vec_leadTime[e]->channel,vec_leadTime[e]->straw,sh->channel );
-                                SttHit* s = vec_leadTime.at ( e );
-                                s->drifttime=vec_leadTime[e]->leadTime - sh->leadTime;
+                                SttHit& s = vec_leadTime.at ( e );
                                 vec_stthits.push_back ( s );
-                                h->h_LTvsLayer1->Fill ( vec_leadTime[e]->layer, vec_leadTime[e]->leadTime );
-                                h->h_tot2->Fill ( vec_leadTime[e]->tot );
+                                h->h_LTvsLayer1->Fill ( vec_leadTime[e].layer, vec_leadTime[e].leadTime );
+                                h->h_tot2->Fill ( vec_leadTime[e].tot );
                             }
                             if ( vec_leadTime[e]->tdcid==0x6400 || vec_leadTime[e]->tdcid==0x6410 ||vec_leadTime[e]->tdcid==0x6411 ) {
                                 h->h_drifttimeTRB1->Fill ( vec_leadTime[e]->leadTime - sh->leadTime );
@@ -282,10 +277,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
                 }
                 //cout<<"\n\n";
+
 //cout<<"Size :"<<vec_stthits.size()<<endl;
                 h->h_cluster_size->Fill ( vec_stthits.size() );
+
                 if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake ) {
-                    //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                   PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
 
                 }*/
 
@@ -402,8 +399,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_drifttimeTRB2->Write();
 
     PDAQ_tree->Write();
-    Ttree->Close();
-    inFile.Close();
+    //Ttree->Close();
+    //inFile.Close();
     printf ( "Total Hits processed : %f Repeated Hits in an Event : %f\n\n", All_repeat, repeat );
     printf ( "In_File: %s 	Out_File:  %s\n", intree, outtree );
     return 0;

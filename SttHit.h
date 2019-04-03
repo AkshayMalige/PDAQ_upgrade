@@ -2,7 +2,6 @@
 #define H_STT_HIT
 
 #include <SttRawHit.h>
-#include <TObject.h>
 
 class SttHit : public SttRawHit
 {
@@ -34,7 +33,7 @@ class SttHit : public SttRawHit
 
     SttHit();
 
-    ~SttHit() {}
+    virtual ~SttHit() {}
 
     void SetChannel(int c) { channel = c; }
 

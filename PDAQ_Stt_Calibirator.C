@@ -1,10 +1,10 @@
 #include "PDAQ_Stt_Calibirator.h"
+#include "TH2F.h"
 #include "panda_subsystem_sci.h"
 #include <MLookup.h>
 #include <MLookupContainer.h>
 #include <MLookupManager.cc>
 #include <MLookupManager.h>
-
 
 using namespace std;
 
@@ -40,6 +40,20 @@ bool f_sttHitCompareLeadTime ( SttHit* a, SttHit* b )
     return ( a->leadTime < b->leadTime );
 }
 
+//////////////////////////////////         TDC CALIBRATION FORMULA     /////////////////////////////////////////////////////
+/////  ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff )- ( tdc_ref[0]+trb_diff );       //
+/////                                                                                                                     //
+/////   ( ( ( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ) +tdc_ref[index] ) +trb_diff ) =  A                           //
+/////   ( tdc_ref[0]+trb_diff ) = B                                                                                       //
+/////   A - B = hit time  - ref time                                                                                      //
+/////   ( tdc_ref[index]-tdc_ref[0] ) -> To shift the TDC ref time to the TRB ref time                                    //
+/////   tdc_ref[index] -> To get hit time from leadtime                                                                   //
+/////   +trb_diff -> To shift the hit time to the reference TRB time                                                      //
+/////   ( tdc_ref[0]+trb_diff ) -> Diff btwn the TRB's                                                                    //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 {
 
@@ -66,16 +80,16 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
     }
 
     ftGeomPar->print();
-//     double ax=ftGeomPar->getOffsetX ( 0, 0,  0 );
-//     double tx = ftGeomPar->getStrawRadius ( 0 );
-//     double bx=ftGeomPar->getOffsetX ( 0, 0,  1 );
-//     double cx=ftGeomPar->getOffsetX ( 0, 3,  1 );
-//     for ( int tr=1; tr<33; tr++ ) {
-//         double ay = ( ax + ( tr * tx ) );
-//         cout<<ax<<"\t"<<ay <<endl;
-// 
-//     }
-  //double offX = ftGeomPar->getOffsetX ( 0, 0,  0 );
+    //     double ax=ftGeomPar->getOffsetX ( 0, 0,  0 );
+    //     double tx = ftGeomPar->getStrawRadius ( 0 );
+    //     double bx=ftGeomPar->getOffsetX ( 0, 0,  1 );
+    //     double cx=ftGeomPar->getOffsetX ( 0, 3,  1 );
+    //     for ( int tr=1; tr<33; tr++ ) {
+    //         double ay = ( ax + ( tr * tx ) );
+    //         cout<<ax<<"\t"<<ay <<endl;
+    //
+    //     }
+    // double offX = ftGeomPar->getOffsetX ( 0, 0,  0 );
 
     PandaSubsystemSTT* STT = 0;
     PandaSttCal* CAL = new PandaSttCal();
@@ -116,23 +130,43 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
     PDAQ_tree->Branch ( "STT_CAL", "PandaSttCal", &CAL, 64000, 99 );
     PDAQ_tree->Branch ( "SCI_CAL", "PandaSubsystemSCI", &SCI_CAL, 64000, 99 );
 
+    TH1F* h_TRB_ref_diff =
+        new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 600000,
+                   -100000, 1000000 );
+
     Long_t global_cnt = 0;
     // TH2F* h_TotVsChannel = new TH2F("TotVsChannel", "TotVsChannel", 1000,
     // -100, 700, 300, 0, 300);
 
     Float_t scint_offset = ftGeomPar->getDTOffset();
-    double rad =  ftGeomPar->getStrawRadius ( 0 );
+    double rad = ftGeomPar->getStrawRadius ( 0 );
 
     for ( Long_t e = 0; e < nentries; e++ ) {
         tree->GetEntry ( e );
         int hitsInEvent = 0;
+
+        double trb_diff = 0;
+        double tdc0 = 0;
+        double tdc1 = 0;
+        double tdc2 = 0;
+        double tdc3 = 0;
+        double tdc4 = 0;
+        double tdc5 = 0;
+        double tdc6 = 0;
+
+        UInt_t tdc[7] = {0x6400, 0x6410, 0x6411, 0x6420, 0x6430, 0x6431, 0x6500 };
+        double tdc_ref[7];
+        for ( int a = 0; a < 7; a++ ) {
+            tdc_ref[a] = 0;
+        }
+
         std::vector<SttHit*> vec_filterLeadTime;
 
         // percentage = (e*100)/nentries;
 
-        if ( e % 10000 == 0 ) {
-            printf ( "%d\n", e );
-        }
+        //if ( e % 10000 == 0 ) {
+        printf ( "%d\n", e );
+        //}
         if ( e == maxEvents ) {
             break;
         }
@@ -141,49 +175,136 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         stt_event->CalClear();
         sci_event->Clear();
 
-        // cout<<"^^^^^^^^^totalNTDCHits :
-        // "<<STT->stt_raw.totalNTDCHits<<"\t^^^^^ Sci
-        // "<<SCI->sci_raw.totalNTDCHits<<endl<<endl;
+///Loop to get TDC Ref's
+        for ( int s = 0; s < STT->stt_raw.totalNTDCHits; s++ ) {
+            SttRawHit* s_hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( s );
+            int tdc_index = 0;
+            for ( int t = 0; t < 7; t++ ) {
+                if ( s_hit->tdcid == tdc[t] && s_hit->channel == 0 ) {
+                    tdc_index = t;
+                    tdc_ref[tdc_index] = s_hit->leadTime;
+                    //printf ( "%i  %x  %x\n",t,tdc[t],s_hit->tdcid );
+                }
+            }
+        }
+
+        //printf ( "%lf  %lf  %lf\n",tdc_ref[0],tdc_ref[3],tdc_ref[0]- tdc_ref[3] );
+
+
+
+//Loop over Scintillator data
+        for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
+            SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
+            if ( scihit->channel==0 ) {
+                tdc_ref[6]=scihit->leadTime;
+            }
+        }
+
+        trb_diff = tdc_ref[6]- tdc_ref[3];
+        h_TRB_ref_diff->Fill ( trb_diff );
 
         for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
             SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
             SciHit* shit = sci_event->AddSciHit();
             shit->tdcid = scihit->tdcid;
             shit->channel = scihit->channel;
-            shit->leadTime = scihit->leadTime - scint_offset;
-            shit->trailTime = scihit->trailTime - scint_offset;
             shit->isRef = scihit->isRef;
+//             shit->leadTime = scihit->leadTime;
+//             shit->trailTime = scihit->trailTime;
+
+
+            shit->leadTime = ( (scihit->leadTime - tdc_ref[6]) - scint_offset );
+            shit->trailTime = ( (scihit->trailTime- tdc_ref[6]) - scint_offset );
+
+            //printf("scint ref: %i\n",scihit->channel);
+//             if (scihit->channel ==0)
+//             printf("scint ref :%lf \n\n",shit->leadTime);
+//             else
+//               printf("scint hit :%lf\n",shit->leadTime);
+
         }
 
+        //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",tdc0,tdc3,trb_diff );
+
+//Loop over straw hits
         for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
-            // cout<<endl<<endl;
-            // cout<<"check0 "<<endl;
-            // printf("i %i  NTDCHits %i\n",i,STT->stt_raw.totalNTDCHits);
-
             SttRawHit* hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( i ); // retrieve particular hit
-            //  if ((TestChannel*)t->getAddress(hit->tdcid,
-            // hit->new_channel)){continue;}
-            //  else {
-            //    cout<<"Bad TDC Address"<<endl;}
+            // printf("%x \n",hit->tdcid);
 
-            if ( hit->isRef == false ) {
-                // printf("tdc : %x ch: %i\n",hit->tdcid,hit->channel);
+            if ( hit->isRef == true && hit->tdcid!=0xe103 ) {
+                SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
+                int index = 0;
+                double ref_diff=0;
+                for ( int j = 0; j < 7; j++ ) {
+                    if ( hit->tdcid == tdc[j] && hit->channel==0 ) {
+                        index = j;
+                    }
+                }
+                cal_hit->tdcid = hit->tdcid;
+                cal_hit->tot = hit->tot;
+                cal_hit->isRef = hit->isRef;
+                cal_hit->x = 0;
+                cal_hit->y = 0;
+                cal_hit->z = 0;
+                cal_hit->layer = 0;
+                cal_hit->straw = 0;
+                cal_hit->station = 0;
+
+                cal_hit->leadTime = hit->leadTime;
+                cal_hit->trailTime =hit->trailTime;
+
+                if ( index < 3 ) {
+                    ref_diff = ( tdc_ref[6] - tdc_ref[index] ) - ( tdc_ref[3] - tdc_ref[0] );
+                } else {
+                    ref_diff = tdc_ref[6] - tdc_ref[index];
+                }
+                cal_hit->leadTime = (hit->leadTime - tdc_ref[index]) + ref_diff;
+                cal_hit->trailTime = (hit->trailTime- tdc_ref[index]) + ref_diff;
+
+                //printf ( "index %i, ref_diff %lf\n",index,ref_diff );
+
+
+
+                //printf("Hit ti:%lf  RefT:%lf  H-R:%lf  Trb1ref:%lf  trb1crr:%lf  trb1cr-trb1:%lf Trb2ref:%lf trb12crr:%lf    crr:%lf  diff:%lf:  trbdiff:%lf: \n\n\n", hit->leadTime,tdc_ref[index],hit->leadTime-tdc_ref[index],tdc_ref[0],( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) ),( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )- tdc_ref[0],tdc_ref[3],tdc_ref[3],( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3]),( hit->leadTime- ( tdc_ref[index]-tdc_ref[0] ) )-(tdc_ref[0]-tdc_ref[3])-tdc_ref[3],tdc_ref[0]-tdc_ref[3]);
+
+
+            } else {
+
                 TestChannel* tc = 0;
+                int index = 0;
+                double ref_diff=0;
                 tc = ( TestChannel* ) t->getAddress ( hit->tdcid, hit->channel );
-                // cout<<"After"<<endl;
                 if ( tc == 0 ) {
                 } else if ( tc->mod == 1 ) {
-
-                    // tc->print("   address");
+                    for ( int j = 0; j < 7; j++ ) {
+                        if ( hit->tdcid == tdc[j] ) {
+                            index = j;
+                        }
+                    }
                     SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
                     cal_hit->tdcid = hit->tdcid;
-                    cal_hit->leadTime = hit->leadTime;
-                    cal_hit->trailTime = hit->trailTime;
                     cal_hit->tot = hit->tot;
                     cal_hit->isRef = hit->isRef;
                     cal_hit->layer = tc->lay;
                     cal_hit->straw = tc->straw;
                     cal_hit->station = tc->mod;
+
+//                     cal_hit->leadTime = hit->leadTime;
+//                     cal_hit->trailTime = hit->trailTime;
+//(scint_ref - refTime[tdc]) - (refTime[3] - refTime[0])
+
+                    if ( index < 3 ) {
+                        ref_diff = ( tdc_ref[6] - tdc_ref[index] ) - ( tdc_ref[3] - tdc_ref[0] );
+                    } else {
+                        ref_diff = tdc_ref[6] - tdc_ref[index];
+                    }
+                    cal_hit->leadTime = (hit->leadTime - tdc_ref[index]) + ref_diff;
+                    cal_hit->trailTime = (hit->trailTime - tdc_ref[index])+ ref_diff;
+
+//                     printf("index %i, ref_diff %lf\n",index,ref_diff);
+
+                    //printf ( "TRB1ref: %lf, TRB2ref:%lf refdiff:%lf  CLT:%lf  id:%x  L: %i  S: %i\n",tdc_ref[0],tdc_ref[3],tdc_ref[0]-tdc_ref[3],cal_hit->leadTime,cal_hit->tdcid,cal_hit->layer,cal_hit->straw );
+
 
                     if ( tc->straw % 2 == 0 ) {
                         cal_hit->plane = 0;
@@ -194,18 +315,16 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     if ( hit->tot > 0 ) {
                         good_counter++;
                     }
-                    //cout<<"check 1"<<endl;
+                    // cout<<"check 1"<<endl;
 
                     if ( cal_hit->isRef == false && cal_hit->tdcid != 0xe103 ) {
 
-                        // printf("TDC: %x Ch: %i Stn: %i Lay: %i Cell: %i Pln:
-                        // %i X: %.3f Y: %.3f Z: %.3f\n",
-                        //  cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
 
-                        //double pit =  ftGeomPar->getStrawPitch ( cal_hit->station - 1 );
-                        double offX = ftGeomPar->getOffsetX ( cal_hit->station - 1, cal_hit->layer - 1,  0 );
-                        double offY = ftGeomPar->getOffsetY ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
-                        double offZ = ftGeomPar->getOffsetZ ( cal_hit->station - 1, cal_hit->layer - 1,  cal_hit->plane );
+                        double offX = ftGeomPar->getOffsetX ( cal_hit->station - 1, cal_hit->layer - 1, 0 );
+                        double offY = ftGeomPar->getOffsetY ( cal_hit->station - 1, cal_hit->layer - 1,
+                                                              cal_hit->plane );
+                        double offZ = ftGeomPar->getOffsetZ ( cal_hit->station - 1, cal_hit->layer - 1,
+                                                              cal_hit->plane );
 
                         if ( offX == 0 ) {
                             cal_hit->x = 0;
@@ -220,7 +339,9 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
                         cal_hit->z = offZ;
 
-                        //printf("TDC: %x Ch: %i Stn: %i Lay: %i Straw: %i Pln: %i X: %.3f Y: %.3f Z: %.3f \n", cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
+                        // printf("TDC: %x Ch: %i Stn: %i Lay: %i Straw: %i Pln:
+                        // %i X: %.3f Y: %.3f Z: %.3f \n",
+                        // cal_hit->tdcid,cal_hit->channel,cal_hit->station,cal_hit->layer,cal_hit->straw,cal_hit->plane,cal_hit->x,cal_hit->y,cal_hit->z);
                     }
 
                     else {
@@ -231,15 +352,16 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 }
             }
         }
-        //cout<<"***********\n\n"<<endl;
-    } // over events
+        cout<<"***********\n\n"<<endl;
 
+    } // over events
+    h_TRB_ref_diff->Write();
     PDAQ_tree->Write();
     cout << "Repeated entries  :" << repeat << "/" << All_repeat << endl;
     cout << "Good Hits : " << good_counter << endl;
-    // if (fp)
-    //     fclose(fp);
     printf ( "In_File: %s   Out_File:  %s\n", intree, outtree );
 
     return 0;
 }
+
+
