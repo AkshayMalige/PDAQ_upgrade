@@ -60,7 +60,7 @@ void add_tuples ( const std::vector<std::vector<VecSttHit>>& vectors,
 }
 
 std::vector<std::vector<VecSttHit>>
-make_tuples ( const std::vector<std::vector<VecSttHit>>& vectors )
+                                 make_tuples ( const std::vector<std::vector<VecSttHit>>& vectors )
 {
     std::vector<std::vector<VecSttHit>> result;
     add_tuples ( vectors, 0, {}, result );
@@ -123,7 +123,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                          TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                          MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h )
 {
-     //    printf("*** Event %d\n", i);
+    //    printf("*** Event %d\n", i);
     // for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
     // vec_tracks[tq].drifttime =  max_dt_offset+(meanTime - (
     // vec_tracks[tq].leadTime ) ) ;
@@ -446,23 +446,24 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             // vec_tracks[tq].drifttime =  max_dt_offset+(meanTime - (
             // vec_tracks[tq].leadTime ) ) ;
             //vec_tracks[tq].drifttime =  - ( refTime - ( vec_tracks[tq].leadTime ) );
-          //vec_tracks[tq].drifttime =  vec_tracks[tq].drifttime;
+            //vec_tracks[tq].drifttime =  vec_tracks[tq].drifttime;
             //vec_tracks[tq].meanDriftTime = - ( meanTime - ( vec_tracks[tq].leadTime ) );
             h->h_drifttimevstot->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
             h->h_tot4->Fill ( vec_tracks[tq].tot );
-            
-            if ( vec_tracks[tq].plane==0 ) {
-                h->h_drifttimevsplane->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer );
-            } else {
-                h->h_drifttimevsplane->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer+0.5 );
-            }
+            h->h_layerDT[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime );
+            h->h_L_dtvstot[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
+            //if ( vec_tracks[tq].plane==0 ) {
+            h->h_drifttimevsLayer->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer );
+//             } else {
+//                 h->h_drifttimevsplane->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer+0.5 );
+//             }
             h->h_drifttime->Fill ( vec_tracks[tq].drifttime );
-            
-            if (vec_tracks[tq].tdcid==0x6400||vec_tracks[tq].tdcid==0x6410||vec_tracks[tq].tdcid==0x6411){
-              h->h_drifttimeTRB1->Fill(vec_tracks[tq].drifttime);
+
+            if ( vec_tracks[tq].tdcid==0x6400||vec_tracks[tq].tdcid==0x6410||vec_tracks[tq].tdcid==0x6411 ) {
+                h->h_drifttimeTRB1->Fill ( vec_tracks[tq].drifttime );
+            } else {
+                h->h_drifttimeTRB2->Fill ( vec_tracks[tq].drifttime );
             }
-            else
-              h->h_drifttimeTRB2->Fill(vec_tracks[tq].drifttime);
 
             // printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f
             // SMDT:%f\n",max_dt_offset,vec_tracks[tq].leadTime,refTime,meanTime,vec_tracks[tq].drifttime,vec_tracks[tq].meanDriftTime);
