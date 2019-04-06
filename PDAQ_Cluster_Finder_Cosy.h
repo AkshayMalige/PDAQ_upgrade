@@ -4,5 +4,6 @@
 
 int PDAQ_Cluster_Finder_Cosy(char* intree, char* outtree, int maxEvents);
 
+std::vector<SciHit*> ex_Scint_pileup(PandaSubsystemSCI* SCI_CAL);
 
 #endif

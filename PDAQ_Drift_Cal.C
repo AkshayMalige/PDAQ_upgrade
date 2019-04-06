@@ -62,11 +62,11 @@ Bool_t PDAQ_Drift_Cal(void)
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
 
-    for (Int_t i = 0; i < iev; i++)
+    for (Int_t i = 0; i < 2; i++)
     {
         tree->GetEntry(i);
         if (i % 100 == 0) {
-            cout << i << endl;
+            cout << i <<"\they"<< endl;
         }
 
         for (int n = 0; n < STT_TRACK->stt_track_can.total_track_NTDCHits; n++)

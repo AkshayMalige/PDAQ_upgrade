@@ -303,7 +303,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                 double time =
                                     ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
                                 time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
-                                //printf ( "%lf %x\n", time, tdc_id );
+                                 //printf ( "%lf %x\n", time, tdc_id );
 
                                 if ( channel_nr == 0 ) { // ref time
                                     refTime = time;
@@ -319,20 +319,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
                                     //printf("%d %x\n", tdc_ptr-1, tdc_id);
 
-//                                     if ( tdc_id == 0x6400 ) {
-//                                         h_tdc_ref->Fill ( 1 );
-//                                     } else if ( tdc_id == 0x6410 ) {
-//                                         h_tdc_ref->Fill ( 2 );
-//                                     } else if ( tdc_id == 0x6410 ) {
-//                                         h_tdc_ref->Fill ( 2 );
-//                                     } else if ( tdc_id == 0x6411 ) {
-//                                         h_tdc_ref->Fill ( 3 );
-//                                     } else if ( tdc_id == 0x6420 ) {
-//                                         h_tdc_ref->Fill ( 4 );
-//                                     } else if ( tdc_id == 0x6430 ) {
-//                                         h_tdc_ref->Fill ( 5 );
-//                                     } else if ( tdc_id == 0x6431 ) {
-//                                         h_tdc_ref->Fill ( 6 );
+
                                     else if ( tdc_id == 0x6500 ) {
                                         SciHit* s = sci_event->AddSciHit();
                                         s->tdcid = tdc_id;
@@ -347,16 +334,19 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                     // printf("\tRef R: %f on channel %d on %x
                                     // on %x\n", a->leadTime, channel_nr,
                                     // tdc_id, sub_id);
+                                    
                                 } else {
-                                    if ( edge == 1 ) { // rising edge
+                                    if ( edge == 1 && (fabs(time-refTime)<100000)) { // rising edge
 
                                         lastRise = time;
 
 
-                                        if ( lastRise <=100000 ) {
+                                        if ( lastRise-refTime <=100000 ) {
                                             h_currpt->Fill ( 1 );
+                                           // printf("Good %lf %lf %lf\n",lastRise,refTime,lastRise-refTime);
                                         } else {
                                             h_currpt->Fill ( 2 );
+                                           // printf("corrupt %lf  %lf %lf\n",lastRise,refTime,lastRise-refTime);
                                         }
 //                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
 
@@ -372,8 +362,8 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         }
                                     } else {
                                         // falling edge
-
-                                        if ( lastRise != 0 ) { // only in case
+  ///////////////////////(fabs(time-refTime)<100000) -> To reject the corrupted entries from the epoch counter/////////////
+                                        if ( lastRise != 0 && (fabs(time-refTime)<100000)) { // only in case
                                             // there was a
                                             // rising to pair
 

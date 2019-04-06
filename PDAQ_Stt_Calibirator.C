@@ -206,6 +206,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
         for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
             SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
+            if (!scihit->channel==0){
             SciHit* shit = sci_event->AddSciHit();
             shit->tdcid = scihit->tdcid;
             shit->channel = scihit->channel;
@@ -222,6 +223,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 //             printf("scint ref :%lf \n\n",shit->leadTime);
 //             else
 //               printf("scint hit :%lf\n",shit->leadTime);
+            }
 
         }
 
@@ -231,35 +233,36 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
             SttRawHit* hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( i ); // retrieve particular hit
             // printf("%x \n",hit->tdcid);
+//printf ( "tdcid %x, channel %i\n",hit->tdcid,hit->channel );
 
-            if ( hit->isRef == true && hit->tdcid!=0xe103 ) {
-                SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
-                int index = 0;
-                double ref_diff=0;
-                for ( int j = 0; j < 7; j++ ) {
-                    if ( hit->tdcid == tdc[j] && hit->channel==0 ) {
-                        index = j;
-                    }
-                }
-                cal_hit->tdcid = hit->tdcid;
-                cal_hit->tot = hit->tot;
-                cal_hit->isRef = hit->isRef;
-                cal_hit->x = 0;
-                cal_hit->y = 0;
-                cal_hit->z = 0;
-                cal_hit->layer = 0;
-                cal_hit->straw = 0;
-                cal_hit->station = 0;
+            if ( hit->channel == 0 || hit->tdcid==0xe103 ) {
+//                 SttHit* cal_hit = stt_event->AddCalHit ( hit->channel );
+//                 int index = 0;
+//                 double ref_diff=0;
+//                 for ( int j = 0; j < 7; j++ ) {
+//                     if ( hit->tdcid == tdc[j] && hit->channel==0 ) {
+//                         index = j;
+//                     }
+//                 }
+//                 cal_hit->tdcid = hit->tdcid;
+//                 cal_hit->tot = hit->tot;
+//                 cal_hit->isRef = hit->isRef;
+//                 cal_hit->x = 0;
+//                 cal_hit->y = 0;
+//                 cal_hit->z = 0;
+//                 cal_hit->layer = 0;
+//                 cal_hit->straw = 0;
+//                 cal_hit->station = 0;
+// 
+//                 if ( index < 3 ) {
+//                     ref_diff = ( tdc_ref[6] - tdc_ref[index] ) - ( tdc_ref[3] - tdc_ref[0] );
+//                 } else {
+//                     ref_diff = tdc_ref[6] - tdc_ref[index];
+//                 }
+//                 cal_hit->leadTime = ( hit->leadTime - tdc_ref[index] ) + ref_diff;
+//                 cal_hit->trailTime = ( hit->trailTime- tdc_ref[index] ) + ref_diff;
 
-                if ( index < 3 ) {
-                    ref_diff = ( tdc_ref[6] - tdc_ref[index] ) - ( tdc_ref[3] - tdc_ref[0] );
-                } else {
-                    ref_diff = tdc_ref[6] - tdc_ref[index];
-                }
-                cal_hit->leadTime = ( hit->leadTime - tdc_ref[index] ) + ref_diff;
-                cal_hit->trailTime = ( hit->trailTime- tdc_ref[index] ) + ref_diff;
-
-                //printf ( "index %i, ref_diff %lf\n",index,ref_diff );
+               // printf ( "tdcid %x, channel %i\n",hit->tdcid,hit->channel );
 
 
 
@@ -267,7 +270,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
 
             } else {
-
+// printf ( "tdcid %x, channel %i\n",hit->tdcid,hit->channel );
                 TestChannel* tc = 0;
                 int index = 0;
                 double ref_diff=0;
@@ -361,5 +364,6 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
     return 0;
 }
+
 
 

@@ -62,7 +62,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
 
-    for (Int_t i = 0; i < iev; i++)
+    for (Int_t i = 0; i < 25000; i++)
     {
         tree->GetEntry(i);
         if (i % 100 == 0) {
@@ -183,7 +183,7 @@ Bool_t PDAQ_Drift_Cal(void)
 
     for (int l = 0; l < vec_pos_DT.size(); l++)
     {
-         cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l];
+         //cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l];
         // << endl;
   DR->Fill(vec_drift_radius[l]);
         a1[l] = vec_pos_DT[l];

@@ -128,7 +128,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     // vec_tracks[tq].drifttime =  max_dt_offset+(meanTime - (
     // vec_tracks[tq].leadTime ) ) ;
     for ( int ac=0; ac< vec_stthits.size(); ac++ ) {
-        h->h_tot3->Fill ( vec_stthits[ac].tot );
+        //h->h_tot3->Fill ( vec_stthits[ac].tot );
     }
     // 	printf("\n*********************\n");
     //}
@@ -395,8 +395,8 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         float refTime = 0;
         float refDiff = 0;
         bool scintSep = false;
-        double scint_time_diffF = 0;
-        double scint_time_diffB = 0;
+//         double scint_time_diffF = 0;
+//         double scint_time_diffB = 0;
 
         bool found_pair = false;
         /* for ( int rt = 0; rt < SCI_CAL->sci_raw.totalNTDCHits; rt++ ) {
