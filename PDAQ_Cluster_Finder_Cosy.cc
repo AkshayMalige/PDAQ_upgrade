@@ -2,58 +2,41 @@
 
 using namespace std;
 
-std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
+std::vector<SciHit*> ex_Scint_pileup ( std::vector<SciHit*> B )
 {
-    std::vector<SciHit*> B;
+    //std::vector<SciHit*> B;
+    std::vector<SciHit*> C;
     int scint_diff_limit = 200;
-    int hit =0;
-    SciHit* l =0;
-    SciHit* l2=0;
-    SciHit* l3=0;
+
     bool scint =false;
-    //cout<<"SIZE "<<SCI_CAL->sci_raw.totalNTDCHits<<endl;
-    if ( SCI_CAL->sci_raw.totalNTDCHits>2 ) {
-        for ( int a=0; a< SCI_CAL->sci_raw.totalNTDCHits-1; a++ ) {
 
-            SciHit* l2 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a );
-            SciHit* l3 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a +1 );
-            if ( a >=1 ) {
-                SciHit* l = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a -1 );
-                if ( a==SCI_CAL->sci_raw.totalNTDCHits-2 ) {
-                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
-                        B.push_back ( l2 );
-                        B.push_back ( l3 );
-                    } else if ( ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
-                        B.push_back ( l3 );
-                    }
-                } else {
-                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
-                        B.push_back ( l2 );
-                    }
+    if ( B.size() >2 ) {
+        for ( int aa=0; aa< B.size()-1; aa++ ) {
+            //printf("%lf %lf \n",B[aa+1]->leadTime - B[aa]->leadTime, B[aa]->leadTime - B[aa-1]->leadTime);
+            if ( aa ==0 ) {
+                if ( B[aa+1]->leadTime - B[aa]->leadTime >=scint_diff_limit ) {}
+                else {
+                    B.erase ( B.begin() +aa+1 );
+                    //cout<<B.size() <<endl;
+                    --aa;
                 }
-
-            } else {
-                B.push_back ( l2 );
+            } else if ( aa >=1 ) {
+                if ( B[aa+1]->leadTime - B[aa]->leadTime >=scint_diff_limit && B[aa]->leadTime - B[aa-1]->leadTime >=scint_diff_limit ) {}
+                else {
+                    B.erase ( B.begin() +aa+1 );
+                    //cout<<B.size() <<endl;
+                    --aa;
+                }
             }
-
         }
     } else {
-        if ( SCI_CAL->sci_raw.totalNTDCHits==1 ) {
-            B.push_back ( ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 0 ) );
-        }
-
-        if ( SCI_CAL->sci_raw.totalNTDCHits==2 ) {
-            SciHit* h1 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 0 );
-            SciHit* h2 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 1 );
-            if ( ( h2->leadTime - h1->leadTime ) >=scint_diff_limit ) {
-                B.push_back ( h1 );
-                B.push_back ( h2 );
-            } else {
-                B.push_back ( h1 );
+        if ( B.size() ==2 ) {
+            if ( B[1]->leadTime - B[0]->leadTime >=scint_diff_limit ) {}
+            else {
+                B.erase ( B.begin() +1 );
             }
         }
     }
-
     return B;
 }
 
@@ -206,23 +189,48 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         std::vector<SciHit*> vec_scihits;
 
-        h->h_scint_mult_b->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
+        if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
+            h->h_scint_mult_b->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
+        }
+
+        std::vector<SciHit*> B;
+        B.clear();
         for ( int pn = 0; pn < SCI_CAL->sci_raw.totalNTDCHits; pn++ ) {
+            SciHit* b = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( pn );
+            B.push_back ( b );
             h->h_scnt_plup_cnts->Fill ( 1 );
 
         }
 
+        /////////////////////////////// scint diff ///////////////////////////////////////////////
+        if ( B.size() >=2 ) {
+            for ( int a=0; a< B.size()-1; a++ ) {
+                h->h_scint_timediffa->Fill ( B[a+1]->leadTime - B[a]->leadTime );
+            }
+        }
 
         //if (STT_CAL->SCI_CAL->sci_raw.totalNTDCHits>0){
-        if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
 
-            vec_scihits = ex_Scint_pileup ( SCI_CAL ); ///to remove the scint pile up////////
+
+        if ( B.size() >0 ) {
+
+
+            vec_scihits =  ex_Scint_pileup ( B ) ;
+
+
+            if ( vec_scihits.size() >=2 ) {
+                for ( int a=0; a< vec_scihits.size()-1; a++ ) {
+                    h->h_scint_timediffb->Fill ( vec_scihits[a+1]->leadTime - vec_scihits[a]->leadTime );
+                }
+            }
+
+
             h->h_scint_mult_a->Fill ( vec_scihits.size() );
             //printf("\nSIZE : %i\n",vec_scihits.size());
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
                 SciHit* sh = vec_scihits[sn];
                 h->h_scnt_plup_cnts->Fill ( 2 );
-                if ( sh->tdcid ==0x6500 && sh->channel==1 && SCI_CAL->sci_raw.totalNTDCHits>1 ) {
+                if ( sh->tdcid ==0x6500 && sh->channel==1 && vec_scihits.size() >1 ) {
                     scint = true;
                 } else {
                     scint = false;
@@ -297,24 +305,19 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
                     vec_stthits.clear();
                     double doublehitdiff = 0;
-                    std::vector<SttHit> vec_leadTime_d;
 
-                    for ( Int_t je = 1; je < vec_leadTime.size(); je++ ) {
-                        if ( ( vec_leadTime[je - 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je - 1].channel == vec_leadTime[je].channel ) && ( vec_leadTime[je - 1].leadTime == vec_leadTime[je].leadTime ) ) {
-                          printf("Repeat : %lf  %lf\n",vec_leadTime[je - 1].leadTime,vec_leadTime[je].leadTime);
-                        } else {
-                            if ( je==1 ) {
-                                if ( ( vec_leadTime[je - 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je - 1].channel == vec_leadTime[je].channel ) && ( vec_leadTime[je - 1].leadTime == vec_leadTime[je].leadTime ) ) {
+////////////////////////////////////////////////////////// Multiple entry rejection ///////////////////
+                    if ( vec_leadTime.size() >1 ) {
+                        for ( Int_t je = 0; je < vec_leadTime.size()-1; je++ ) {
+                            if ( ( vec_leadTime[je + 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je + 1].channel == vec_leadTime[je].channel ) && ( vec_leadTime[je + 1].leadTime == vec_leadTime[je].leadTime ) ) {
 
-                                }
-                                else vec_leadTime_d.push_back(vec_leadTime[0]);
+                                vec_leadTime.erase ( vec_leadTime.begin() +je+1 );
                             }
-                            else vec_leadTime_d.push_back(vec_leadTime[je]);
-
                         }
-
                     }
 
+////////////////////////////////////////////////////////// DT 500 ns window /////////////////////////////////////////
+                    std::vector<SttHit> vec_leadTime_e;
                     int MultLayer[8];
                     int ChHitsMult[8][32];
                     for ( int la = 0; la < 8; la++ ) {
@@ -323,15 +326,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             ChHitsMult[la][ma] = 0;
                         }
                     }
-
-                    for ( int jx=0; jx<vec_leadTime_d.size() ; jx++ ) {
-                        if ( vec_leadTime_d[jx].leadTime - sh->leadTime >0 && vec_leadTime_d[jx].leadTime - sh->leadTime <500 ) {
-                            h->h_pL_layerDT[vec_leadTime_d[jx].layer-1]->Fill ( vec_leadTime_d[jx].leadTime - sh->leadTime );
-                            h->h_pL_TOT[vec_leadTime_d[jx].layer-1]->Fill ( vec_leadTime_d[jx].tot );
-                            h->h_pL_dtvstot[vec_leadTime_d[jx].layer-1]->Fill ( vec_leadTime_d[jx].leadTime - sh->leadTime,vec_leadTime_d[jx].tot );
-                            MultLayer[vec_leadTime_d[jx].layer-1]++;
-                            ChHitsMult[vec_leadTime_d[jx].layer-1][vec_leadTime_d[jx].straw-1]++;
-                            printf ( "STRAW: %i  %i  %lf \n",vec_leadTime_d[jx].layer,vec_leadTime_d[jx].straw,vec_leadTime_d[jx].leadTime );
+                    for ( int jx=0; jx<vec_leadTime.size() ; jx++ ) {
+                        if ( vec_leadTime[jx].leadTime - sh->leadTime >0 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
+                            h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
+                            h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
+                            h->h_pL_dtvstot[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
+                            MultLayer[vec_leadTime[jx].layer-1]++;
+                            ChHitsMult[vec_leadTime[jx].layer-1][vec_leadTime[jx].straw-1]++;
+                            vec_leadTime_e.push_back ( vec_leadTime[jx] );
+                            //printf ( "STRAW: %i  %i  %lf \n",vec_leadTime_d[jx].layer,vec_leadTime_d[jx].straw,vec_leadTime_d[jx].leadTime );
                         } else {
                             //vec_leadTime_d.erase ( vec_leadTime_d.begin() + jx );
                         }
@@ -346,71 +349,105 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         for ( int ba=0; ba<32; ba++ ) {
                             if ( ChHitsMult[aa][ba] >0 ) {
                                 h->h_pL_channel_mult[aa]->Fill ( ba,ChHitsMult[aa][ba] );    //Fill(b,dtHitsMult[a][b]);
-                                cout<<aa+1<<"\t"<<ba+1<<"\t"<<ChHitsMult[aa][ba]<<endl;
+                                //cout<<aa+1<<"\t"<<ba+1<<"\t"<<ChHitsMult[aa][ba]<<endl;
                             }
                         }
                     }
 
+////////////////////////////////////Rejection of double hits <500ns in a channel//////////////////////////////
+                    //cout<<"First : "<<vec_leadTime_e.size() <<endl;
+                    std::vector<SttHit> vec_leadTime_f;
+                    if ( vec_leadTime_e.size() >1 ) {
+                        for ( Int_t je = 0; je < vec_leadTime_e.size()-1; je++ ) {
+                          printf("ONE : %i  %i  %lf\n",vec_leadTime_e[je].layer,vec_leadTime_e[je].channel,vec_leadTime_e[je].leadTime);
+                            if ( ( vec_leadTime_e[je + 1].layer ) == ( vec_leadTime_e[je].layer ) && ( vec_leadTime_e[je+1].channel == vec_leadTime_e[je].channel ) && fabs( vec_leadTime_e[je + 1].leadTime - vec_leadTime_e[je].leadTime)   <=500) {
 
-
-
-                    ////////////////////////////////////Rejection of double hits in a channel//////////////////////////////
-
-                    for ( Int_t je = 0; je < vec_leadTime.size() - 1; je++ ) {
-                        if ( ( vec_leadTime[je + 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je + 1].channel == vec_leadTime[je].channel ) ) {
-                            doublehitdiff = fabs ( vec_leadTime[je].leadTime - vec_leadTime[je + 1].leadTime );
-                            if ( doublehitdiff <= 500 ) {
-                                vec_leadTime.erase ( vec_leadTime.begin() + je + 1 );
+                                vec_leadTime_e.erase ( vec_leadTime_e.begin() +je+1 );
                                 --je;
-                                if ( doublehitdiff > 0 ) {
-                                    repeat++;
-                                    //printf ( "(FH: %x ch: %i LT: %lf)  (SH: %x ch: %i LT: %lf)  Diff: %lf  \n",vec_leadTime[je].tdcid,vec_leadTime[je].channel,vec_leadTime[je].leadTime,vec_leadTime[je+1].tdcid,vec_leadTime[je+1].channel, vec_leadTime[je + 1].leadTime,doublehitdiff );
-//                                     h_STT_Hit_Diff->Fill ( doublehitdiff );
-                                }
+                                cout<<"REJECT THIS *********"<<fabs( vec_leadTime_e[je + 1].leadTime - vec_leadTime_e[je].leadTime  )<<endl;
                             }
                         }
-                        All_repeat++;
-                    }
-
-
-                    h->h_hitmultiplicity3->Fill ( vec_leadTime.size() );
-
-                    for ( Int_t jc = 0; jc < vec_leadTime.size(); jc++ ) {
-
-
 
                     }
+                    //cout<<"Next : "<<vec_leadTime_e.size() <<endl<<endl<<endl;;
 
+                    h->h_hitmultiplicity3->Fill ( vec_leadTime_e.size() );
+
+                    int MultLayer2[8];
+                    int ChHitsMult2[8][32];
+                    for ( int lb = 0; lb < 8; lb++ ) {
+                        MultLayer2[lb] = 0;
+                        for ( int mb =0; mb< 32; mb++ ) {
+                            ChHitsMult2[lb][mb] = 0;
+                        }
+                    }
+
+                    std::vector<SttHit> vec_L5S9;
+
+                    for ( Int_t jc = 0; jc < vec_leadTime_e.size(); jc++ ) {
+                      printf("TWO : %i  %i  %lf\n",vec_leadTime_e[jc].layer,vec_leadTime_e[jc].channel,vec_leadTime_e[jc].leadTime);
+                        h->h_L_layerDT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime );
+                        h->h_L_TOT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].tot );
+                        h->h_L_dtvstot[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime,vec_leadTime_e[jc].tot );
+
+                        MultLayer2[vec_leadTime_e[jc].layer-1]++;
+                        ChHitsMult2[vec_leadTime_e[jc].layer-1][vec_leadTime_e[jc].straw-1]++;
+                        if ( vec_leadTime_e[jc].layer == 5 && vec_leadTime_e[jc].straw==9 ) {
+                            vec_L5S9.push_back ( vec_leadTime_e[jc] );
+                        }
+
+                    }
+                    int mult2 = 0;
+                    for ( int ab=0; ab<8; ab++ ) {
+                        if ( MultLayer2[ab]> 0 ) {
+                            mult2++;
+                        }
+                        //printf("dt multiplicity%i \n",dtHitsMult[a]);
+                        for ( int bb=0; bb<32; bb++ ) {
+                            if ( ChHitsMult2[ab][bb] >0 ) {
+                                h->h_L_channel_mult[ab]->Fill ( bb,ChHitsMult2[ab][bb] );    //Fill(b,dtHitsMult[a][b]);
+                                //cout<<aa+1<<"\t"<<ba+1<<"\t"<<ChHitsMult[aa][ba]<<endl;
+                            }
+                        }
+                    }
+
+                    if ( vec_L5S9.size() >1 ) {
+                        for ( int L=0; L<vec_L5S9.size()-1; L++ ) {
+                            h->h_L5_S9LTdiff->Fill ( vec_L5S9[L+1].leadTime - vec_L5S9[L].leadTime );
+                            cout<<vec_L5S9.size()<<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
+                        }
+                    }
+cout<<endl<<endl;
                     //cout<<stt<<scint<<endl;
+                    /*
+                                        if ( stt == true && scint==true ) {
 
-                    if ( stt == true && scint==true ) {
+                                            if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
+                                                vec_stthits.clear();
 
-                        if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
-                            vec_stthits.clear();
+                                                for ( int e = 0; e < vec_leadTime.size(); e++ ) {
+                    //                             printf ( "diff %lf\n",vec_leadTime[e].leadTime - sh->leadTime );
+                                                    //printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e].leadTime,sh->leadTime,vec_leadTime[e].leadTime - sh->leadTime,vec_leadTime[e].tdcid,vec_leadTime[e].layer,vec_leadTime[e].channel,vec_leadTime[e].straw,sh->channel );
 
-                            for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-//                             printf ( "diff %lf\n",vec_leadTime[e].leadTime - sh->leadTime );
-                                //printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e].leadTime,sh->leadTime,vec_leadTime[e].leadTime - sh->leadTime,vec_leadTime[e].tdcid,vec_leadTime[e].layer,vec_leadTime[e].channel,vec_leadTime[e].straw,sh->channel );
+                                                    if ( ( vec_leadTime[e].leadTime - sh->leadTime >0 ) && ( vec_leadTime[e].leadTime - sh->leadTime <220 ) ) {
 
-                                if ( ( vec_leadTime[e].leadTime - sh->leadTime >0 ) && ( vec_leadTime[e].leadTime - sh->leadTime <220 ) ) {
+                                                        //printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e].leadTime,sh->leadTime,vec_leadTime[e].leadTime - sh->leadTime,vec_leadTime[e].tdcid,vec_leadTime[e].layer,vec_leadTime[e].channel,vec_leadTime[e].straw,sh->channel );
+                                                        SttHit& s = vec_leadTime.at ( e );
+                                                        s.drifttime = ( vec_leadTime[e].leadTime - sh->leadTime );
+                                                        vec_stthits.push_back ( s );
+                                                    }
+                                                }
 
-                                    //printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e].leadTime,sh->leadTime,vec_leadTime[e].leadTime - sh->leadTime,vec_leadTime[e].tdcid,vec_leadTime[e].layer,vec_leadTime[e].channel,vec_leadTime[e].straw,sh->channel );
-                                    SttHit& s = vec_leadTime.at ( e );
-                                    s.drifttime = ( vec_leadTime[e].leadTime - sh->leadTime );
-                                    vec_stthits.push_back ( s );
-                                }
-                            }
-
-                        }
-                    }
-                    cout<<"\n\n";
-                    h->h_cluster_size->Fill ( vec_stthits.size() );
+                                            }
+                                        }
+                                        //cout<<"\n\n";
+                                        h->h_cluster_size->Fill ( vec_stthits.size() );
 
 
-                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake ) {
-                        //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                        h->h_hitmultiplicity4->Fill ( vec_stthits.size() );
-                    }
+                                        if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake ) {
+                                            //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                                            h->h_hitmultiplicity4->Fill ( vec_stthits.size() );
+                                        }*/
 
                     /* if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
                          const int minNumber = min_track_hits;
@@ -530,7 +567,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_drifttimeTRB2->Write();
     h->h_p_drifttimevstot->Write();
     h->h_p_drifttime->Write();
-
+    h->h_scint_timediffa->Write();
+    h->h_scint_timediffb->Write();
+    h->h_L5_S9LTdiff->Write();
 
 
     for ( int hh = 0; hh < 8; hh++ ) {
@@ -577,6 +616,7 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
 
 
 
