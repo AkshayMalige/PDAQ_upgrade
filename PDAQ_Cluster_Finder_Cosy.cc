@@ -40,6 +40,36 @@ std::vector<SciHit*> ex_Scint_pileup ( std::vector<SciHit*> B )
     return B;
 }
 
+std::vector<SttHit> ex_Stt_double ( std::vector<SttHit> B )
+{
+    int diff_limit = 500;
+
+    if ( B.size() >2 ) {
+        for ( int aa=0; aa< B.size()-1; aa++ ) {
+            //printf("%lf %lf \n",B[aa+1]->leadTime - B[aa]->leadTime, B[aa]->leadTime - B[aa-1]->leadTime);
+            if ( aa ==0 ) {
+                if ( B[aa+1].layer==B[aa].layer && B[aa+1].straw==B[aa].straw && fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) ) <=diff_limit || fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) )==0) {
+                    B.erase ( B.begin() +aa+1 );
+                    --aa;
+                }
+
+            } else if ( aa >=1 ) {
+                if ( B[aa+1].layer==B[aa].layer && B[aa+1].straw==B[aa].straw && fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) ) <=diff_limit || fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) )==0 ) {
+                    B.erase ( B.begin() +aa+1 );
+                    --aa;
+                }
+            }
+        }
+    } else {
+        if ( B.size() ==2 ) {
+            if ( B[1].layer==B[0].layer && B[1].straw==B[0].straw && fabs ( fabs ( B[1].leadTime ) - fabs ( B[0].leadTime ) ) <=diff_limit  || fabs ( fabs ( B[1].leadTime ) - fabs ( B[0].leadTime ) )==0) {
+                B.erase ( B.begin() +1 );
+            }
+        }
+    }
+    return B;
+}
+
 int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 {
 
@@ -312,6 +342,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             if ( ( vec_leadTime[je + 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je + 1].channel == vec_leadTime[je].channel ) && ( vec_leadTime[je + 1].leadTime == vec_leadTime[je].leadTime ) ) {
 
                                 vec_leadTime.erase ( vec_leadTime.begin() +je+1 );
+                                --je;
                             }
                         }
                     }
@@ -354,24 +385,22 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
 
-////////////////////////////////////Rejection of double hits <500ns in a channel//////////////////////////////
                     //cout<<"First : "<<vec_leadTime_e.size() <<endl;
-                    std::vector<SttHit> vec_leadTime_f;
-                    if ( vec_leadTime_e.size() >1 ) {
-                        for ( Int_t je = 0; je < vec_leadTime_e.size()-1; je++ ) {
-                          printf("ONE : %i  %i  %lf\n",vec_leadTime_e[je].layer,vec_leadTime_e[je].channel,vec_leadTime_e[je].leadTime);
-                            if ( ( vec_leadTime_e[je + 1].layer ) == ( vec_leadTime_e[je].layer ) && ( vec_leadTime_e[je+1].channel == vec_leadTime_e[je].channel ) && fabs( vec_leadTime_e[je + 1].leadTime - vec_leadTime_e[je].leadTime)   <=500) {
-
-                                vec_leadTime_e.erase ( vec_leadTime_e.begin() +je+1 );
-                                --je;
-                                cout<<"REJECT THIS *********"<<fabs( vec_leadTime_e[je + 1].leadTime - vec_leadTime_e[je].leadTime  )<<endl;
-                            }
-                        }
-
+                    std::vector<SttHit> vec_channel_hit;
+                    std::vector<std::vector<SttHit>> vec_layer_channel_hit;
+                    for ( Int_t jc = 0; jc < vec_leadTime_e.size(); jc++ ) {
+                        printf ( "ONE : %i  %i  %lf\n",vec_leadTime_e[jc].layer,vec_leadTime_e[jc].channel,vec_leadTime_e[jc].leadTime );
+                        h->h_L_layerDT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime );
+                        h->h_L_TOT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].tot );
+                        h->h_L_dtvstot[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime,vec_leadTime_e[jc].tot );
                     }
+
+
+                    std::vector<SttHit> vec_leadTime_f;
+                    vec_leadTime_f=ex_Stt_double ( vec_leadTime_e );
                     //cout<<"Next : "<<vec_leadTime_e.size() <<endl<<endl<<endl;;
 
-                    h->h_hitmultiplicity3->Fill ( vec_leadTime_e.size() );
+                    h->h_hitmultiplicity3->Fill ( vec_leadTime_f.size() );
 
                     int MultLayer2[8];
                     int ChHitsMult2[8][32];
@@ -383,17 +412,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     std::vector<SttHit> vec_L5S9;
+                    //cout<<vec_leadTime_e.size() <<"\t"<<vec_leadTime_f.size() <<endl;
+                    for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
+                        printf ( "TWO : %i  %i  %lf\n",vec_leadTime_f[jc].layer,vec_leadTime_f[jc].channel,vec_leadTime_f[jc].leadTime );
+                        h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
+                        h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
+                        h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
 
-                    for ( Int_t jc = 0; jc < vec_leadTime_e.size(); jc++ ) {
-                      printf("TWO : %i  %i  %lf\n",vec_leadTime_e[jc].layer,vec_leadTime_e[jc].channel,vec_leadTime_e[jc].leadTime);
-                        h->h_L_layerDT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime );
-                        h->h_L_TOT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].tot );
-                        h->h_L_dtvstot[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime,vec_leadTime_e[jc].tot );
-
-                        MultLayer2[vec_leadTime_e[jc].layer-1]++;
-                        ChHitsMult2[vec_leadTime_e[jc].layer-1][vec_leadTime_e[jc].straw-1]++;
-                        if ( vec_leadTime_e[jc].layer == 5 && vec_leadTime_e[jc].straw==9 ) {
-                            vec_L5S9.push_back ( vec_leadTime_e[jc] );
+                        MultLayer2[vec_leadTime_f[jc].layer-1]++;
+                        ChHitsMult2[vec_leadTime_f[jc].layer-1][vec_leadTime_f[jc].straw-1]++;
+                        if ( vec_leadTime_f[jc].layer == 5 && vec_leadTime_f[jc].straw==9 ) {
+                            vec_L5S9.push_back ( vec_leadTime_f[jc] );
                         }
 
                     }
@@ -414,10 +443,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     if ( vec_L5S9.size() >1 ) {
                         for ( int L=0; L<vec_L5S9.size()-1; L++ ) {
                             h->h_L5_S9LTdiff->Fill ( vec_L5S9[L+1].leadTime - vec_L5S9[L].leadTime );
-                            cout<<vec_L5S9.size()<<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
+                            cout<<vec_L5S9.size() <<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
                         }
                     }
-cout<<endl<<endl;
+                    //cout<<endl<<endl;
                     //cout<<stt<<scint<<endl;
                     /*
                                         if ( stt == true && scint==true ) {
@@ -616,6 +645,12 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
+
+
+
+
+
 
 
 

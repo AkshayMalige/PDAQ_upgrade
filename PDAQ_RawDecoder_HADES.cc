@@ -208,6 +208,8 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
     double doubleCntr = 0;
     double doubleCntr1 = 0;
+    
+    int prev_time=0;
 
     while ( !in_file.eof() ) {
 
@@ -339,7 +341,11 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                     if ( edge == 1 && (fabs(time-refTime)<100000)) { // rising edge
 
                                         lastRise = time;
-
+                                        
+                                         // if (prev_time- lastRise ==0){
+                                          printf("%lf \n",lastRise);//}
+                                          
+                                          prev_time = time;
 
                                         if ( lastRise-refTime <=100000 ) {
                                             h_currpt->Fill ( 1 );
