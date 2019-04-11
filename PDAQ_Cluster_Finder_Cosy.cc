@@ -2,42 +2,66 @@
 
 using namespace std;
 
-std::vector<SciHit*> ex_Scint_pileup ( std::vector<SciHit*> B )
+std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
 {
-    //std::vector<SciHit*> B;
-    std::vector<SciHit*> C;
-    int scint_diff_limit = 200;
+    std::vector<SciHit*> B;
 
+    int scint_diff_limit = 300;
+
+    int hit =0;
+
+    SciHit* l =0;
+    SciHit* l2=0;
+    SciHit* l3=0;
     bool scint =false;
+    //cout<<"SIZE "<<SCI_CAL->sci_raw.totalNTDCHits<<endl;
+    if ( SCI_CAL->sci_raw.totalNTDCHits>2 ) {
+        for ( int a=0; a< SCI_CAL->sci_raw.totalNTDCHits-1; a++ ) {
 
-    if ( B.size() >2 ) {
-        for ( int aa=0; aa< B.size()-1; aa++ ) {
-            //printf("%lf %lf \n",B[aa+1]->leadTime - B[aa]->leadTime, B[aa]->leadTime - B[aa-1]->leadTime);
-            if ( aa ==0 ) {
-                if ( B[aa+1]->leadTime - B[aa]->leadTime >=scint_diff_limit ) {}
-                else {
-                    B.erase ( B.begin() +aa+1 );
-                    //cout<<B.size() <<endl;
-                    --aa;
+            SciHit* l2 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a );
+            SciHit* l3 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a +1 );
+            if ( a >=1 ) {
+                SciHit* l = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a -1 );
+                if ( a==SCI_CAL->sci_raw.totalNTDCHits-2 ) {
+                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+                        B.push_back ( l2 );
+                        B.push_back ( l3 );
+                    } else if ( ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+                        B.push_back ( l3 );
+                    }
+                } else {
+                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+                        B.push_back ( l2 );
+                    }
                 }
-            } else if ( aa >=1 ) {
-                if ( B[aa+1]->leadTime - B[aa]->leadTime >=scint_diff_limit && B[aa]->leadTime - B[aa-1]->leadTime >=scint_diff_limit ) {}
-                else {
-                    B.erase ( B.begin() +aa+1 );
-                    //cout<<B.size() <<endl;
-                    --aa;
-                }
+
+            } else if ( a==0 && l3->leadTime-l2->leadTime >=scint_diff_limit ) {
+                B.push_back ( l2 );
             }
+
         }
     } else {
-        if ( B.size() ==2 ) {
-            if ( B[1]->leadTime - B[0]->leadTime >=scint_diff_limit ) {}
-            else {
-                B.erase ( B.begin() +1 );
+        if ( SCI_CAL->sci_raw.totalNTDCHits==1 ) {
+            B.push_back ( ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 0 ) );
+        }
+
+
+        if ( SCI_CAL->sci_raw.totalNTDCHits==2 ) {
+            SciHit* h1 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 0 );
+            SciHit* h2 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 1 );
+            if ( ( h2->leadTime - h1->leadTime ) >=scint_diff_limit ) {
+                B.push_back ( h1 );
+                B.push_back ( h2 );
+            } else {
+                B.push_back ( h1 );
             }
         }
     }
+
+
+
     return B;
+
 }
 
 std::vector<SttHit> ex_Stt_double ( std::vector<std::vector<SttHit>> vec_layer_channel_hit )
@@ -53,13 +77,13 @@ std::vector<SttHit> ex_Stt_double ( std::vector<std::vector<SttHit>> vec_layer_c
             for ( int aa=0; aa< B.size()-1; aa++ ) {
                 //printf("%lf %lf \n",B[aa+1]->leadTime - B[aa]->leadTime, B[aa]->leadTime - B[aa-1]->leadTime);
                 if ( aa ==0 ) {
-                    if ( B[aa+1].layer==B[aa].layer && B[aa+1].straw==B[aa].straw && fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) ) <=diff_limit ||  B[aa+1].leadTime  ==  B[aa].leadTime ) {
+                    if ( ( B[aa+1].layer==B[aa].layer && B[aa+1].straw==B[aa].straw && fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) ) <=diff_limit ) ||  B[aa+1].leadTime  ==  B[aa].leadTime ) {
                         B.erase ( B.begin() +aa+1 );
                         --aa;
                     }
 
                 } else if ( aa >=1 ) {
-                    if ( B[aa+1].layer==B[aa].layer && B[aa+1].straw==B[aa].straw && fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) ) <=diff_limit || B[aa+1].leadTime  ==  B[aa].leadTime ) {
+                    if ( ( B[aa+1].layer==B[aa].layer && B[aa+1].straw==B[aa].straw && fabs ( fabs ( B[aa+1].leadTime ) - fabs ( B[aa].leadTime ) ) <=diff_limit ) || B[aa+1].leadTime  ==  B[aa].leadTime ) {
                         B.erase ( B.begin() +aa+1 );
                         --aa;
                     }
@@ -67,7 +91,7 @@ std::vector<SttHit> ex_Stt_double ( std::vector<std::vector<SttHit>> vec_layer_c
             }
         } else {
             if ( B.size() ==2 ) {
-                if ( B[1].layer==B[0].layer && B[1].straw==B[0].straw && fabs ( fabs ( B[1].leadTime ) - fabs ( B[0].leadTime ) ) <=diff_limit  || B[1].leadTime  ==  B[0].leadTime ) {
+                if ( ( B[1].layer==B[0].layer && B[1].straw==B[0].straw && fabs ( fabs ( B[1].leadTime ) - fabs ( B[0].leadTime ) ) <=diff_limit ) || B[1].leadTime  ==  B[0].leadTime ) {
                     B.erase ( B.begin() +1 );
                 }
             }
@@ -172,12 +196,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int mh = 0; mh < 8; mh++ ) {
         h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa", mh+1 ), 600, -100, 500 );
-        h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time;Time Over Threshold",mh+1 ), 560, -10, 550,550,0,550 );
+        h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time;Time Over Threshold",mh+1 ), 560, -10, 550,700,0,700 );
         h->h_pL_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTa", mh+1 ) , Form ( "Layer_%d_TOTa", mh+1 ), 600, -100, 500 );
         h->h_pL_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multa", mh+1 ) , Form ( "Layer_%d_multa;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
         h->h_L_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTb", mh+1 ) , Form ( "Layer_%d_DTb", mh+1 ), 600, -100, 500 );
-        h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 560, -10, 550,550,0,550 );
+        h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 560, -10, 550,700,0,700 );
         h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb", mh+1 ), 600, -100, 500 );
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
@@ -256,14 +280,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         //if (STT_CAL->SCI_CAL->sci_raw.totalNTDCHits>0){
 
 
-        if ( B.size() >0 ) {
+        if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
 
 
-            vec_scihits =  ex_Scint_pileup ( B ) ;
+            vec_scihits =  ex_Scint_pileup ( SCI_CAL ) ;
 
 
             if ( vec_scihits.size() >=2 ) {
                 for ( int a=0; a< vec_scihits.size()-1; a++ ) {
+                    //if
                     h->h_scint_timediffb->Fill ( vec_scihits[a+1]->leadTime - vec_scihits[a]->leadTime );
                 }
             }
@@ -390,6 +415,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         if ( MultLayer[aa]> 0 ) {
                             mult++;
                         }
+                        h->h_pLayerMult->Fill ( aa,MultLayer[aa] );
                         //printf("dt multiplicity%i \n",dtHitsMult[a]);
                         for ( int ba=0; ba<32; ba++ ) {
                             if ( ChHitsMult[aa][ba] >0 ) {
@@ -404,10 +430,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     std::vector<std::vector<SttHit>> vec_layer_channel_hit;
                     std::vector<SttHit> vec_p_L5S9;
                     for ( Int_t jc = 0; jc < vec_leadTime_e.size(); jc++ ) {
-                        //printf ( "ONE : %i  %i  %lf\n",vec_leadTime_e[jc].layer,vec_leadTime_e[jc].channel,vec_leadTime_e[jc].leadTime );
-                        h->h_L_layerDT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime );
-                        h->h_L_TOT[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].tot );
-                        h->h_L_dtvstot[vec_leadTime_e[jc].layer-1]->Fill ( vec_leadTime_e[jc].leadTime - sh->leadTime,vec_leadTime_e[jc].tot );
+
                         if ( vec_leadTime_e[jc].layer == 5 && vec_leadTime_e[jc].straw==9 ) {
                             vec_p_L5S9.push_back ( vec_leadTime_e[jc] );
                         }
@@ -437,7 +460,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                     std::vector<SttHit> vec_leadTime_f;
                     vec_leadTime_f=ex_Stt_double ( vec_layer_channel_hit );
-                    //cout<<"Next : "<<vec_leadTime_e.size() <<endl<<endl<<endl;;
+                    //cout<<"Next : "<<vec_leadTime_e.size() <<endl;
 
                     h->h_hitmultiplicity3->Fill ( vec_leadTime_f.size() );
 
@@ -470,6 +493,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         if ( MultLayer2[ab]> 0 ) {
                             mult2++;
                         }
+                        h->h_pLayerMult->Fill ( ab,MultLayer2[ab] );
                         //printf("dt multiplicity%i \n",dtHitsMult[a]);
                         for ( int bb=0; bb<32; bb++ ) {
                             if ( ChHitsMult2[ab][bb] >0 ) {
@@ -639,7 +663,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_scint_timediffb->Write();
     h->h_L5_S9LTdiff->Write();
     h->h_pL5_S9LTdiff->Write();
-
+    h->h_pLayerMult->Write();
+    h->h_LayerMult->Write();
     for ( int hh = 0; hh < 8; hh++ ) {
         h->h_pL_layerDT[hh]->Write();
         h->h_pL_dtvstot[hh]->Write();
