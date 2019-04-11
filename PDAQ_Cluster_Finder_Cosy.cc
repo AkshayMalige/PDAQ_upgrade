@@ -117,6 +117,31 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     histograms* h = new histograms();
 
+    TCanvas * DT; //Canvas for ToT
+    DT=new TCanvas ( "DT_Canvas","DT_Canvas" );
+    DT->Divide ( 4,2 );
+
+    TCanvas * TOT; //Canvas for ToT
+    TOT=new TCanvas ( "TOT_Canvas","TOT_Canvas" );
+    TOT->Divide ( 4,2 );
+
+    TCanvas * pDTvsTOT; //Canvas for ToT
+    pDTvsTOT=new TCanvas ( "pDTvsTOT_Canvas","pDTvsTOT_Canvas" );
+    pDTvsTOT->Divide ( 4,2 );
+
+    TCanvas * DTvsTOT; //Canvas for ToT
+    DTvsTOT=new TCanvas ( "DTvsTOT_Canvas","DTvsTOT_Canvas" );
+    DTvsTOT->Divide ( 4,2 );
+    
+    TCanvas * pChMult; //Canvas for ToT
+    pChMult=new TCanvas ( "pChMult_Canvas","pChMult_Canvas" );
+    pChMult->Divide ( 4,2 );
+    
+    TCanvas * ChMult; //Canvas for ToT
+    ChMult=new TCanvas ( "ChMult_Canvas","ChMult_Canvas" );
+    ChMult->Divide ( 4,2 );
+
+
     printf ( "%s\n", outtree );
     PandaSttCal* STT_CAL = new PandaSttCal();
     PandaSubsystemSCI* SCI_TRACKS = new PandaSubsystemSCI();
@@ -196,12 +221,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int mh = 0; mh < 8; mh++ ) {
         h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa", mh+1 ), 600, -100, 500 );
-        h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time;Time Over Threshold",mh+1 ), 560, -10, 550,700,0,700 );
+        h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time;Time Over Threshold",mh+1 ), 700, 0, 700,700,0,700 );
         h->h_pL_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTa", mh+1 ) , Form ( "Layer_%d_TOTa", mh+1 ), 600, -100, 500 );
         h->h_pL_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multa", mh+1 ) , Form ( "Layer_%d_multa;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
         h->h_L_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTb", mh+1 ) , Form ( "Layer_%d_DTb", mh+1 ), 600, -100, 500 );
-        h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 560, -10, 550,700,0,700 );
+        h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 700, 0, 700,700,0,700 );
         h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb", mh+1 ), 600, -100, 500 );
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
@@ -261,12 +286,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             h->h_scint_mult_b->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
         }
 
+        for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
+            h->h_hitBlock->Fill ( 2 );
+        }
+
         std::vector<SciHit*> B;
         B.clear();
         for ( int pn = 0; pn < SCI_CAL->sci_raw.totalNTDCHits; pn++ ) {
             SciHit* b = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( pn );
             B.push_back ( b );
             h->h_scnt_plup_cnts->Fill ( 1 );
+            h->h_hitBlock->Fill ( 0 );
 
         }
 
@@ -299,6 +329,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
                 SciHit* sh = vec_scihits[sn];
                 h->h_scnt_plup_cnts->Fill ( 2 );
+                h->h_hitBlock->Fill ( 1 );
                 if ( sh->tdcid ==0x6500 && sh->channel==1 && vec_scihits.size() >1 ) {
                     scint = true;
                 } else {
@@ -317,6 +348,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     h->h_LTvsLayer0->Fill ( cal_hit->layer, cal_hit->leadTime );
                     h->h_raw_leadtimes->Fill ( cal_hit->leadTime );
                     h->h_tot0->Fill ( cal_hit->tot );
+
 
                     // hit on reference channel
                     if ( cal_hit->isRef == true ) {
@@ -404,6 +436,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             MultLayer[vec_leadTime[jx].layer-1]++;
                             ChHitsMult[vec_leadTime[jx].layer-1][vec_leadTime[jx].straw-1]++;
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
+                            h->h_hitBlock->Fill ( 3 );
                             //printf ( "STRAW: %i  %i  %lf \n",vec_leadTime_d[jx].layer,vec_leadTime_d[jx].straw,vec_leadTime_d[jx].leadTime );
                         } else {
                             //vec_leadTime_d.erase ( vec_leadTime_d.begin() + jx );
@@ -480,6 +513,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
                         h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
+                        h->h_hitBlock->Fill ( 4 );
 
                         MultLayer2[vec_leadTime_f[jc].layer-1]++;
                         ChHitsMult2[vec_leadTime_f[jc].layer-1][vec_leadTime_f[jc].straw-1]++;
@@ -665,6 +699,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_pL5_S9LTdiff->Write();
     h->h_pLayerMult->Write();
     h->h_LayerMult->Write();
+    h->h_hitBlock->Write();
+
+
     for ( int hh = 0; hh < 8; hh++ ) {
         h->h_pL_layerDT[hh]->Write();
         h->h_pL_dtvstot[hh]->Write();
@@ -676,7 +713,36 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_TOT[hh]->Write();
         h->h_L_channel_mult[hh]->Write();
 
+        DT->cd ( hh+1 );
+        h->h_pL_layerDT[hh]->Draw();
+        h->h_L_layerDT[hh]->Draw ( "same" );
+        h->h_L_layerDT[hh]->SetLineColor ( kRed );
+
+        TOT->cd ( hh+1 );
+        h->h_pL_TOT[hh]->Draw();
+        h->h_L_TOT[hh]->Draw ( "same" );
+        h->h_L_TOT[hh]->SetLineColor ( kRed );
+
+        pDTvsTOT->cd ( hh+1 );
+        h->h_pL_dtvstot[hh]->Draw("colz");
+        
+        DTvsTOT->cd ( hh+1 );
+        h->h_L_dtvstot[hh]->Draw("colz");
+        
+        pChMult->cd(hh+1);
+        h->h_pL_channel_mult[hh]->Draw("colz");
+        
+        ChMult->cd(hh+1);
+        h->h_L_channel_mult[hh]->Draw("colz");
+        
+
     }
+
+    DT->Write();
+    pDTvsTOT->Write();
+    DTvsTOT->Write();
+    pChMult->Write();
+    pChMult->Write();
 
 
     PDAQ_tree->Write();

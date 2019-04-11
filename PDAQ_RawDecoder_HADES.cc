@@ -343,7 +343,6 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         lastRise = time;
                                         
                                          // if (prev_time- lastRise ==0){
-                                          printf("%lf \n",lastRise);//}
                                           
                                           prev_time = time;
 
