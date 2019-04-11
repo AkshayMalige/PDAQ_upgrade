@@ -433,6 +433,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
                             h->h_pL_dtvstot[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
+                            h->h_p_drifttime->Fill(vec_leadTime[jx].leadTime - sh->leadTime);
+                            h->h_p_tot->Fill(vec_leadTime[jx].tot);
                             MultLayer[vec_leadTime[jx].layer-1]++;
                             ChHitsMult[vec_leadTime[jx].layer-1][vec_leadTime[jx].straw-1]++;
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
@@ -513,6 +515,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
                         h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
+                        h->h_drifttime->Fill(vec_leadTime_f[jc].leadTime - sh->leadTime);
+                        h->h_tot->Fill(vec_leadTime_f[jc].tot);
                         h->h_hitBlock->Fill ( 4 );
 
                         MultLayer2[vec_leadTime_f[jc].layer-1]++;
@@ -693,6 +697,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_drifttimeTRB2->Write();
     h->h_p_drifttimevstot->Write();
     h->h_p_drifttime->Write();
+    h->h_drifttime->Write();
+    h->h_p_tot->Write();
+    h->h_tot->Write();
     h->h_scint_timediffa->Write();
     h->h_scint_timediffb->Write();
     h->h_L5_S9LTdiff->Write();

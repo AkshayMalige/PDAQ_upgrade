@@ -73,6 +73,10 @@ struct histograms{
     
     TH1F* h_p_drifttime = new TH1F("h_p_drifttime", "h_p_drifttime;Drift Time [ns]", 710, -10,700 );
     TH1F* h_drifttime = new TH1F("h_drifttime", "h_drifttime;Drift Time [ns]", 710, -10,700 );
+  
+    TH1F* h_p_tot = new TH1F("h_p_tot", "h_p_tot;Time Over Threshold [ns]", 710, -10,700 );
+    TH1F* h_tot = new TH1F("h_tot", "h_tot;Time Over Threshold [ns]", 710, -10,700 );
+    
     
     TH2F* h_drifttimevsLayer = new TH2F("h_drifttimevsLayer", "h_drifttimevsLayer;Drift Time [ns];Layer", 360, -10, 350,20,0,10);
     
@@ -139,6 +143,7 @@ bool PDAQ_Event_Finder(VecSttHit vec_stthits, int i,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h);
 
 #endif
+
 
 
 
