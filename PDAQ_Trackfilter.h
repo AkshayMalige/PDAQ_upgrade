@@ -91,6 +91,7 @@ struct histograms{
 
     
     TH1F* h_L5_S9LTdiff = new TH1F("h_L5_S9LTdiff", "h_L5_S9LTdiff;Time diff [ns]", 1100, -100, 1000);
+    TH1F* h_pL5_S9LTdiff = new TH1F("h_pL5_S9LTdiff", "h_pL5_S9LTdiff;Time diff [ns]", 1100, -100, 1000);
     
     TH1F* h_pL_layerDT[8];
     TH2F* h_pL_dtvstot[8];
