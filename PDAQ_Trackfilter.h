@@ -99,8 +99,13 @@ struct histograms{
     
     TH2F* h_pLayerMult = new TH2F("h_pLayerMult", "h_pLayerMult;Layer;Multiplicity", 8, 0, 8,75,0,75);
     TH2F* h_LayerMult = new TH2F("h_LayerMult", "h_LayerMult;Layer;Multiplicity", 8, 0, 8,75,0,75);
+    TH1F* h_0LMultiplicity = new TH1F("h_0LMultiplicity", "h_0LMultiplicity;Multiplicity", 10, 0, 10);
+    TH1F* h_pLMultiplicity = new TH1F("h_pLMultiplicity", "h_pLMultiplicity;Multiplicity", 10, 0, 10);
+    TH1F* h_LMultiplicity = new TH1F("h_LMultiplicity", "h_LMultiplicity;Multiplicity", 10, 0, 10);
     
     TH1F* h_hitBlock = new TH1F("h_hitBlock", "h_hitBlock;Number of hits", 5, 0, 5);
+    
+    TH2F* h_ppL_dtvstot[8];
     
     TH1F* h_pL_layerDT[8];
     TH2F* h_pL_dtvstot[8];

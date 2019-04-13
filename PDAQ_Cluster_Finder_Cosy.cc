@@ -53,7 +53,7 @@ std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
                 B.push_back ( h1 );
                 B.push_back ( h2 );
             } else {
-                B.push_back ( h1 );
+                //B.push_back ( h1 );
             }
         }
     }
@@ -129,6 +129,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     pDTvsTOT=new TCanvas ( "pDTvsTOT_Canvas","pDTvsTOT_Canvas" );
     pDTvsTOT->Divide ( 4,2 );
 
+    
     TCanvas * DTvsTOT; //Canvas for ToT
     DTvsTOT=new TCanvas ( "DTvsTOT_Canvas","DTvsTOT_Canvas" );
     DTvsTOT->Divide ( 4,2 );
@@ -229,6 +230,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 700, 0, 700,700,0,700 );
         h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb", mh+1 ), 600, -100, 500 );
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
+        
+       
 
     }
 
@@ -245,6 +248,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     double repeat = 0;
     double All_repeat = 0;
+    int scint_event =0;
 
     SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][5000];
 
@@ -260,7 +264,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         bool scint = false;
         bool stt = false;
 
-        if ( i == maxEvents ) {
+        if ( /*i*/scint_event >= maxEvents ) {
             break;
         }
 
@@ -327,6 +331,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             h->h_scint_mult_a->Fill ( vec_scihits.size() );
             //printf("\nSIZE : %i\n",vec_scihits.size());
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
+                scint_event++;
                 SciHit* sh = vec_scihits[sn];
                 h->h_scnt_plup_cnts->Fill ( 2 );
                 h->h_hitBlock->Fill ( 1 );
@@ -381,6 +386,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         layerCounter++;
                     }
                 }
+                h->h_0LMultiplicity->Fill(layerCounter);
 //                cout<<"check6"<<endl;
 
                 if ( layerCounter >0/*== MAX_FT_TOTAL_LAYERS*/ ) {
@@ -429,6 +435,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
                     for ( int jx=0; jx<vec_leadTime.size() ; jx++ ) {
+                         
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >0 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
@@ -459,6 +466,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             }
                         }
                     }
+                    h->h_pLMultiplicity->Fill(mult);
 
                     //cout<<"First : "<<vec_leadTime_e.size() <<endl;
                     std::vector<SttHit> vec_channel_hit;
@@ -531,8 +539,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         if ( MultLayer2[ab]> 0 ) {
                             mult2++;
                         }
-                        h->h_pLayerMult->Fill ( ab,MultLayer2[ab] );
-                        //printf("dt multiplicity%i \n",dtHitsMult[a]);
+                        h->h_LayerMult->Fill ( ab,MultLayer2[ab] );
+                        //printf("dt multiplicity%i \n",MultLayer2[ab]);
                         for ( int bb=0; bb<32; bb++ ) {
                             if ( ChHitsMult2[ab][bb] >0 ) {
                                 h->h_L_channel_mult[ab]->Fill ( bb,ChHitsMult2[ab][bb] );    //Fill(b,dtHitsMult[a][b]);
@@ -540,6 +548,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             }
                         }
                     }
+                    h->h_LMultiplicity->Fill(mult2);
 
                     if ( vec_L5S9.size() >1 ) {
                         for ( int L=0; L<vec_L5S9.size()-1; L++ ) {
@@ -707,6 +716,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_pLayerMult->Write();
     h->h_LayerMult->Write();
     h->h_hitBlock->Write();
+    h->h_0LMultiplicity->Write();
+    h->h_pLMultiplicity->Write();
+    h->h_LMultiplicity->Write();
 
 
     for ( int hh = 0; hh < 8; hh++ ) {
@@ -722,12 +734,16 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         DT->cd ( hh+1 );
         h->h_pL_layerDT[hh]->Draw();
+        h->h_pL_layerDT[hh]->SetLineWidth ( 2 );
         h->h_L_layerDT[hh]->Draw ( "same" );
+        h->h_L_layerDT[hh]->SetLineWidth ( 2 );
         h->h_L_layerDT[hh]->SetLineColor ( kRed );
 
         TOT->cd ( hh+1 );
         h->h_pL_TOT[hh]->Draw();
+        h->h_pL_TOT[hh]->SetLineWidth ( 2 );
         h->h_L_TOT[hh]->Draw ( "same" );
+        h->h_L_TOT[hh]->SetLineWidth ( 2 );
         h->h_L_TOT[hh]->SetLineColor ( kRed );
 
         pDTvsTOT->cd ( hh+1 );
@@ -742,14 +758,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         ChMult->cd(hh+1);
         h->h_L_channel_mult[hh]->Draw("colz");
         
-
     }
 
     DT->Write();
+    TOT->Write();
     pDTvsTOT->Write();
     DTvsTOT->Write();
     pChMult->Write();
-    pChMult->Write();
+    ChMult->Write();
 
 
     PDAQ_tree->Write();
