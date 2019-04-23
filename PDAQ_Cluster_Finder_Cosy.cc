@@ -129,15 +129,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     pDTvsTOT=new TCanvas ( "pDTvsTOT_Canvas","pDTvsTOT_Canvas" );
     pDTvsTOT->Divide ( 4,2 );
 
-    
+
     TCanvas * DTvsTOT; //Canvas for ToT
     DTvsTOT=new TCanvas ( "DTvsTOT_Canvas","DTvsTOT_Canvas" );
     DTvsTOT->Divide ( 4,2 );
-    
+
     TCanvas * pChMult; //Canvas for ToT
     pChMult=new TCanvas ( "pChMult_Canvas","pChMult_Canvas" );
     pChMult->Divide ( 4,2 );
-    
+
     TCanvas * ChMult; //Canvas for ToT
     ChMult=new TCanvas ( "ChMult_Canvas","ChMult_Canvas" );
     ChMult->Divide ( 4,2 );
@@ -230,8 +230,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 700, 0, 700,700,0,700 );
         h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb", mh+1 ), 600, -100, 500 );
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
-        
-       
+
+
 
     }
 
@@ -386,7 +386,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         layerCounter++;
                     }
                 }
-                h->h_0LMultiplicity->Fill(layerCounter);
+                h->h_0LMultiplicity->Fill ( layerCounter );
 //                cout<<"check6"<<endl;
 
                 if ( layerCounter >0/*== MAX_FT_TOTAL_LAYERS*/ ) {
@@ -410,7 +410,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
-                    vec_stthits.clear();
                     double doublehitdiff = 0;
 
 ////////////////////////////////////////////////////////// Multiple entry rejection ///////////////////
@@ -435,13 +434,13 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
                     for ( int jx=0; jx<vec_leadTime.size() ; jx++ ) {
-                         
-                        if ( vec_leadTime[jx].leadTime - sh->leadTime >0 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
+
+                        if ( /*vec_leadTime[jx].leadTime - sh->leadTime >0 &&*/ vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
                             h->h_pL_dtvstot[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
-                            h->h_p_drifttime->Fill(vec_leadTime[jx].leadTime - sh->leadTime);
-                            h->h_p_tot->Fill(vec_leadTime[jx].tot);
+                            h->h_p_drifttime->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
+                            h->h_p_tot->Fill ( vec_leadTime[jx].tot );
                             MultLayer[vec_leadTime[jx].layer-1]++;
                             ChHitsMult[vec_leadTime[jx].layer-1][vec_leadTime[jx].straw-1]++;
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
@@ -466,7 +465,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             }
                         }
                     }
-                    h->h_pLMultiplicity->Fill(mult);
+                    h->h_pLMultiplicity->Fill ( mult );
 
                     //cout<<"First : "<<vec_leadTime_e.size() <<endl;
                     std::vector<SttHit> vec_channel_hit;
@@ -517,14 +516,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     std::vector<SttHit> vec_L5S9;
+                    vec_stthits.clear();
                     //cout<<vec_leadTime_e.size() <<"\t"<<vec_leadTime_f.size() <<endl;
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
                         // printf ( "TWO : %i  %i  %lf\n",vec_leadTime_f[jc].layer,vec_leadTime_f[jc].channel,vec_leadTime_f[jc].leadTime );
                         h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
                         h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
-                        h->h_drifttime->Fill(vec_leadTime_f[jc].leadTime - sh->leadTime);
-                        h->h_tot->Fill(vec_leadTime_f[jc].tot);
+                        h->h_drifttime->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
+                        h->h_tot->Fill ( vec_leadTime_f[jc].tot );
                         h->h_hitBlock->Fill ( 4 );
 
                         MultLayer2[vec_leadTime_f[jc].layer-1]++;
@@ -548,7 +548,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             }
                         }
                     }
-                    h->h_LMultiplicity->Fill(mult2);
+                    h->h_LMultiplicity->Fill ( mult2 );
 
                     if ( vec_L5S9.size() >1 ) {
                         for ( int L=0; L<vec_L5S9.size()-1; L++ ) {
@@ -556,81 +556,25 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             //cout<<vec_L5S9.size() <<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
                         }
                     }
-                    //cout<<endl<<endl;
-                    //cout<<stt<<scint<<endl;
-                    /*
-                                        if ( stt == true && scint==true ) {
-
-                                            if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
-                                                vec_stthits.clear();
-
-                                                for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-                    //                             printf ( "diff %lf\n",vec_leadTime[e].leadTime - sh->leadTime );
-                                                    //printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e].leadTime,sh->leadTime,vec_leadTime[e].leadTime - sh->leadTime,vec_leadTime[e].tdcid,vec_leadTime[e].layer,vec_leadTime[e].channel,vec_leadTime[e].straw,sh->channel );
-
-                                                    if ( ( vec_leadTime[e].leadTime - sh->leadTime >0 ) && ( vec_leadTime[e].leadTime - sh->leadTime <220 ) ) {
-
-                                                        //printf ( "Track hit time: %lf Scint: %lf diff: %lf (%x %i %i %i| %i)\n",vec_leadTime[e].leadTime,sh->leadTime,vec_leadTime[e].leadTime - sh->leadTime,vec_leadTime[e].tdcid,vec_leadTime[e].layer,vec_leadTime[e].channel,vec_leadTime[e].straw,sh->channel );
-                                                        SttHit& s = vec_leadTime.at ( e );
-                                                        s.drifttime = ( vec_leadTime[e].leadTime - sh->leadTime );
-                                                        vec_stthits.push_back ( s );
-                                                    }
-                                                }
-
-                                            }
-                                        }
-                                        //cout<<"\n\n";
-                                        h->h_cluster_size->Fill ( vec_stthits.size() );
 
 
-                                        if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() < max_cluster_intake ) {
-                                            //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                                            h->h_hitmultiplicity4->Fill ( vec_stthits.size() );
-                                        }*/
+                    PDAQ_Event_Finder ( vec_leadTime_f, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
 
-                    /* if ( vec_leadTime.size() >= min_track_hits && vec_leadTime.size() < max_cluster_intake ) {
-                         const int minNumber = min_track_hits;
-                         const int maxDifference = max_lead_time_diff - 1;
-                         int currentNumber = 0;
-                         int currentSum = 0;
-                         int numGroups = 0;
-                         double last = vec_leadTime[0]->leadTime - maxDifference - 1;
-                         vec_stthits.clear();
-
-                         for ( int e = 0; e < vec_leadTime.size(); e++ ) {
-                             if ( vec_leadTime[e]->leadTime - last <= maxDifference ) { // Continue with current group
-                                 currentNumber++;
-                                 SttHit* h = vec_leadTime.at ( e );
-                                 vec_stthits.push_back ( h );
-
-                                 }
-                             else {   // Finish previous group and start anew
-                                 if ( currentNumber >= minNumber ) { // Previous was a valid group
-                                     numGroups++;
-                                     PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                                     h->h_cluster_size->Fill ( currentNumber );
-                                     h->h_hitmultiplicity3->Fill ( currentNumber );
-                                     }
-                                 vec_stthits.clear();
-                                 SttHit* h = vec_leadTime.at ( e );
-                                 vec_stthits.push_back ( h ); // Start afresh
-                                 currentNumber = 1;
-                                 }
-                             last = vec_leadTime[e]->leadTime;
-                             }
-                         // Deal with leftovers at the end
-                         if ( currentNumber >= minNumber ) { // Previous was a valid group
-                             numGroups++;
-                             PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                             h->h_cluster_size->Fill ( currentNumber );
-                             h->h_hitmultiplicity3->Fill ( currentNumber );
-                             }
-                         }*/
                 }
             }
         }
 
     } // End of loop over events
+    //h->h_drifttime->GetXaxis()->SetRange ( -20,+20 );
+    TF1* f1 = new TF1 ( "f1", "pol6" );
+    int maxbin =0;
+    maxbin= ( h->h_drifttime->GetMaximumBin() *90 ) /100;
+    cout<<maxbin<<"\t"<<h->h_drifttime->GetBinCenter ( maxbin-50 ) <<endl;
+    h->h_drifttime->GetXaxis()->SetRange ( maxbin-50,maxbin );
+    h->h_drifttime->Fit ( f1, "q" );
+    cout<<f1->GetMinimumX ( -10,10 ) <<endl;
+    //cout<<"Maximum "<<h->h_drifttime->GetMaximumBin()<<"\t"<<h->h_drifttime->GetMaximum()<<"\t"<<"Minimum  "<<h->h_drifttime->GetMinimumBin()<<"\t"<<h->h_drifttime->GetMinimum()<<endl;
+
     h_STT_Hit_Diff->Write();
     h->h_cluster_size->Write();
     h->h_LTvsLayer0->Write();
@@ -747,17 +691,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_TOT[hh]->SetLineColor ( kRed );
 
         pDTvsTOT->cd ( hh+1 );
-        h->h_pL_dtvstot[hh]->Draw("colz");
-        
+        h->h_pL_dtvstot[hh]->Draw ( "colz" );
+
         DTvsTOT->cd ( hh+1 );
-        h->h_L_dtvstot[hh]->Draw("colz");
-        
-        pChMult->cd(hh+1);
-        h->h_pL_channel_mult[hh]->Draw("colz");
-        
-        ChMult->cd(hh+1);
-        h->h_L_channel_mult[hh]->Draw("colz");
-        
+        h->h_L_dtvstot[hh]->Draw ( "colz" );
+
+        pChMult->cd ( hh+1 );
+        h->h_pL_channel_mult[hh]->Draw ( "colz" );
+
+        ChMult->cd ( hh+1 );
+        h->h_L_channel_mult[hh]->Draw ( "colz" );
+
     }
 
     DT->Write();
