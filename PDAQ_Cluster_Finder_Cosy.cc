@@ -264,7 +264,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         bool scint = false;
         bool stt = false;
 
-        if (scint_event >= maxEvents ) {
+        if (i == maxEvents ) {
             break;
         }
 
@@ -433,9 +433,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             ChHitsMult[la][ma] = 0;
                         }
                     }
-                    for ( int jx=0; jx<vec_leadTime.size() ; jx++ ) {
+                    for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
 
-                        if ( /*vec_leadTime[jx].leadTime - sh->leadTime >0 &&*/ vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
+                        if ( vec_leadTime[jx].leadTime - sh->leadTime >-100 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
                             h->h_pL_dtvstot[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
@@ -501,7 +501,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
                     std::vector<SttHit> vec_leadTime_f;
-                    vec_leadTime_f=ex_Stt_double ( vec_layer_channel_hit );
+                    vec_leadTime_f = ex_Stt_double ( vec_layer_channel_hit );
                     //cout<<"Next : "<<vec_leadTime_e.size() <<endl;
 
                     h->h_hitmultiplicity3->Fill ( vec_leadTime_f.size() );
@@ -575,7 +575,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     cout<<maxbin<<"\t"<<h->h_drifttime->GetBinCenter ( maxbin-50 ) <<endl;
     h->h_drifttime->GetXaxis()->SetRange ( maxbin-50,maxbin );
     h->h_drifttime->Fit ( f1, "q" );
-    cout<<f1->GetMinimumX ( -10,10 ) <<endl;
+    cout<<f1->GetMinimumX ( -15,15 ) <<endl;
     //cout<<"Maximum "<<h->h_drifttime->GetMaximumBin()<<"\t"<<h->h_drifttime->GetMaximum()<<"\t"<<"Minimum  "<<h->h_drifttime->GetMinimumBin()<<"\t"<<h->h_drifttime->GetMinimum()<<endl;
 
     h_STT_Hit_Diff->Write();

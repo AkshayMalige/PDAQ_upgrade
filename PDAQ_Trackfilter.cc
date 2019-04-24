@@ -301,8 +301,8 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 
             TGraph* chiY =
                 new TGraph ( vec_ClustersY.size(), clusterArrayY, clusterArrayZy );
-            chiY->Fit ( f2, "q" );
-            chi_valueY = f2->GetChisquare();
+            //chiY->Fit ( f2, "q" );
+            //chi_valueY = f2->GetChisquare();
             vec_Chi2y.push_back ( chi_valueY );
             Double_t pp0 = f2->GetParameter ( 0 );
             Double_t pp1 = f2->GetParameter ( 1 );
