@@ -573,9 +573,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     int maxbin =0;
     maxbin= ( h->h_drifttime->GetMaximumBin() *90 ) /100;
     cout<<maxbin<<"\t"<<h->h_drifttime->GetBinCenter ( maxbin-50 ) <<endl;
-    h->h_drifttime->GetXaxis()->SetRange ( maxbin-50,maxbin );
+    h->h_drifttime->GetXaxis()->SetRange ( maxbin-75,maxbin );
     h->h_drifttime->Fit ( f1, "q" );
-    cout<<f1->GetMinimumX ( -15,15 ) <<endl;
+    cout<<f1->GetMinimumX ( -20,20 ) <<endl;
     //cout<<"Maximum "<<h->h_drifttime->GetMaximumBin()<<"\t"<<h->h_drifttime->GetMaximum()<<"\t"<<"Minimum  "<<h->h_drifttime->GetMinimumBin()<<"\t"<<h->h_drifttime->GetMinimum()<<endl;
 
     h_STT_Hit_Diff->Write();
