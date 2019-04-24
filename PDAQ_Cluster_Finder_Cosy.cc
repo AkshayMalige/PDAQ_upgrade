@@ -264,7 +264,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         bool scint = false;
         bool stt = false;
 
-        if ( /*i*/scint_event >= maxEvents ) {
+        if (scint_event >= maxEvents ) {
             break;
         }
 
@@ -389,7 +389,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 h->h_0LMultiplicity->Fill ( layerCounter );
 //                cout<<"check6"<<endl;
 
-                if ( layerCounter >0/*== MAX_FT_TOTAL_LAYERS*/ ) {
+                if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
 
                     Layer_eq_4_counter++;
                     stt = true;
@@ -520,6 +520,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     //cout<<vec_leadTime_e.size() <<"\t"<<vec_leadTime_f.size() <<endl;
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
                         // printf ( "TWO : %i  %i  %lf\n",vec_leadTime_f[jc].layer,vec_leadTime_f[jc].channel,vec_leadTime_f[jc].leadTime );
+                        vec_leadTime_f[jc].drifttime = vec_leadTime_f[jc].leadTime - sh->leadTime;
+                        vec_stthits.push_back(vec_leadTime_f[jc]);
                         h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
                         h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
@@ -557,8 +559,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
 
-
-                    PDAQ_Event_Finder ( vec_leadTime_f, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    if (vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake){
+                    PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    }
 
                 }
             }
@@ -742,6 +745,9 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
+
+
 
 
 
