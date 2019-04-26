@@ -62,14 +62,17 @@ target_link_libraries(pdaq_unpacker_HADES PDAQ ${ROOT_LIBRARIES})
 add_executable(pdaq_calibrater pdaq_calibirator.cc PDAQ_Stt_Calibirator.C)
 target_link_libraries(pdaq_calibrater PDAQ ${ROOT_LIBRARIES})
 
-add_executable(pdaq_cluster_finder PDAQ_Cluster_Finder.cc)
-target_link_libraries(pdaq_cluster_finder PDAQ ${ROOT_LIBRARIES})
+#add_executable(pdaq_cluster_finder PDAQ_Cluster_Finder.cc)
+#target_link_libraries(pdaq_cluster_finder PDAQ ${ROOT_LIBRARIES})
 
 add_executable(pdaq_cluster_finder_cosy PDAQ_Cluster_Finder_Cosy.cc)
 target_link_libraries(pdaq_cluster_finder_cosy PDAQ ${ROOT_LIBRARIES})
 
-add_executable(pdaq_drift_cal PDAQ_Drift_Cal.C)
+add_executable(pdaq_drift_cal PDAQ_Drift_Cal.cc)
 target_link_libraries(pdaq_drift_cal PDAQ ${ROOT_LIBRARIES})
+
+add_executable(pdaq_rad_cal PDAQ_Rad_Cal.cc)
+target_link_libraries(pdaq_rad_cal PDAQ ${ROOT_LIBRARIES})
 
 add_executable(pdaq_spatial_resolution PDAQ_Spl_Res.C)
 target_link_libraries(pdaq_spatial_resolution PDAQ ${ROOT_LIBRARIES})

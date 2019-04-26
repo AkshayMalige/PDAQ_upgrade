@@ -1,5 +1,5 @@
-#ifndef PDAQ_DRIFT_CAL_H
-#define PDAQ_DRIFT_CAL_H
+#ifndef PDAQ_Drift_CAL_H
+#define PDAQ_Drift_CAL_H
 
 #include "TFile.h"
 #include "TH2F.h"

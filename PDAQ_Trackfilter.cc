@@ -301,8 +301,8 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 
             TGraph* chiY =
                 new TGraph ( vec_ClustersY.size(), clusterArrayY, clusterArrayZy );
-            //chiY->Fit ( f2, "q" );
-            //chi_valueY = f2->GetChisquare();
+            chiY->Fit ( f2, "q" );
+            chi_valueY = f2->GetChisquare();
             vec_Chi2y.push_back ( chi_valueY );
             Double_t pp0 = f2->GetParameter ( 0 );
             Double_t pp1 = f2->GetParameter ( 1 );
@@ -425,10 +425,8 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                          } else {
                                  scint_time_diffB = 500;
                          }
-
                          scint_time_diffF = fabs ( d2->leadTime - d1->leadTime );
                          h->h_scint_timediff->Fill ( scint_time_diffF );
-
                  }*/
         //cout<<"Scint : "<<scint_time_diffF<<"\t"<<scint_time_diffB<<endl;
         //if ( scint_time_diffF >= 250 && scint_time_diffB >= 250 ) {
@@ -494,4 +492,3 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     }
     return false;
 }
-

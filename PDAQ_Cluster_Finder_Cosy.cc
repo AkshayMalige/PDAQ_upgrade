@@ -234,6 +234,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
     }
+    
+    for(int ch=0; ch<256; ch++){
+       h->h_Ch_Dt[ch] = new TH1F ( Form ( "Ch_%d_Dt", ch+1 ) , Form ( "Ch_%d_Dt", ch+1 ),  810, -100,700 ); 
+        
+    }
 
 
     if ( stations > 1 ) {
@@ -517,6 +522,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                     std::vector<SttHit> vec_L5S9;
                     vec_stthits.clear();
+                    int sq_ch=0;
                     //cout<<vec_leadTime_e.size() <<"\t"<<vec_leadTime_f.size() <<endl;
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
                         // printf ( "TWO : %i  %i  %lf\n",vec_leadTime_f[jc].layer,vec_leadTime_f[jc].channel,vec_leadTime_f[jc].leadTime );
@@ -528,6 +534,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         h->h_drifttime->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_tot->Fill ( vec_leadTime_f[jc].tot );
                         h->h_hitBlock->Fill ( 4 );
+                        
+                        sq_ch = ((vec_leadTime_f[jc].layer-1) * 32)+vec_leadTime_f[jc].straw-1;
+                        h->h_Ch_Dt[sq_ch]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
 
                         MultLayer2[vec_leadTime_f[jc].layer-1]++;
                         ChHitsMult2[vec_leadTime_f[jc].layer-1][vec_leadTime_f[jc].straw-1]++;
@@ -560,7 +569,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     if (vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake){
-                    PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                     }
 
                 }
@@ -707,6 +716,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     }
 
+    for (int cha=0; cha<256; cha++){
+        h->h_Ch_Dt[cha]->Write();
+    }
+    
     DT->Write();
     TOT->Write();
     pDTvsTOT->Write();

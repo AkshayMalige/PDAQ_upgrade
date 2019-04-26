@@ -116,6 +116,7 @@ struct histograms{
     TH2F* h_L_dtvstot[8];
     TH1F* h_L_TOT[8];
     TH2F* h_L_channel_mult[8];
+    TH1F* h_Ch_Dt[256];
 //     for ( int i = 0; i < 8; i++ ) {
 //       
 //        h_layerDT[i] = new TH1F ( Form ( "Layer_%d_DT", i ) , Form ( "Layer_%d_DT", i ), 600, -100, 500 );
