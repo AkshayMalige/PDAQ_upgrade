@@ -716,8 +716,21 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     }
 
+    std::vector<double> vec_DT_start;
+    
     for (int cha=0; cha<256; cha++){
+          int maxbin2 =0;
+    maxbin2 = (  h->h_Ch_Dt[cha]->GetMaximumBin() *90 ) /100;
+    h->h_Ch_Dt[cha]->GetXaxis()->SetRange ( maxbin2-75,maxbin2 );
+    h->h_Ch_Dt[cha]->Fit ( f1, "q" );
+    vec_DT_start.push_back(f1->GetMinimumX ( -20,20 ));
+    //cout<<f1->GetMinimumX ( -20,20 ) <<endl;
         h->h_Ch_Dt[cha]->Write();
+    }
+    
+    for (int d=0; d<vec_DT_start.size(); d++){
+      
+      printf("Channel %i,  DT_zero:  %d\n",d+1, vec_DT_start[d]);
     }
     
     DT->Write();
