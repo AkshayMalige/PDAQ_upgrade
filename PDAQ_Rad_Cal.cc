@@ -9,9 +9,9 @@ Bool_t PDAQ_Rad_Cal(void)
     PandaSubsystemSTT* STT_RAW = 0;
     PandaSubsystemSTT* CAL = 0;
     PandaSttCal* STT_CAL = 0;
-    PandaSttTrack* STT_TRACK = new PandaSttTrack();
+    PandaSttTrack* DT_TRACKS = new PandaSttTrack();
 
-    TFile* file = TFile::Open("1750_Tp20_Th20c.root","READ");
+    TFile* file = TFile::Open("d.root","READ");
 	TH1F* DR = new TH1F ( "DR", "DRX", 1000,-0.1, 0.6 );
     TTree* tree = 0;
     file->GetObject("PDAQ_tree", tree);
@@ -46,7 +46,7 @@ Bool_t PDAQ_Rad_Cal(void)
     int counterofdt = 0;
     int driftTimeCounter2 = 0;
 
-    tree->SetBranchAddress("STT_TRACKS", &STT_TRACK);
+    tree->SetBranchAddress("DT_TRACKS", &DT_TRACKS);
     TFile* ftree = new TFile("DT1750.root", "RECREATE");
     TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
 
@@ -60,7 +60,7 @@ Bool_t PDAQ_Rad_Cal(void)
     Int_t iev = (Int_t)tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl << endl;
 
-    cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
+    cout << DT_TRACKS->stt_track_can.total_track_NTDCHits << endl;
 
     for (Int_t i = 0; i < iev; i++)
     {
@@ -69,15 +69,15 @@ Bool_t PDAQ_Rad_Cal(void)
             cout << i << endl;
         }
 
-        for (int n = 0; n < STT_TRACK->stt_track_can.total_track_NTDCHits; n++)
+        for (int n = 0; n < DT_TRACKS->stt_track_can.total_track_NTDCHits; n++)
         {
 
 //             std::vector<SttHit> vec_track_can;
             // SttHit* cal_hit  =
             // (SttHit*)STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt(n);
-            SttTrackHit& track_hit = STT_TRACK->stt_track_can.tdc_track_hits[n];
+            SttTrackHit& track_hit = DT_TRACKS->stt_track_can.tdc_track_hits[n];
             const std::vector<SttHit> & vec_track_can = track_hit.vec_Track;
-
+           // cout<<vec_track_can.size()<<endl;
             for (int t = 0; t < vec_track_can.size(); t++)
             {
                 vec_o_test1.push_back(vec_track_can[t].drifttime);
@@ -87,6 +87,7 @@ Bool_t PDAQ_Rad_Cal(void)
                 vec_z.push_back(vec_track_can[t].z);
                 vec_layer.push_back(vec_track_can[t].layer);
                 vec_straw.push_back(vec_track_can[t].straw);
+               // cout<<vec_track_can[t].straw<<endl;
 
                 counterofdt++;
             }
@@ -106,7 +107,7 @@ Bool_t PDAQ_Rad_Cal(void)
     int d = 0;
     int sum = 0;
 
-    // Only under 450ns.
+    // Only under 220ns.
 
     for (int r = 0; r < vec_o_test1.size(); r++)
     {

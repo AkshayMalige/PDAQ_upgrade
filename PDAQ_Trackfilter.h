@@ -72,7 +72,7 @@ struct histograms{
     TH1F* h_double_hit = new TH1F("h_double_hit", "h_double_hit;Number of hits", 5, 0, 5);
     
     TH1F* h_p_drifttime = new TH1F("h_p_drifttime", "h_p_drifttime;Drift Time [ns]", 710, -10,700 );
-    TH1F* h_drifttime = new TH1F("h_drifttime", "h_drifttime;Drift Time [ns]", 810, -100,700 );
+    TH1F* h_drifttime = new TH1F("h_drifttime", "h_drifttime;Drift Time [ns]", 800, -100,700 );
   
     TH1F* h_p_tot = new TH1F("h_p_tot", "h_p_tot;Time Over Threshold [ns]", 710, -10,700 );
     TH1F* h_tot = new TH1F("h_tot", "h_tot;Time Over Threshold [ns]", 710, -10,700 );
@@ -96,6 +96,7 @@ struct histograms{
     
     TH1F* h_L5_S9LTdiff = new TH1F("h_L5_S9LTdiff", "h_L5_S9LTdiff;Time diff [ns]", 1100, -100, 1000);
     TH1F* h_pL5_S9LTdiff = new TH1F("h_pL5_S9LTdiff", "h_pL5_S9LTdiff;Time diff [ns]", 1100, -100, 1000);
+
     
     TH2F* h_pLayerMult = new TH2F("h_pLayerMult", "h_pLayerMult;Layer;Multiplicity", 8, 0, 8,75,0,75);
     TH2F* h_LayerMult = new TH2F("h_LayerMult", "h_LayerMult;Layer;Multiplicity", 8, 0, 8,75,0,75);
@@ -117,6 +118,7 @@ struct histograms{
     TH1F* h_L_TOT[8];
     TH2F* h_L_channel_mult[8];
     TH1F* h_Ch_Dt[256];
+    TH1F* h_pLT_Diff[256];
 //     for ( int i = 0; i < 8; i++ ) {
 //       
 //        h_layerDT[i] = new TH1F ( Form ( "Layer_%d_DT", i ) , Form ( "Layer_%d_DT", i ), 600, -100, 500 );

@@ -72,7 +72,6 @@ std::vector<SttHit> ex_Stt_double ( std::vector<std::vector<SttHit>> vec_layer_c
 
     for ( int a=0; a<vec_layer_channel_hit.size(); a++ ) {
         B = vec_layer_channel_hit[a];
-
         if ( B.size() >2 ) {
             for ( int aa=0; aa< B.size()-1; aa++ ) {
                 //printf("%lf %lf \n",B[aa+1]->leadTime - B[aa]->leadTime, B[aa]->leadTime - B[aa-1]->leadTime);
@@ -142,6 +141,13 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     ChMult=new TCanvas ( "ChMult_Canvas","ChMult_Canvas" );
     ChMult->Divide ( 4,2 );
 
+    TCanvas * LtDiff; //Canvas for ToT
+    LtDiff=new TCanvas ( "LtDiff_Canvas","LtDiff_Canvas" );
+    LtDiff->Divide ( 4,2 );
+
+    TCanvas * LtDiffLow; //Canvas for ToT
+    LtDiffLow=new TCanvas ( "LtDiffLow_Canvas","LtDiffLow_Canvas" );
+    LtDiffLow->Divide ( 4,2 );
 
     printf ( "%s\n", outtree );
     PandaSttCal* STT_CAL = new PandaSttCal();
@@ -234,10 +240,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
     }
-    
-    for(int ch=0; ch<256; ch++){
-       h->h_Ch_Dt[ch] = new TH1F ( Form ( "Ch_%d_Dt", ch+1 ) , Form ( "Ch_%d_Dt", ch+1 ),  810, -100,700 ); 
-        
+
+    for ( int ch=0; ch<256; ch++ ) {
+        h->h_Ch_Dt[ch] = new TH1F ( Form ( "Ch_%d_Dt", ch+1 ) , Form ( "Ch_%d_Dt", ch+1 ),  800, -100,700 );
+        h->h_pLT_Diff[ch] = new TH1F ( Form ( "Ch_%d_LT_diff", ch+1 ) , Form ( "Ch_%d_LT_diff", ch+1 ), 1100, -100, 1000 );
     }
 
 
@@ -269,7 +275,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         bool scint = false;
         bool stt = false;
 
-        if (i == maxEvents ) {
+        if ( i == maxEvents ) {
             break;
         }
 
@@ -504,6 +510,18 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
 
+                    std::vector<SttHit> B_lt;
+                    int ch_sq=0;
+
+                    for ( int ae=0; ae<vec_layer_channel_hit.size(); ae++ ) {
+                        B_lt = vec_layer_channel_hit[ae];
+                        if ( B_lt.size() >1 ) {
+                            for ( int aee=0; aee< B_lt.size()-1; aee++ ) {
+                                ch_sq = ( ( B_lt[aee].layer-1 ) * 32 ) +B_lt[aee].straw-1;
+                                h->h_pLT_Diff[ch_sq-1]->Fill ( B_lt[aee+1].leadTime - B_lt[aee].leadTime );
+                            }
+                        }
+                    }
 
                     std::vector<SttHit> vec_leadTime_f;
                     vec_leadTime_f = ex_Stt_double ( vec_layer_channel_hit );
@@ -527,15 +545,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
                         // printf ( "TWO : %i  %i  %lf\n",vec_leadTime_f[jc].layer,vec_leadTime_f[jc].channel,vec_leadTime_f[jc].leadTime );
                         vec_leadTime_f[jc].drifttime = vec_leadTime_f[jc].leadTime - sh->leadTime;
-                        vec_stthits.push_back(vec_leadTime_f[jc]);
+                        vec_stthits.push_back ( vec_leadTime_f[jc] );
                         h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
                         h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
                         h->h_drifttime->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
                         h->h_tot->Fill ( vec_leadTime_f[jc].tot );
                         h->h_hitBlock->Fill ( 4 );
-                        
-                        sq_ch = ((vec_leadTime_f[jc].layer-1) * 32)+vec_leadTime_f[jc].straw-1;
+
+                        sq_ch = ( ( vec_leadTime_f[jc].layer-1 ) * 32 ) +vec_leadTime_f[jc].straw-1;
                         h->h_Ch_Dt[sq_ch]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
 
                         MultLayer2[vec_leadTime_f[jc].layer-1]++;
@@ -568,8 +586,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
 
-                    if (vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake){
-                    //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake ) {
+                        PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                     }
 
                 }
@@ -577,15 +595,18 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         }
 
     } // End of loop over events
-    //h->h_drifttime->GetXaxis()->SetRange ( -20,+20 );
-    TF1* f1 = new TF1 ( "f1", "pol6" );
-    int maxbin =0;
-    maxbin= ( h->h_drifttime->GetMaximumBin() *90 ) /100;
-    cout<<maxbin<<"\t"<<h->h_drifttime->GetBinCenter ( maxbin-50 ) <<endl;
-    h->h_drifttime->GetXaxis()->SetRange ( maxbin-75,maxbin );
-    h->h_drifttime->Fit ( f1, "q" );
-    cout<<f1->GetMinimumX ( -20,20 ) <<endl;
-    //cout<<"Maximum "<<h->h_drifttime->GetMaximumBin()<<"\t"<<h->h_drifttime->GetMaximum()<<"\t"<<"Minimum  "<<h->h_drifttime->GetMinimumBin()<<"\t"<<h->h_drifttime->GetMinimum()<<endl;
+
+    double maxbin =0;
+    double DTmin =0;
+    double dt_at_10=0;
+    Int_t maximum = h->h_drifttime->GetBinContent ( h->h_drifttime->GetMaximumBin() );
+    DTmin = h->h_drifttime->FindFirstBinAbove ( maximum/10,1 );
+    dt_at_10 = h->h_drifttime->GetXaxis()->GetBinCenter ( h->h_drifttime->GetXaxis()->FindBin ( DTmin ) );
+
+//     cout<< dt_at_10 - 100<<endl;
+//
+//     cout<<"New  "<<maximum<<"\t"<<DTmin <<"\t"<<dt_at_10<<endl;
+
 
     h_STT_Hit_Diff->Write();
     h->h_cluster_size->Write();
@@ -676,6 +697,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_pLMultiplicity->Write();
     h->h_LMultiplicity->Write();
 
+    int High_ch[8]= {8,43,69,104,136,171,197,232};
+    int Low_ch[8]= {0,32,64,96,128,160,192,224};
 
     for ( int hh = 0; hh < 8; hh++ ) {
         h->h_pL_layerDT[hh]->Write();
@@ -714,31 +737,43 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         ChMult->cd ( hh+1 );
         h->h_L_channel_mult[hh]->Draw ( "colz" );
 
+        LtDiff->cd ( hh+1 );
+        h->h_pLT_Diff[High_ch[hh]]->Draw ();
+        gPad->SetLogy();
+
+        LtDiffLow->cd ( hh+1 );
+        h->h_pLT_Diff[Low_ch[hh]]->Draw ();
+        gPad->SetLogy();
+
     }
 
+
+
     std::vector<double> vec_DT_start;
-    
-    for (int cha=0; cha<256; cha++){
-          int maxbin2 =0;
-    maxbin2 = (  h->h_Ch_Dt[cha]->GetMaximumBin() *90 ) /100;
-    h->h_Ch_Dt[cha]->GetXaxis()->SetRange ( maxbin2-75,maxbin2 );
-    h->h_Ch_Dt[cha]->Fit ( f1, "q" );
-    vec_DT_start.push_back(f1->GetMinimumX ( -20,20 ));
-    //cout<<f1->GetMinimumX ( -20,20 ) <<endl;
+
+
+    for ( int cha=0; cha<256; cha++ ) {
+
+
         h->h_Ch_Dt[cha]->Write();
+
+        h->h_pLT_Diff[cha]->Write();
     }
-    
-    for (int d=0; d<vec_DT_start.size(); d++){
-      
-      printf("Channel %i,  DT_zero:  %d\n",d+1, vec_DT_start[d]);
-    }
-    
+
+//     for(int dot=0; dot<vec_DT_start.size(); dot++){
+//       printf("Channel : %i   DT_crr: %d \n",dot,vec_DT_start[dot]-dt_at_10);
+//     }
+
+
+
     DT->Write();
     TOT->Write();
     pDTvsTOT->Write();
     DTvsTOT->Write();
     pChMult->Write();
     ChMult->Write();
+    LtDiff->Write();
+    LtDiffLow->Write();
 
 
     PDAQ_tree->Write();
@@ -771,6 +806,10 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
+
+
+
 
 
 
