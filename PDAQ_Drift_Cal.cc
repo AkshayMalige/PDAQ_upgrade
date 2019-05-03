@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Bool_t PDAQ_Drift_Cal ( void )
+Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 {
     cout << "Open" << endl;
 
@@ -14,18 +14,26 @@ Bool_t PDAQ_Drift_Cal ( void )
     PandaSttTrack* DT_TRACKS = new PandaSttTrack();
     Stt_Track_Event* stt_event = & ( DT_TRACKS->stt_track_can );
 
-    TFile* file = TFile::Open ( "c.root","READ" );
+    TFile inFile ( intree );
+    TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
+    if ( !tree ) {
+        std::cerr << "Tree PDAQ_tree was not found\n";
+        std::exit ( 1 );
+    }
+
+
+    //TFile* file = TFile::Open ( "c.root","READ" );
     TH1F* DR = new TH1F ( "DR", "DRX", 1000,-0.1, 0.6 );
-    TTree* tree = 0;
-    file->GetObject ( "PDAQ_tree", tree );
+    //TTree* tree = 0;
+    //file->GetObject ( "PDAQ_tree", tree );
     if ( !tree ) {
         std::cerr << "Tree doesn't exists" << std::endl;
         return 1;
     }
     tree->Print();
-
+    printf ( "%s\n", outtree );
     tree->SetBranchAddress ( "STT_TRACKS", &STT_TRACK );
-    TFile* Ttree = new TFile ( "d.root", "RECREATE" );
+    TFile* Ttree = new TFile ( outtree, "RECREATE" );
     TTree* PDAQ_tree = new TTree ( "PDAQ_tree", "PDAQ_tree" );
     PDAQ_tree->Branch ( "DT_TRACKS", "PandaSttTrack", &DT_TRACKS, 64000, 99 );
 
@@ -45,7 +53,7 @@ Bool_t PDAQ_Drift_Cal ( void )
 
     }
 
-    h_drifttime = ( TH1F* ) file->Get ( "h_drifttime" );
+    h_drifttime = ( TH1F* ) inFile.Get ( "h_drifttime" );
 
     double maxbin =0;
     double DTmin =0;
@@ -58,7 +66,7 @@ Bool_t PDAQ_Drift_Cal ( void )
     std::vector<double> vec_DT_start;
 
     for ( int chh=0; chh<256; chh++ ) {
-        h_Ch_Dt[chh] = ( TH1F* ) file->Get ( Form ( "Ch_%d_Dt",chh+1 ) );
+        h_Ch_Dt[chh] = ( TH1F* ) inFile.Get ( Form ( "Ch_%d_Dt",chh+1 ) );
 
         if ( h_Ch_Dt[chh]->GetBinContent ( h_Ch_Dt[chh]->GetMaximumBin() ) >=20 ) {
             vec_DT_start.push_back ( DTmin - ( h_Ch_Dt[chh]->FindFirstBinAbove ( ( h_Ch_Dt[chh]->GetBinContent ( h_Ch_Dt[chh]->GetMaximumBin() ) ) /10,1 ) ) );
@@ -68,9 +76,9 @@ Bool_t PDAQ_Drift_Cal ( void )
 
     }
 
-    for(int as=0; as<vec_DT_start.size();as++){
+    for ( int as=0; as<vec_DT_start.size(); as++ ) {
 
-      cout<<vec_DT_start[as]<<endl;
+        cout<<vec_DT_start[as]<<endl;
     }
 
 
@@ -78,6 +86,11 @@ Bool_t PDAQ_Drift_Cal ( void )
 
     for ( Int_t i = 0; i < iev; i++ ) {
         tree->GetEntry ( i );
+
+
+        if ( i == maxEvents ) {
+            break;
+        }
         if ( i % 1000 == 0 ) {
             cout << i << endl;
         }
@@ -97,8 +110,8 @@ Bool_t PDAQ_Drift_Cal ( void )
                 a = vec_track_can[t];
                 a.drifttime = dt_crr;
                 vec_tracks.push_back ( a );
-                h_Cal_Ch_Dt[sq_ch]->Fill(a.drifttime);
-                h_Dt[sq_ch]->Fill(vec_track_can[t].drifttime);
+                h_Cal_Ch_Dt[sq_ch]->Fill ( a.drifttime );
+                h_Dt[sq_ch]->Fill ( vec_track_can[t].drifttime );
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
             //cout<<vec_tracks.size()<<endl;
@@ -126,7 +139,30 @@ Bool_t PDAQ_Drift_Cal ( void )
     ////////////////////
 }
 
-int main()
+int main ( int argc, char** argv )
 {
-    return PDAQ_Drift_Cal();
+
+    if ( argc >= 3 )
+
+        if ( !argv[3] ) {
+            printf ( "\n\nNote : One Million Events will be processed. To change "
+                     "add the number of events to be processed after the ouput "
+                     "file name.\n" );
+            // atoi(argv[3]) == 1000;
+            sleep ( 2 );
+            -         PDAQ_Drift_Cal ( argv[1], argv[2], 100000000 );
+        } else {
+            PDAQ_Drift_Cal ( argv[1], argv[2], atoi ( argv[3] ) );
+        }
+
+    else {
+        return 1;
+    }
+
+    return 0;
 }
+
+
+
+
+

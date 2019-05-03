@@ -275,7 +275,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         bool scint = false;
         bool stt = false;
 
-        if ( i == maxEvents ) {
+        if ( scint_event >= maxEvents ) {
             break;
         }
 

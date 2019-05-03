@@ -32,6 +32,6 @@
 
 using namespace std;
 
-Bool_t PDAQ_Drift_Cal(void);
+Bool_t PDAQ_Drift_Cal(char* intree, char* outtree, int maxEvents);
 
 #endif
