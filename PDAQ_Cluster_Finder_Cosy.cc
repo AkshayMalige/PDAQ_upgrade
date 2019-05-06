@@ -148,6 +148,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     TCanvas * LtDiffLow; //Canvas for ToT
     LtDiffLow=new TCanvas ( "LtDiffLow_Canvas","LtDiffLow_Canvas" );
     LtDiffLow->Divide ( 4,2 );
+    
+    TCanvas * ChDiff; //Canvas for ToT
+    ChDiff=new TCanvas ( "ChDiff_Canvas","ChDiff_Canvas" );
+    ChDiff->Divide ( 4,2 );
 
     printf ( "%s\n", outtree );
     PandaSttCal* STT_CAL = new PandaSttCal();
@@ -219,12 +223,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     int stations = ftGeomPar->getModules();
     int max_cluster_intake = ftGeomPar->getClusterLimit();
     int MAX_FT_TOTAL_LAYERS = 0;
-    // int MAX_FT_TOTAL_LAYERS1 =0;
-
-//     TH1F* h_p_layerDT[8];
-//     TH2F* h_pL_dtvstot[8];
-//     TH1F* h_p_TOT[8];
-//     TH1F* h_pL_channel_mult[8];
+    
+    int High_ch[8]= {8,43,69,104,136,171,197,232};
+    int Low_ch[8]= {0,32,64,96,128,160,192,224};
+    //int High_strw[8]= {9,12,6,9,9,12,6,9};
 
     for ( int mh = 0; mh < 8; mh++ ) {
         h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa", mh+1 ), 600, -100, 500 );
@@ -236,8 +238,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 700, 0, 700,700,0,700 );
         h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb", mh+1 ), 600, -100, 500 );
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
-
-
+        
+        h->h_pChDiff[mh] = new TH1F ( Form ( "Layer_%d_pChDiff", mh+1 ) , Form ( "Layer_%d_pChDiff", mh+1 ), 5, 0, 5 );
 
     }
 
@@ -400,7 +402,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 h->h_0LMultiplicity->Fill ( layerCounter );
 //                cout<<"check6"<<endl;
 
-                if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
+                if ( layerCounter >0/*== MAX_FT_TOTAL_LAYERS*/ ) {
 
                     Layer_eq_4_counter++;
                     stt = true;
@@ -463,6 +465,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     int mult = 0;
+                    int layer_eff_count =0;
                     for ( int aa=0; aa<8; aa++ ) {
                         if ( MultLayer[aa]> 0 ) {
                             mult++;
@@ -471,10 +474,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         //printf("dt multiplicity%i \n",dtHitsMult[a]);
                         for ( int ba=0; ba<32; ba++ ) {
                             if ( ChHitsMult[aa][ba] >0 ) {
-                                h->h_pL_channel_mult[aa]->Fill ( ba,ChHitsMult[aa][ba] );    //Fill(b,dtHitsMult[a][b]);
+                                h->h_pL_channel_mult[aa]->Fill ( ba,ChHitsMult[aa][ba] );
+                                layer_eff_count++;
                                 //cout<<aa+1<<"\t"<<ba+1<<"\t"<<ChHitsMult[aa][ba]<<endl;
                             }
                         }
+                    }
+                    h->h_pLayer_eff->Fill(layer_eff_count);
+                    if (MultLayer[0]>0 && MultLayer[7]>0){
+                        h->h_Layer_eff->Fill(layer_eff_count);
                     }
                     h->h_pLMultiplicity->Fill ( mult );
 
@@ -494,6 +502,27 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_pL5_S9LTdiff->Fill ( vec_p_L5S9[L+1].leadTime - vec_p_L5S9[L].leadTime );
                             //cout<<vec_L5S9.size() <<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
                         }
+                    }
+                    int sqq_ch=0;
+                    bool ch_hi =false;
+                    bool diff_1=false;
+                    bool diff_2=false;
+                    for(int hc=0; hc<8; hc++){
+                        for (int fc=0; fc<vec_leadTime_e.size(); fc++){
+                            sqq_ch = ( ( vec_leadTime_e[hc].layer-1 ) * 32 ) +vec_leadTime_e[hc].straw-1;
+                            if(sqq_ch == High_ch[hc]+1){ch_hi = true;}
+                            if(sqq_ch == High_ch[hc]+2 || sqq_ch == High_ch[hc]){diff_1 = true;}
+                            if(sqq_ch == High_ch[hc]+3 || sqq_ch == High_ch[hc]-1){diff_2 = true;}
+                            if(sqq_ch < 32){cout<<vec_leadTime_e[hc].leadTime<<"\t"<<vec_leadTime_e[hc].layer<<"\t"<<sqq_ch<<endl;}
+                        }
+                        if (ch_hi==true && diff_2==true && diff_1==true)
+                            h->h_pChDiff[hc]->Fill(4);
+                        else if (ch_hi==true && diff_2==true && diff_1==false)
+                            h->h_pChDiff[hc]->Fill(3);
+                        else if (ch_hi==true && diff_1==true && diff_2==false)
+                            h->h_pChDiff[hc]->Fill(2);
+                        else if (ch_hi==true  && diff_1==false && diff_2==false)
+                            h->h_pChDiff[hc]->Fill(1);
                     }
 
 
@@ -586,8 +615,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
 
-                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake ) {
-                        PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8) {
+                        //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                     }
 
                 }
@@ -696,9 +725,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_0LMultiplicity->Write();
     h->h_pLMultiplicity->Write();
     h->h_LMultiplicity->Write();
+    h->h_Layer_eff->Write();
+    h->h_pLayer_eff->Write();
 
-    int High_ch[8]= {8,43,69,104,136,171,197,232};
-    int Low_ch[8]= {0,32,64,96,128,160,192,224};
+
 
     for ( int hh = 0; hh < 8; hh++ ) {
         h->h_pL_layerDT[hh]->Write();
@@ -710,6 +740,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_dtvstot[hh]->Write();
         h->h_L_TOT[hh]->Write();
         h->h_L_channel_mult[hh]->Write();
+        
+        h->h_pChDiff[hh]->Write();
 
         DT->cd ( hh+1 );
         h->h_pL_layerDT[hh]->Draw();
@@ -744,7 +776,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         LtDiffLow->cd ( hh+1 );
         h->h_pLT_Diff[Low_ch[hh]]->Draw ();
         gPad->SetLogy();
-
+        
+        ChDiff->cd(hh+1);
+        h->h_pChDiff[hh]->Draw();
+        gPad->SetLogy();
+        
     }
 
 
@@ -774,6 +810,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     ChMult->Write();
     LtDiff->Write();
     LtDiffLow->Write();
+    ChDiff->Write();
 
 
     PDAQ_tree->Write();

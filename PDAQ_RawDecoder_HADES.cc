@@ -220,7 +220,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
         // skip queue headers
         in_file.read ( ( char* ) &word, 4 );
         queue_size = word / 4;
-        // printf("\t Queue: size: %d\n", queue_size);
+        //printf("\t Queue: size: %d\n", queue_size);
 
         if ( queue_size < 20 ) { // skipping empty queues
             in_file.ignore ( ( queue_size - 1 ) * 4 );
@@ -251,19 +251,18 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 // in_file.ignore(4);  // trigger nr
                 word = readWord ( &in_file );
                 trigger_nr = word;
-                // printf("Subevent: id: %x size: %d trg:%x\n", sub_id,
-                // sub_size, trigger_nr);
+                //printf("Subevent: id: %x size: %d trg:%x\n", sub_id,sub_size, trigger_nr);
 
                 queue_words += 4;
 
                 // loop over TDCs
                 while ( !in_file.eof() ) {
-
+                    
                     word = readWord ( &in_file ); // tdc headers
                     // printf("%x\n", word);
                     tdc_size = ( word >> 16 ) & 0xffff; // tdc size
                     tdc_id = word & 0xffff;
-                    // printf("\tTDC: id: %x size: %d\n", tdc_id, tdc_size);
+                   // printf("\tTDC: id: %x size: %d\n", tdc_id, tdc_size);
 
                     queue_words++;
                     tdc_words = 0;
@@ -276,23 +275,24 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                             in_file.ignore ( 4 );
                             queue_words++;
                         }
-                        // printf("trailer: queue:%d queue_words:%d\n",
-                        // queue_size, queue_words);
+                       // printf("trailer: queue:%d queue_words:%d\n", queue_size, queue_words);
                         if ( queue_size == queue_words ) {
                             end_of_queue = true;
                         }
                         break;
+                    
                     } else {
 
-                        tdc_ptr++;
+                        if ( (tdc_id >> 8) != 0x8b) {
+                            tdc_ptr++;
+                        }
 
                         // loop over TDC data
                         while ( !in_file.eof() ) {
-
                             word = readWord ( &in_file );
                             tdc_words++;
                             queue_words++;
-                            // printf("%x\n", word);
+                            //printf("%x\n", word);
 
                             if ( ( ( word >> 28 ) & 0xf ) == 0x8 ) { // hit marker
                                 channel_nr = ( ( word >> 22 ) & 0x7f );
@@ -332,10 +332,9 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         RefTime[tdc_ptr-1] = refTime;
 
                                         //h_tdc_ref->Fill ( 7 );
+                                        //printf("\tRef R: %f on channel %d on %x on %x tdcptr: %d\n", s->leadTime, channel_nr,  tdc_id, sub_id, tdc_ptr - 1);
+                                    
                                     }
-                                    // printf("\tRef R: %f on channel %d on %x
-                                    // on %x\n", a->leadTime, channel_nr,
-                                    // tdc_id, sub_id);
                                     
                                 } else {
                                     if ( edge == 1 && (fabs(time-refTime)<100000)) { // rising edge
@@ -429,9 +428,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                             }
 
                             if ( tdc_words == tdc_size ) {
-                                // printf("\t Sizes: queue: %d tdc:%d current
-                                // queue:%d tdc:%d\n", queue_size, tdc_size,
-                                // queue_words, tdc_words);
+                                 //printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
                                 break;
                             }
                         } // end of tdc data loop
