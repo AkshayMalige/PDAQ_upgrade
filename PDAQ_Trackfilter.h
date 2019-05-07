@@ -66,7 +66,7 @@ struct histograms{
     
     TH2F* h_drifttimevstot = new TH2F("h_drifttimevstot", "h_drifttimevstot;Drift Time [ns];TOT [ns]", 700, 0, 700,700,0,700);
     
-    TH2F* h_p_drifttimevstot = new TH2F("h_p_drifttimevstot", "h_p_drifttimevstot;Drift Time [ns];TOT [ns]", 700, 0, 700,700,0,700);
+    TH2F* h_p_drifttimevstot = new TH2F("h_p_drifttimevstot", "h_p_drifttimevstot;Drift Time [ns];TOT [ns]", 500, 0, 500,700,0,700);
     
     TH1F* h_tot0 = new TH1F("h_tot0", "h_tot0;Time Over Threshold [ns]", 710, -10, 700);
     TH1F* h_tot1 = new TH1F("h_tot1", "h_tot1;Time Over Threshold [ns]", 710, -10, 700);
