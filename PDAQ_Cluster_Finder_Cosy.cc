@@ -850,6 +850,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_LayerMult->Write();
     h->h_hitBlock->Write();
     h->h_ShitBlock->Write();
+    h->h_ShitBlock->Write();
     h->h_0LMultiplicity->Write();
     h->h_pLMultiplicity->Write();
     h->h_LMultiplicity->Write();
