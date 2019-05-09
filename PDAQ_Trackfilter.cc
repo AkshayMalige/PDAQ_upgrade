@@ -462,6 +462,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             } else {
                 h->h_drifttimeTRB2->Fill ( vec_tracks[tq].drifttime );
             }
+            h->h_hitBlock->Fill ( 4 );
 
             // printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f
             // SMDT:%f\n",max_dt_offset,vec_tracks[tq].leadTime,refTime,meanTime,vec_tracks[tq].drifttime,vec_tracks[tq].meanDriftTime);
