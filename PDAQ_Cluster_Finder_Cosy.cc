@@ -3,6 +3,98 @@
 
 using namespace std;
 
+
+int effeciency ( std::vector<SttHit> A )
+{
+    int MultLayer[8];
+    int ChHitsMult[8][32];
+    for ( int lb = 0; lb < 8; lb++ ) {
+        MultLayer[lb] = 0;
+        for ( int mb =0; mb< 32; mb++ ) {
+            ChHitsMult[lb][mb] = 0;
+        }
+    }
+
+    std::vector<SttHit> L1;
+    std::vector<SttHit> L8;
+    double arrayX[4];
+    double arrayZ[4];
+    double arrayZcoo[6] = {7.02,13.03, 19.04,37.05,43.06,49.07};
+    double arrayOffsetL[6] = {3,-3, 0,0,3,-3};
+    //double arrayOffsetH[6] = {0,13.03, 19.04,37.05,43.06,49.07};
+
+    bool valid = false;
+    for ( int cr=0; cr<A.size(); cr++ ) {
+        MultLayer[A[cr].layer-1]++;
+        ChHitsMult[A[cr].layer-1][A[cr].straw-1]++;
+        if ( A[cr].layer==1 ) {
+            L1.push_back ( A[cr] );
+        }
+        if ( A[cr].layer==8 ) {
+            L8.push_back ( A[cr] );
+        }
+    }
+    std::sort ( L1.begin(), L1.end(), f_sttHitCompareCell );
+    std::sort ( L8.begin(), L8.end(), f_sttHitCompareCell );
+    if ( L1.size() ==2 && L8.size() ==2 && ( fabs ( L1[0].straw - L1[1].straw ) ) ==1 && ( fabs ( L1[0].straw - L1[1].straw ) ) ==1 ) {
+        valid = true;
+        printf ( "L1 : %i  %i  L8 : %i  %i\n",L1[0].straw,L1[1].straw,L8[0].straw,L8[1].straw );
+        printf ( "L1 : %f  %f  L8 : %f  %f\n",L1[0].z,L1[1].z,L8[0].z,L8[1].z );
+        arrayX[0]= L1[0].straw;
+        arrayX[1]= L1[1].straw;
+        arrayX[2]= L8[0].straw;
+        arrayX[3]= L8[1].straw;
+        arrayZ[0]= L1[0].z;
+        arrayZ[1]= L1[1].z;
+        arrayZ[2]= L8[0].z;
+        arrayZ[3]= L8[1].z;
+    } else {
+        valid = false;
+    }
+
+    if ( valid == true ) {
+        TF1* f1 = new TF1 ( "f1", "pol1" );
+        TGraph* cor = new TGraph ( 4, arrayX, arrayZ );
+        cor->Fit ( f1, "q" );
+        Double_t cnst = f1->GetParameter ( 0 );
+        Double_t slope = f1->GetParameter ( 1 );
+
+        printf ( "Cnst : %f  Slope : %f\n",cnst,slope );
+        for ( int a=0; a<6; a++ ) {
+
+            int ex = ( ( arrayZcoo[a]-cnst ) /slope );
+            cout<<a<<"\t"<< ex <<endl;
+
+        }
+        delete f1;
+    }
+    cout<<endl<<endl;
+
+    int mult = 0;
+    int layer_eff_count =0;
+
+//     for ( int kb=0; kb<4; kb++ ) {
+//         if ( MultLayer[kb]> 0 ) {
+//             mult++;
+//             //cout<<"mult 3  "<<kb<<"\t"<<MultLayer3[kb]<<endl;
+//         }
+//
+//         for ( int bk=0; bk<32; bk++ ) {
+//             if ( ChHitsMult[kb][bk] >0 ) {
+//                 layer_eff_count++;
+//             }
+//         }
+//     }
+//     if ( MultLayer[0]>0 && MultLayer[3]>0 ) {
+//         h->h_Layer_eff2->Fill ( layer_eff_count );
+//         //cout<<"Two "<<layer_eff_count3<<endl;
+//     }
+
+    // delete f1;
+    return layer_eff_count;
+}
+
+
 long fact ( int n )
 {
     unsigned long long factorial = 1;
@@ -272,7 +364,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     //int High_strw[8]= {9,12,6,9,9,12,6,9};
 
     for ( int mh = 0; mh < 8; mh++ ) {
-        h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa", mh+1 ), 600, -100, 500 );
+        h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa", mh+1 ), 700, -100,600 );
         h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time;Time Over Threshold",mh+1 ), 500, 0, 500,700,0,700 );
         h->h_pL_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTa", mh+1 ) , Form ( "Layer_%d_TOTa", mh+1 ), 600, -100, 500 );
         h->h_pL_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multa", mh+1 ) , Form ( "Layer_%d_multa;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
@@ -287,7 +379,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     }
 
     for ( int ch=0; ch<256; ch++ ) {
-        h->h_Ch_Dt[ch] = new TH1F ( Form ( "Ch_%d_Dt", ch+1 ) , Form ( "Ch_%d_Dt", ch+1 ),  500, 1,501 );
+        h->h_Ch_Dt[ch] = new TH1F ( Form ( "Ch_%d_Dt", ch+1 ) , Form ( "Ch_%d_Dt", ch+1 ), 700, -100,600 );
         h->h_pLT_Diff[ch] = new TH1F ( Form ( "Ch_%d_LT_diff", ch+1 ) , Form ( "Ch_%d_LT_diff", ch+1 ), 500, 1, 501 );
     }
 
@@ -305,7 +397,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     double repeat = 0;
     double All_repeat = 0;
-    int scint_event =0;
+    double scint_event =0;
 
     SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][5000];
 
@@ -684,7 +776,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
 
-///////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////corridor/////////////////////////////////////////////////
                     std::vector<SttHit> vec_corridor;
                     vec_corridor.clear();
                     int MultLayer3[8];
@@ -733,18 +825,48 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         //cout<<"Two "<<layer_eff_count3<<endl;
                     }
 
+////////////////////////////////////////////end - corridor////////////////////////////////////////
 
-                    //cout<<"***************"<<endl;
-
-                    // for (int sw=0; sw<vec_scihits.size(); sw++){
-                    //cout<<vec_stthits[sw].leadTime<<"\t"<<vec_stthits[sw].layer<<"\t"<<vec_stthits[sw].straw<<endl;
-                    //}
-
-
-                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
-                         PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-
+                    int plane =0;
+                    int cell =0;
+                    int planeMult[16];
+                    int planeCount=0;
+                    for ( int a=0; a<16; a++ ) {
+                        planeMult[a]=0;
                     }
+                    for ( int sw=0; sw<vec_stthits.size(); sw++ ) {
+                        if ( vec_stthits[sw].layer ==1 ||vec_stthits[sw].layer ==3||vec_stthits[sw].layer ==5||vec_stthits[sw].layer ==7 ) {
+                            if ( vec_stthits[sw].straw%2 ==0 ) {
+                                cell =0;
+                            } else {
+                                cell =1;
+                            }
+                        } else if ( vec_stthits[sw].layer ==2 ||vec_stthits[sw].layer ==4||vec_stthits[sw].layer ==6||vec_stthits[sw].layer ==8 ) {
+                            if ( vec_stthits[sw].straw%2 ==0 ) {
+                                cell =1;
+                            } else {
+                                cell =0;
+                            }
+                        }
+
+                        plane = ( vec_stthits[sw].layer-1 ) *2 +cell;
+                        planeMult[plane]++;
+                        h->h_drifttimevstot->Fill ( vec_stthits[sw].drifttime,vec_stthits[sw].tot );
+                    }
+                    for ( int bbx=0; bbx<16; bbx++ ) {
+                        if ( planeMult[bbx]>0 ) {
+                            planeCount++;
+                        }
+                    }
+                    //cout<<planeCount<<endl;
+                    if ( vec_stthits.size() >0 ) {
+                        h->h_PlaneMult->Fill ( planeCount );
+                    }
+
+                    // if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
+                    // PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+
+                    // }
 
                 }
             }
@@ -798,6 +920,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->HitMultiplicity->Write();
 
     h->h_drifttimevstot->Write();
+    h->h_drifttimevstot->GetXaxis()->SetLabelSize ( 0.055 );
+    h->h_drifttimevstot->GetXaxis()->SetNdivisions ( 310 );
+    h->h_drifttimevstot->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_drifttimevstot->GetYaxis()->SetNdivisions ( 310 );
 
     h->TimeOverThreshold->cd();
     h->h_tot0->Draw();
@@ -823,7 +949,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_drifttimevsLayer->Write();
 
     h->h_drifttime->Write();
-    h->h_drifttime->GetXaxis()->SetLabelSize ( 0.050 );
+    h->h_drifttime->GetXaxis()->SetLabelSize ( 0.055 );
+    h->h_drifttime->GetXaxis()->SetNdivisions ( 310 );
+    h->h_drifttime->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_drifttime->GetYaxis()->SetNdivisions ( 310 );
 
     h->h_scint_mult_b->Write();
     h->h_scint_mult_a->Write();
@@ -855,11 +984,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_pLMultiplicity->Write();
     h->h_LMultiplicity->Write();
 
-    Double_t norm = h->h_Layer_eff->GetEntries();
+    double norm = h->h_Layer_eff->GetEntries();
     h->h_Layer_eff->Scale ( 1/norm );
     h->h_Layer_eff->Write();
 
-    Double_t norm2 = h->h_Layer_eff2->GetEntries();
+    double norm2 = h->h_Layer_eff2->GetEntries();
     h->h_Layer_eff2->Scale ( 1/norm2 );
     h->h_Layer_eff2->Write();
 
@@ -895,14 +1024,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     TGraph* gEffeciency2 = new TGraph ( 30, index , from_corridor );
     TGraph* gFrom90Data = new TGraph ( B.size(), from_90index , from_90per );
     TGraph* gFrom95Data = new TGraph ( C.size(), from_90index , from_95per );
-    
+
     gEffeciency->Write();
     gEffeciency->Draw ( "AB" );
     gEffeciency->SetFillColor ( kRed );
     gEffeciency->SetFillStyle ( 3007 );
     gEffeciency->SetMarkerStyle ( 3 );
     gEffeciency->SetMarkerColor ( kRed );
-    
+
 
     gEffeciency2->Write();
     gEffeciency2->Draw ( "same,P" );
@@ -923,6 +1052,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     gFrom95Data->Draw ( "same,P" );
     gFrom95Data->Write();
 
+    h->h_PlaneMult->Scale ( 1/scint_event );
+    h->h_PlaneMult->Write();
 
 
     for ( int hh = 0; hh < 8; hh++ ) {
@@ -945,6 +1076,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_dtvstot[hh]->Write();
         h->h_L_dtvstot[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_dtvstot[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_L_dtvstot[hh]->GetXaxis()->SetNdivisions ( 310 );
         h->h_L_TOT[hh]->Write();
         h->h_L_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
@@ -1047,7 +1179,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     //Ttree->Close();
     //inFile.Close();
     printf ( "Total Hits processed : %f Repeated Hits in an Event : %f\n\n", All_repeat, repeat );
-    printf ( "In_File: %s 	Out_File:  %s\n", intree, outtree );
+    printf ( "In_File: %s   Out_File:  %s\n", intree, outtree );
     return 0;
 }
 
@@ -1073,6 +1205,7 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
 
 
 

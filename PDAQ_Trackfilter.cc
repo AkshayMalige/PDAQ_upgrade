@@ -446,7 +446,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             //vec_tracks[tq].drifttime =  - ( refTime - ( vec_tracks[tq].leadTime ) );
             //vec_tracks[tq].drifttime =  vec_tracks[tq].drifttime;
             //vec_tracks[tq].meanDriftTime = - ( meanTime - ( vec_tracks[tq].leadTime ) );
-            h->h_drifttimevstot->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
+            //h->h_drifttimevstot->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
             h->h_tot4->Fill ( vec_tracks[tq].tot );
            // h->h_layerDT[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime );
             h->h_L_dtvstot[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
