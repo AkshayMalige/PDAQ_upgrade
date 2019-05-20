@@ -57,6 +57,7 @@ struct histograms{
     TH1F* h_pLayer_eff = new TH1F ( "h_pLayer_eff", "h_pLayer_eff;Number of fired straws", 30, 0, 30 );
     TH1F* h_Layer_eff = new TH1F ( "h_Layer_eff", "h_Layer_eff;Number of fired straws", 30, 0, 30 );
     TH1F* h_Layer_eff2 = new TH1F ( "h_Layer_eff2", "h_Layer_eff2;Number of fired straws", 30, 0, 30 );
+    TH1F* h_Layer_eff3 = new TH1F ( "h_Layer_eff3", "h_Layer_eff3;Number of fired straws", 30, 0, 30 );
     TH1F* h_sq_ch = new TH1F ( "h_sq_ch", "h_sq_ch;channel", 300, 0, 300 );
 
     

@@ -4,7 +4,7 @@
 using namespace std;
 
 
-int effeciency ( std::vector<SttHit> A )
+bool effeciency ( std::vector<SttHit> A, histograms* h )
 {
     int MultLayer[8];
     int ChHitsMult[8][32];
@@ -38,8 +38,8 @@ int effeciency ( std::vector<SttHit> A )
     std::sort ( L8.begin(), L8.end(), f_sttHitCompareCell );
     if ( L1.size() ==2 && L8.size() ==2 && ( fabs ( L1[0].straw - L1[1].straw ) ) ==1 && ( fabs ( L1[0].straw - L1[1].straw ) ) ==1 ) {
         valid = true;
-        printf ( "L1 : %i  %i  L8 : %i  %i\n",L1[0].straw,L1[1].straw,L8[0].straw,L8[1].straw );
-        printf ( "L1 : %f  %f  L8 : %f  %f\n",L1[0].z,L1[1].z,L8[0].z,L8[1].z );
+        //printf ( "L1 : %i  %i  L8 : %i  %i\n",L1[0].straw,L1[1].straw,L8[0].straw,L8[1].straw );
+        // printf ( "L1 : %f  %f  L8 : %f  %f\n",L1[0].z,L1[1].z,L8[0].z,L8[1].z );
         arrayX[0]= L1[0].straw;
         arrayX[1]= L1[1].straw;
         arrayX[2]= L8[0].straw;
@@ -59,39 +59,59 @@ int effeciency ( std::vector<SttHit> A )
         Double_t cnst = f1->GetParameter ( 0 );
         Double_t slope = f1->GetParameter ( 1 );
 
-        printf ( "Cnst : %f  Slope : %f\n",cnst,slope );
-        for ( int a=0; a<6; a++ ) {
+       // printf ( "Cnst : %f  Slope : %f\n",cnst,slope );
+        int ex[8];
+        for ( int x=0; x<8; x++ ) {
+            ex[x]=0;
+        }
+        ex[0]= arrayX[0];
+        ex[7]= arrayX[3];
+        if ( ( ( arrayX[0] == arrayX[2] ) || ( arrayX[0] == arrayX[3] ) ) && ( ( arrayX[1] == arrayX[2] ) || ( arrayX[1] == arrayX[3] ) ) ) {
+            for ( int a=1; a<7; a++ ) {
+                ex[a] = arrayX[0];
+            }
 
-            int ex = ( ( arrayZcoo[a]-cnst ) /slope );
-            cout<<a<<"\t"<< ex <<endl;
+        } else {
+            for ( int a=1; a<7; a++ ) {
 
+                ex[a] = ( ( arrayZcoo[a-1]-cnst ) /slope );
+
+
+            }
+        }
+
+        ex[1]=ex[1]+3;
+        ex[2]=ex[2]-3;
+        ex[5]=ex[5]+3;
+        ex[6]=ex[6]-3;
+
+        for ( int s=0; s<A.size(); s++ ) {
+            if ( ( A[s].straw < ex[A[s].layer-1]+1 ) && ( A[s].straw > ex[A[s].layer-1]-1 ) ) {
+                //cout<<A[s].layer<<"\t"<<A[s].straw<<endl;
+                MultLayer[A[s].layer-1]++;
+                ChHitsMult[A[s].layer-1][A[s].straw-1]++;
+            }
         }
         delete f1;
+
+        int mult = 0;
+        int layer_eff_count =0;
+
+        for ( int kb=0; kb<8; kb++ ) {
+            if ( MultLayer[kb]> 0 ) {
+                mult++;
+            }
+            for ( int bk=0; bk<32; bk++ ) {
+                if ( ChHitsMult[kb][bk] >0 ) {
+                    layer_eff_count++;
+                }
+            }
+        }
+        h->h_Layer_eff3->Fill ( layer_eff_count-4 );
+
     }
-    cout<<endl<<endl;
 
-    int mult = 0;
-    int layer_eff_count =0;
-
-//     for ( int kb=0; kb<4; kb++ ) {
-//         if ( MultLayer[kb]> 0 ) {
-//             mult++;
-//             //cout<<"mult 3  "<<kb<<"\t"<<MultLayer3[kb]<<endl;
-//         }
-//
-//         for ( int bk=0; bk<32; bk++ ) {
-//             if ( ChHitsMult[kb][bk] >0 ) {
-//                 layer_eff_count++;
-//             }
-//         }
-//     }
-//     if ( MultLayer[0]>0 && MultLayer[3]>0 ) {
-//         h->h_Layer_eff2->Fill ( layer_eff_count );
-//         //cout<<"Two "<<layer_eff_count3<<endl;
-//     }
-
-    // delete f1;
-    return layer_eff_count;
+   // return 0;
 }
 
 
@@ -111,7 +131,7 @@ std::vector<float> eff_job ( double ax )
     double probability =0;
     double sum =0;
     for ( int a=0; a<17; a++ ) {
-        probability = ( ( fact ( 16 )  / ( fact ( a ) * fact ( 16-a ) ) )    * pow ( ax,a ) * pow ( ( 1-ax ),16-a ) );
+        probability = ( ( fact ( 12 )  / ( fact ( a ) * fact ( 12-a ) ) )    * pow ( ax,a ) * pow ( ( 1-ax ),12-a ) );
         sum += probability;
         cout<<a<<"\t"<<probability*100<<endl;
         A.push_back ( probability );
@@ -825,7 +845,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         //cout<<"Two "<<layer_eff_count3<<endl;
                     }
 
-////////////////////////////////////////////end - corridor////////////////////////////////////////
+//////////////////////////////////////////// end - corridor ////////////////////////////////////////////////////
 
                     int plane =0;
                     int cell =0;
@@ -863,6 +883,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         h->h_PlaneMult->Fill ( planeCount );
                     }
 
+                    effeciency ( vec_stthits ,h);
                     // if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
                     // PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
 
@@ -988,9 +1009,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_Layer_eff->Scale ( 1/norm );
     h->h_Layer_eff->Write();
 
-    double norm2 = h->h_Layer_eff2->GetEntries();
-    h->h_Layer_eff2->Scale ( 1/norm2 );
-    h->h_Layer_eff2->Write();
+    double norm2 = h->h_Layer_eff3->GetEntries();
+    h->h_Layer_eff3->Scale ( 1/norm2 );
+    h->h_Layer_eff3->Write();
 
     h->h_pLayer_eff->Write();
     h->h_sq_ch->Write();
@@ -1000,8 +1021,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     double index[30];
     std::vector<float> B;
     std::vector<float> C;
-    B = eff_job ( 0.90 );
-    C = eff_job ( 0.95 );
+    B = eff_job ( 0.95 );
+    C = eff_job ( 0.96 );
 
     float from_90per[B.size()];
     float from_95per[C.size()];
@@ -1015,7 +1036,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int r=0; r<30; r++ ) {
         from_data[r]= h->h_Layer_eff->GetBinContent ( r );
-        from_corridor[r]= h->h_Layer_eff2->GetBinContent ( r );
+        from_corridor[r]= h->h_Layer_eff3->GetBinContent ( r );
         index[r] =r-1;
     }
 
@@ -1025,18 +1046,18 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     TGraph* gFrom90Data = new TGraph ( B.size(), from_90index , from_90per );
     TGraph* gFrom95Data = new TGraph ( C.size(), from_90index , from_95per );
 
-    gEffeciency->Write();
-    gEffeciency->Draw ( "AB" );
-    gEffeciency->SetFillColor ( kRed );
-    gEffeciency->SetFillStyle ( 3007 );
-    gEffeciency->SetMarkerStyle ( 3 );
-    gEffeciency->SetMarkerColor ( kRed );
+//     gEffeciency->Write();
+//     gEffeciency->Draw ( "AB" );
+//     gEffeciency->SetFillColor ( kRed );
+//     gEffeciency->SetFillStyle ( 3007 );
+//     gEffeciency->SetMarkerStyle ( 3 );
+//     gEffeciency->SetMarkerColor ( kRed );
 
 
     gEffeciency2->Write();
-    gEffeciency2->Draw ( "same,P" );
-    //gEffeciency2->SetFillColor ( kBlack );
-    //gEffeciency2->SetFillStyle ( 3006 );
+    gEffeciency2->Draw ( "AB" );
+    gEffeciency2->SetFillColor ( kBlack );
+    gEffeciency2->SetFillStyle ( 3006 );
     gEffeciency2->SetMarkerStyle ( 3 );
     gEffeciency2->SetMarkerColor ( kBlack );
 
@@ -1205,6 +1226,7 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
 
 
 
