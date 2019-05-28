@@ -20,8 +20,6 @@ bool effeciency ( std::vector<SttHit> A, histograms* h )
     double arrayX[4];
     double arrayZ[4];
     double arrayZcoo[6] = {7.02,13.03, 19.04,37.05,43.06,49.07};
-    double arrayOffsetL[6] = {3,-3, 0,0,3,-3};
-    //double arrayOffsetH[6] = {0,13.03, 19.04,37.05,43.06,49.07};
 
     bool valid = false;
     for ( int cr=0; cr<A.size(); cr++ ) {
@@ -614,6 +612,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             ChHitsMult[vec_leadTime[jx].layer-1][vec_leadTime[jx].straw-1]++;
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
                             h->h_hitBlock->Fill ( 2 );
+                            h->h_p_drifttimevstot->Fill(vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot);
                             //printf ( "STRAW: %i  %i  %lf \n",vec_leadTime_d[jx].layer,vec_leadTime_d[jx].straw,vec_leadTime_d[jx].leadTime );
                         } else {
                             //vec_leadTime_d.erase ( vec_leadTime_d.begin() + jx );
@@ -884,10 +883,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     effeciency ( vec_stthits ,h);
-                    // if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
-                    // PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
+                   // PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
 
-                    // }
+                    }
 
                 }
             }
@@ -1022,7 +1021,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     std::vector<float> B;
     std::vector<float> C;
     B = eff_job ( 0.95 );
-    C = eff_job ( 0.96 );
+    C = eff_job ( 0.97 );
 
     float from_90per[B.size()];
     float from_95per[C.size()];
