@@ -206,19 +206,19 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
         for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
             SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
-            if (!scihit->channel==0){
-            SciHit* shit = sci_event->AddSciHit();
-            shit->tdcid = scihit->tdcid;
-            shit->channel = scihit->channel;
-            shit->isRef = scihit->isRef;
+            if ( !scihit->channel==0 ) {
+                SciHit* shit = sci_event->AddSciHit();
+                shit->tdcid = scihit->tdcid;
+                shit->channel = scihit->channel;
+                shit->isRef = scihit->isRef;
 //             shit->leadTime = scihit->leadTime;
 //             shit->trailTime = scihit->trailTime;
 
 
-            shit->leadTime = ( ( scihit->leadTime - tdc_ref[6] ) - scint_offset );
-            shit->trailTime = ( ( scihit->trailTime- tdc_ref[6] ) - scint_offset );
+                shit->leadTime = ( ( scihit->leadTime - tdc_ref[6] ) - scint_offset );
+                shit->trailTime = ( ( scihit->trailTime- tdc_ref[6] ) - scint_offset );
 
-            //printf("scint ref: %i\n",scihit->channel);
+                //printf("scint ref: %i\n",scihit->channel);
 //             if (scihit->channel ==0)
 //             printf("scint ref :%lf \n\n",shit->leadTime);
 //             else
@@ -253,7 +253,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 //                 cal_hit->layer = 0;
 //                 cal_hit->straw = 0;
 //                 cal_hit->station = 0;
-// 
+//
 //                 if ( index < 3 ) {
 //                     ref_diff = ( tdc_ref[6] - tdc_ref[index] ) - ( tdc_ref[3] - tdc_ref[0] );
 //                 } else {
@@ -262,7 +262,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 //                 cal_hit->leadTime = ( hit->leadTime - tdc_ref[index] ) + ref_diff;
 //                 cal_hit->trailTime = ( hit->trailTime- tdc_ref[index] ) + ref_diff;
 
-               // printf ( "tdcid %x, channel %i\n",hit->tdcid,hit->channel );
+                // printf ( "tdcid %x, channel %i\n",hit->tdcid,hit->channel );
 
 
 
@@ -307,11 +307,27 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     //printf ( "TRB1ref: %lf, TRB2ref:%lf refdiff:%lf  CLT:%lf  id:%x  L: %i  S: %i\n",tdc_ref[0],tdc_ref[3],tdc_ref[0]-tdc_ref[3],cal_hit->leadTime,cal_hit->tdcid,cal_hit->layer,cal_hit->straw );
 
 
+                    if ( tc->lay ==1 ||tc->lay ==3||tc->lay ==5||tc->lay ==7 ) {
+                        if ( tc->straw%2 ==0 ) {
+                            cal_hit->plane =0;
+                        } else {
+                            cal_hit->plane =1;
+                        }
+                    } else if ( tc->lay ==2 ||tc->lay ==4||tc->lay ==6||tc->lay ==8 ) {
+                        if ( tc->straw%2 ==0 ) {
+                            cal_hit->plane =1;
+                        } else {
+                            cal_hit->plane =0;
+                        }
+
+                    }
+
+/*
                     if ( tc->straw % 2 == 0 ) {
                         cal_hit->plane = 0;
                     } else {
                         cal_hit->plane = 1;
-                    }
+                    }*/
 
                     if ( hit->tot > 0 ) {
                         good_counter++;

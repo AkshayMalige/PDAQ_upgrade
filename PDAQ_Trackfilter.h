@@ -114,6 +114,8 @@ struct histograms{
     TH1F* h_ShitBlock = new TH1F("h_ShitBlock", "h_ShitBlock;Number of hits", 5, 0, 5);
     TH1F* h_PlaneMult = new TH1F("h_PlaneMult", "h_PlaneMult;Plane No.;Multiplicity", 18, 0, 18);
     
+    TH1F* h_L_layerEff = new TH1F("h_L_layerEff", "h_L_layerEff;Layer No.;Probability", 10, 0, 10);
+    
     TH2F* h_ppL_dtvstot[8];
     
     TH1F* h_pL_layerDT[8];
@@ -130,10 +132,6 @@ struct histograms{
     TH2F* h_L_channel_mult[8];
     TH1F* h_Ch_Dt[256];
     TH1F* h_pLT_Diff[256];
-//     for ( int i = 0; i < 8; i++ ) {
-//       
-//        h_layerDT[i] = new TH1F ( Form ( "Layer_%d_DT", i ) , Form ( "Layer_%d_DT", i ), 600, -100, 500 );
-//     }
     
 
     
