@@ -3,17 +3,6 @@
 
 using namespace std;
 
-bool layer_eff ( std::vector<SttHit> A, histograms* h )
-{
-    int plane =0;
-    int cell =0;
-
-
-
-}
-
-
-
 std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
 {
     std::vector<SttHit> vec_corr;
@@ -314,6 +303,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     ChDiff=new TCanvas ( "ChDiff_Canvas","ChDiff_Canvas" );
     ChDiff->Divide ( 4,2 );
 
+    TCanvas *Lay_ef = new TCanvas ( "Lay_ef","Lay_ef",200,10,500,300 );
+    TCanvas *Lay_ef1 = new TCanvas ( "Lay_ef1","Lay_ef1",200,10,500,300 );
+
     printf ( "%s\n", outtree );
     PandaSttCal* STT_CAL = new PandaSttCal();
     PandaSubsystemSCI* SCI_TRACKS = new PandaSubsystemSCI();
@@ -398,9 +390,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     int L7[2]= {7,11};
 
     double pl[8][3];
+    double pl2[8][3];
     for ( int pp=0; pp<8; pp++ ) {
         for ( int p=0; p<3; p++ ) {
             pl[pp][p]=0;
+            pl2[pp][p]=0;
         }
     }
 
@@ -418,6 +412,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
         h->h_pChDiff[mh] = new TH1F ( Form ( "Layer_%d_pChDiff", mh+1 ) , Form ( "Layer_%d_pChDiff", mh+1 ), 5, 0, 5 );
+
+        h->h_ChDiff[mh] = new TH1F ( Form ( "Layer_%d_ChDiff", mh+1 ) , Form ( "Layer_%d_ChDiff", mh+1 ), 7, 0, 7 );
         h->h_straw[mh] = new TH1F ( Form ( "Layer_%d_h_straw", mh+1 ) , Form ( "Layer_%d_h_straw", mh+1 ), 32, 0, 32 );
 
 
@@ -786,21 +782,41 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
 
-                    int sqq_ch=0;
-                    bool ch_hi =false;
-                    bool diff_1=false;
-                    bool diff_2=false;
+
                     for ( int hc=0; hc<8; hc++ ) {
+                        int sqq_ch=0;
+                        bool ch_hi =false;
+                        bool diff_1=false;
+                        bool diff_2=false;
+                        bool ch_p1=false;
+                        bool ch_p2=false;
+                        bool ch_m1=false;
+                        bool ch_m2=false;
+
                         for ( int fc=0; fc<vec_stthits.size(); fc++ ) {
-                            sqq_ch = ( ( vec_stthits[fc].layer-1 ) * 32 ) +vec_stthits[fc].straw-1;
-                            if ( sqq_ch == High_ch[hc]+1 ) {
-                                ch_hi = true;
-                            }
-                            if ( sqq_ch == High_ch[hc]+2 || sqq_ch == High_ch[hc] ) {
-                                diff_1 = true;
-                            }
-                            if ( sqq_ch == High_ch[hc]+3 || sqq_ch == High_ch[hc]-1 ) {
-                                diff_2 = true;
+                            if ( vec_stthits[fc].layer-1 == hc ) {
+                                sqq_ch = ( ( ( vec_stthits[fc].layer-1 ) * 32 ) +vec_stthits[fc].straw-1 )-1;
+                                if ( sqq_ch == High_ch[hc] ) {
+                                    ch_hi = true;
+                                }
+                                if ( sqq_ch == High_ch[hc]+1 ) {
+                                    ch_p1 = true;
+                                }
+                                if ( sqq_ch == High_ch[hc]+2 ) {
+                                    ch_p2 = true;
+                                }
+                                if ( sqq_ch == High_ch[hc]-1 ) {
+                                    ch_m1 = true;
+                                }
+                                if ( sqq_ch == High_ch[hc]-2 ) {
+                                    ch_m2 = true;
+                                }
+                                if ( sqq_ch == High_ch[hc]+1 || sqq_ch == High_ch[hc]-1 ) {
+                                    diff_1 = true;
+                                }
+                                if ( sqq_ch == High_ch[hc]+2 || sqq_ch == High_ch[hc]-2 ) {
+                                    diff_2 = true;
+                                }
                             }
                         }
                         //cout<<ch_hi<<"\t"<<diff_1<<"\t"<<diff_2<<endl;
@@ -814,62 +830,84 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_pChDiff[hc]->Fill ( 1 );
                         }
 
+                        if ( ( ch_hi==true && ch_m1==true && ch_p2 == true && ch_m2==false && ch_p1==false ) || ( ch_hi==true && ch_m1==false && ch_p2 == false && ch_m2==true && ch_p1==true ) ) {
+                            h->h_ChDiff[hc]->Fill ( 6 );
+                        }
+                        if ( ch_hi==true && ch_m2==true && ch_p2==true && ch_m1==false && ch_p1==false ) {
+                            h->h_ChDiff[hc]->Fill ( 5 );
+                        }
+                        if ( ( ch_hi==true && ch_m2==true && ch_m1==false && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p2==true && ch_m1==false && ch_p1==false && ch_m2==false ) ) {
+                            h->h_ChDiff[hc]->Fill ( 4 );
+                        }
+                        if ( ( ch_hi==true && ch_m1==true && ch_m2==true && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p1==true && ch_p2==true && ch_m1==false && ch_m2==false ) ) {
+                            h->h_ChDiff[hc]->Fill ( 3 );
+                        }
+                        if ( ch_hi==true && ch_m1==true && ch_p1==true && ch_m2==false && ch_p2==false ) {
+                            h->h_ChDiff[hc]->Fill ( 2 );
+                        }
+                        if ( ( ch_hi==true && ch_m1==true && ch_m2==false && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p1==true && ch_p2==false && ch_m1==false && ch_m2==false ) ) {
+                            h->h_ChDiff[hc]->Fill ( 1 );
+                        }
+                        if ( ch_hi==true && ch_m1==false && ch_m2==false && ch_p1==false && ch_p2==false ) {
+                            h->h_ChDiff[hc]->Fill ( 0 );
+                        }
+
+
+
                         ch_hi=false;
                         diff_1 = false;
                         diff_2 = false;
+                        ch_p1=false;
+                        ch_p2=false;
+                        ch_m1=false;
+                        ch_m2=false;
 
 
                     }
 
+
+//                     for ( int x=0; x<8; x++ ) {
+//                         //for(int xx=0; xx<2; xx++){
+//                         int strw =0;
+//                         int strw2 =0;
+//                         for ( int xxx=0; xxx<vec_stthits.size(); xxx++ ) {
+//                             if ( vec_stthits[xxx].layer-1 == x ) {
+//                                 if ( vec_stthits[xxx].plane == 0 ) {
+//                                     pl[x][0]++;
+//                                     strw = vec_stthits[xxx].straw;
+//                                 }
+//                                 if ( strw >0 ) {
+//                                     if ( vec_stthits[xxx].plane == 1 && ( fabs ( vec_stthits[xxx].straw - strw ) ==1 ) ) {
+//                                         pl[x][1]++;
+//                                     }
+//
+//                                     if ( pl[x][0]>0 && pl[x][1]>0 ) {
+//                                         pl[x][2]++;
+//                                     }
+//                                 }
+//
+//
+//
+//                                 if ( vec_stthits[xxx].plane == 1 ) {
+//                                     pl2[x][0]++;
+//                                     strw2 = vec_stthits[xxx].straw;
+//                                 }
+//                                 if ( strw >0 ) {
+//                                     if ( vec_stthits[xxx].plane == 1 && ( fabs ( vec_stthits[xxx].straw - strw2 ) ==1 ) ) {
+//                                         pl2[x][1]++;
+//                                     }
+//
+//                                     if ( pl2[x][0]>0 && pl2[x][1]>0 ) {
+//                                         pl2[x][2]++;
+//                                     }
+//                                 }
+//
+//                             }
+//                         }
+//                     }
+                    // }
 
 //////////////////////////////////corridor/////////////////////////////////////////////////
-                    std::vector<SttHit> vec_corridor;
-                    vec_corridor.clear();
-                    int MultLayer3[8];
-                    int ChHitsMult3[8][32];
-
-                    for ( int lb = 0; lb < 8; lb++ ) {
-                        MultLayer3[lb] = 0;
-                        for ( int mb =0; mb< 32; mb++ ) {
-                            ChHitsMult3[lb][mb] = 0;
-                        }
-                    }
-
-                    for ( int cr=0; cr<vec_stthits.size(); cr++ ) {
-                        if ( ( vec_stthits[cr].layer==1 || vec_stthits[cr].layer==4 || vec_stthits[cr].layer==5 || vec_stthits[cr].layer==8 ) && ( vec_stthits[cr].straw>=7 && vec_stthits[cr].straw<=11 ) ) {
-                            vec_corridor.push_back ( vec_stthits[cr] );
-                        } else if ( ( vec_stthits[cr].layer==2 || vec_stthits[cr].layer==6 ) && ( vec_stthits[cr].straw>=10 && vec_stthits[cr].straw<=14 ) ) {
-                            vec_corridor.push_back ( vec_stthits[cr] );
-                        } else if ( ( vec_stthits[cr].layer==3 || vec_stthits[cr].layer== 7 ) && ( vec_stthits[cr].straw>=4 && vec_stthits[cr].straw<=8 ) ) {
-                            vec_corridor.push_back ( vec_stthits[cr] );
-                        }
-                    }
-
-                    for ( int cr=0; cr<vec_corridor.size(); cr++ ) {
-                        MultLayer3[vec_corridor[cr].layer-1]++;
-                        ChHitsMult3[vec_corridor[cr].layer-1][vec_corridor[cr].straw-1]++;
-
-                    }
-
-                    int mult3 = 0;
-                    int layer_eff_count3 =0;
-
-                    for ( int kb=0; kb<8; kb++ ) {
-                        if ( MultLayer3[kb]> 0 ) {
-                            mult3++;
-                            //cout<<"mult 3  "<<kb<<"\t"<<MultLayer3[kb]<<endl;
-                        }
-
-                        for ( int bk=0; bk<32; bk++ ) {
-                            if ( ChHitsMult3[kb][bk] >0 ) {
-                                layer_eff_count3++;
-                            }
-                        }
-                    }
-                    if ( MultLayer3[0]>0 && MultLayer3[7]>0 ) {
-                        h->h_Layer_eff2->Fill ( layer_eff_count3 );
-                        //cout<<"Two "<<layer_eff_count3<<endl;
-                    }
 
 //////////////////////////////////////////// end - corridor ////////////////////////////////////////////////////
 
@@ -911,24 +949,24 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                     std::vector<SttHit> vec_corridor1;
                     vec_corridor1 = effeciency ( vec_stthits ,h );
-                    
-                    
+
+
 
                     for ( int b=0; b<8; b++ ) {
-                      bool pl0=false;
-                      bool pl1=false;
+                        bool pl0=false;
+                        bool pl1=false;
                         for ( int a=0; a<vec_corridor1.size(); a++ ) {
                             if ( vec_corridor1[a].layer ==b+1 ) {
                                 if ( vec_corridor1[a].plane ==0 ) {
-                                    pl[b][0]++;
+                                    pl2[b][0]++;
                                     pl0 =true;
                                 }
                                 if ( vec_corridor1[a].plane ==1 ) {
-                                    pl[b][1]++;
+                                    pl2[b][1]++;
                                     pl1 =true;
                                 }
                                 if ( pl0==true && pl1==true ) {
-                                    pl[b][2]++;
+                                    pl2[b][2]++;
                                 }
                             }
 
@@ -957,19 +995,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 //     cout<< dt_at_10 - 100<<endl;
 //
-    double lay_ef[8];
-    double lay_index[8];
-    
-    for ( int u=0; u<8; u++ ) {
-        lay_ef[u]=pl[u][2]/pl[u][1];
-        lay_index[u]=u+1;
-                
-        cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
-        printf("%2.2f\n",(pl[u][2])/(pl[u][1]));
-    }
-    TGraph* gLayerEff = new TGraph ( 8, lay_index, lay_ef  );
-    gLayerEff->Write();
-    
 
 
     h_STT_Hit_Diff->Write();
@@ -1124,22 +1149,24 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     gEffeciency2->Write();
     gEffeciency2->Draw ( "AB" );
-    gEffeciency2->SetFillColor ( kBlack );
-    gEffeciency2->SetFillStyle ( 3006 );
-    gEffeciency2->SetMarkerStyle ( 3 );
-    gEffeciency2->SetMarkerColor ( kBlack );
+    gEffeciency2->SetFillColor ( kRed );
+    gEffeciency2->SetTitle ( "Efficiency" );
+    gEffeciency2->GetXaxis()->SetTitle ( "Layer" );
+    //gEffeciency2->SetFillStyle ( 3006 );
+    // gEffeciency2->SetMarkerStyle ( 3 );
+    // gEffeciency2->SetMarkerColor ( kBlack );
 
     //gFrom90Data->Draw("AP");
 
-    gFrom90Data->SetMarkerStyle ( 3 );
-    gFrom90Data->SetMarkerColor ( kBlue );
-    gFrom90Data->Draw ( "same,P" );
-    gFrom90Data->Write();
-
-    gFrom95Data->SetMarkerStyle ( 3 );
-    gFrom95Data->SetMarkerColor ( kGreen );
-    gFrom95Data->Draw ( "same,P" );
-    gFrom95Data->Write();
+//     gFrom90Data->SetMarkerStyle ( 3 );
+//     gFrom90Data->SetMarkerColor ( kBlue );
+//     gFrom90Data->Draw ( "same,P" );
+//     gFrom90Data->Write();
+//
+//     gFrom95Data->SetMarkerStyle ( 3 );
+//     gFrom95Data->SetMarkerColor ( kGreen );
+//     gFrom95Data->Draw ( "same,P" );
+//     gFrom95Data->Write();
 
     h->h_PlaneMult->Scale ( 1/scint_event );
     h->h_PlaneMult->Write();
@@ -1177,9 +1204,28 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_pChDiff[hh]->Write();
         h->h_pChDiff[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_pChDiff[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_straw[hh]->Write();
+
+
+        for ( int a=1; a<8; a++ ) {
+            int b = h->h_ChDiff[hh]->GetBinContent ( a );
+            // cout<<b<<endl;
+            stringstream ss;
+            ss << b;
+            TString str = ss.str();
+            h->h_ChDiff[hh]->GetXaxis()->SetBinLabel ( a,str );
+        }
+        Double_t norm2 = h->h_ChDiff[hh]->GetEntries();
+        h->h_ChDiff[hh]->Scale ( 1/norm2 );
+        h->h_ChDiff[hh]->SetLineWidth ( 3 );
+        h->h_ChDiff[hh]->GetXaxis()->SetLabelSize ( 0.075 );
+        h->h_ChDiff[hh]->GetYaxis()->SetLabelSize ( 0.055 );
+        h->h_ChDiff[hh]->Write();
+
+
         h->h_straw[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_straw[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_straw[hh]->Write();
+
 
         DT->cd ( hh+1 );
         h->h_pL_layerDT[hh]->Draw();
@@ -1216,7 +1262,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         gPad->SetLogy();
 
         ChDiff->cd ( hh+1 );
-        h->h_pChDiff[hh]->Draw();
+        h->h_ChDiff[hh]->Draw();
         //gPad->SetLogy();
 
 
@@ -1265,6 +1311,41 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     Eff->Write();
 
 
+    double lay_ef[8];
+    double lay_ef2[8];
+    double lay_index[8];
+
+    for ( int u=0; u<8; u++ ) {
+        lay_ef[u]=pl2[u][2]/pl2[u][1];
+        lay_ef2[u]=pl2[u][2]/pl2[u][0];
+        lay_index[u]=u+1;
+
+        cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
+        printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][1] ) );
+
+        cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
+        printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][0] ) );
+        cout<<"**********"<<endl;
+    }
+
+    Lay_ef->cd();
+    TGraph* gLayerEff = new TGraph ( 8, lay_index, lay_ef );
+    gLayerEff->Draw ( "AB" );
+    gLayerEff->SetTitle ( "Plane_0" );
+    gLayerEff->GetXaxis()->SetTitle ( "Layer" );
+    gLayerEff->Write();
+    gLayerEff->SetFillColor ( kRed );
+
+    Lay_ef1->cd();
+    TGraph* gLayerEff2 = new TGraph ( 8, lay_index, lay_ef2 );
+    gLayerEff2->Write();
+    gLayerEff2->Draw ( "AB" );
+    gLayerEff2->SetTitle ( "Plane_1" );
+    gLayerEff2->GetXaxis()->SetTitle ( "Layer" );
+    gLayerEff2->SetFillColor ( kRed );
+
+    Lay_ef->Write();
+    Lay_ef1->Write();
     PDAQ_tree->Write();
     //Ttree->Close();
     //inFile.Close();
@@ -1295,6 +1376,10 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
+
+
+
 
 
 

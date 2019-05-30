@@ -123,6 +123,7 @@ struct histograms{
     TH1F* h_pL_TOT[8];
     TH2F* h_pL_channel_mult[8];
     TH1F* h_pChDiff[8];
+    TH1F* h_ChDiff[8];
     TH1F* h_straw[8];
     
     
