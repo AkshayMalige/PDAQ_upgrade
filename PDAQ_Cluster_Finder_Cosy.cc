@@ -1173,6 +1173,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
     for ( int hh = 0; hh < 8; hh++ ) {
+
         h->h_pL_layerDT[hh]->Write();
         h->h_pL_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_pL_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
@@ -1199,6 +1200,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_channel_mult[hh]->Write();
         h->h_L_channel_mult[hh]->GetXaxis()->SetLabelSize ( 0.045 );
 
+        ChDiff->cd ( hh+1 );
+        h->h_ChDiff[hh]->Draw();
         Double_t norm1 = h->h_pChDiff[hh]->GetEntries();
         h->h_pChDiff[hh]->Scale ( 1/norm1 );
         h->h_pChDiff[hh]->Write();
@@ -1206,26 +1209,27 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_pChDiff[hh]->GetYaxis()->SetLabelSize ( 0.045 );
 
 
-        for ( int a=1; a<8; a++ ) {
-            int b = h->h_ChDiff[hh]->GetBinContent ( a );
-            // cout<<b<<endl;
-            stringstream ss;
-            ss << b;
-            TString str = ss.str();
-            h->h_ChDiff[hh]->GetXaxis()->SetBinLabel ( a,str );
-        }
+//         for ( int a=1; a<8; a++ ) {
+//             int b = h->h_ChDiff[hh]->GetBinContent ( a );
+//             stringstream ss;
+//             ss << b;
+//             TString str = ss.str();
+//             h->h_ChDiff[hh]->GetXaxis()->SetBinLabel ( a,str );
+//         }
         Double_t norm2 = h->h_ChDiff[hh]->GetEntries();
-        h->h_ChDiff[hh]->Scale ( 1/norm2 );
+        // h->h_ChDiff[hh]->Scale ( 1/norm2 );
         h->h_ChDiff[hh]->SetLineWidth ( 3 );
         h->h_ChDiff[hh]->GetXaxis()->SetLabelSize ( 0.075 );
         h->h_ChDiff[hh]->GetYaxis()->SetLabelSize ( 0.055 );
+        h->h_ChDiff[hh]->SetMarkerSize ( 3 );
+        h->h_ChDiff[hh]->SetMarkerColor ( kRed );
+        h->h_ChDiff[hh]->Draw ( "h,TEXT45" );
         h->h_ChDiff[hh]->Write();
 
 
         h->h_straw[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_straw[hh]->GetYaxis()->SetLabelSize ( 0.045 );
         h->h_straw[hh]->Write();
-
 
         DT->cd ( hh+1 );
         h->h_pL_layerDT[hh]->Draw();
@@ -1261,8 +1265,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_pLT_Diff[Low_ch[hh]]->Draw ();
         gPad->SetLogy();
 
-        ChDiff->cd ( hh+1 );
-        h->h_ChDiff[hh]->Draw();
+
         //gPad->SetLogy();
 
 
