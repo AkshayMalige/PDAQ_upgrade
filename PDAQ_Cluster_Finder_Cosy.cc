@@ -86,7 +86,7 @@ std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
         vec_corr.clear();
         //cout<<A.size()<<"\t";
         for ( int s=0; s<A.size(); s++ ) {
-            if ( ( A[s].straw <= ex[A[s].layer-1]+1 ) && ( A[s].straw >= ex[A[s].layer-1]-1 ) ) {
+            if ( ( A[s].straw <= ex[A[s].layer-1]+2 ) && ( A[s].straw >= ex[A[s].layer-1]-2 ) ) {
                 MultLayer[A[s].layer-1]++;
                 ChHitsMult[A[s].layer-1][A[s].straw-1]++;
                 vec_corr.push_back ( A[s] );
@@ -1223,7 +1223,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_ChDiff[hh]->GetYaxis()->SetLabelSize ( 0.055 );
         h->h_ChDiff[hh]->SetMarkerSize ( 3 );
         h->h_ChDiff[hh]->SetMarkerColor ( kRed );
-        h->h_ChDiff[hh]->Draw ( "h,TEXT45" );
+        h->h_ChDiff[hh]->Draw ( "h,TEXT60" );
         h->h_ChDiff[hh]->Write();
 
 
