@@ -14,6 +14,16 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     PandaSttTrack* DT_TRACKS = new PandaSttTrack();
     Stt_Track_Event* stt_event = & ( DT_TRACKS->stt_track_can );
 
+    std::vector<double> vec_o_test;
+    std::vector<double> vec_x;
+    std::vector<double> vec_y;
+    std::vector<double> vec_z;
+    std::vector<double> vec_layer;
+    std::vector<double> vec_module;
+    std::vector<double> vec_straw;
+    std::vector<double> vec_fee_ch;
+    std::vector<double> vec_tdc_ch;
+
     TFile inFile ( intree );
     TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
     if ( !tree ) {
@@ -42,8 +52,17 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
 
+
+    PDAQ_tree->Branch ( "vec_Drifttime", &vec_o_test );
+    PDAQ_tree->Branch ( "vec_x", &vec_x );
+    PDAQ_tree->Branch ( "vec_y", &vec_y );
+    PDAQ_tree->Branch ( "vec_z", &vec_z );
+    PDAQ_tree->Branch ( "vec_layer", &vec_layer );
+    PDAQ_tree->Branch ( "vec_straw", &vec_straw );
+
     TH1F* h_Ch_Dt[256];
     TH1F* h_drifttime = new TH1F ( "h_drifttime", "h_drifttime;Drift Time [ns]", 800, -100,700 );
+    TH1F* h_Cal_drifttime = new TH1F ( "h_Cal_drifttime", "h_Cal_drifttime;Drift Time [ns]", 800, -100,700 );
     TH1F* h_Cal_Ch_Dt[256];
     TH1F* h_Dt[256];
 
@@ -76,10 +95,10 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
     }
 
-    for ( int as=0; as<vec_DT_start.size(); as++ ) {
-
-        cout<<vec_DT_start[as]<<endl;
-    }
+//     for ( int as=0; as<vec_DT_start.size(); as++ ) {
+//
+//         cout<<vec_DT_start[as]<<endl;
+//     }
 
 
 
@@ -106,19 +125,38 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             std::vector<SttHit> vec_tracks;
             for ( int t = 0; t < vec_track_can.size(); t++ ) {
                 sq_ch = ( ( vec_track_can[t].layer-1 ) * 32 ) +vec_track_can[t].straw-1;
-                dt_crr = vec_track_can[t].drifttime + vec_DT_start[sq_ch-1];
-                a = vec_track_can[t];
-                a.drifttime = dt_crr;
-                vec_tracks.push_back ( a );
-                h_Cal_Ch_Dt[sq_ch]->Fill ( a.drifttime );
-                h_Dt[sq_ch]->Fill ( vec_track_can[t].drifttime );
+                dt_crr = vec_track_can[t].drifttime + vec_DT_start[sq_ch];
+                if ( dt_crr>0.0 && dt_crr<=200.0 ) {
+                    a = vec_track_can[t];
+                    a.drifttime = dt_crr;
+                    vec_tracks.push_back ( a );
+                    h_Cal_Ch_Dt[sq_ch]->Fill ( a.drifttime );
+                    h_Dt[sq_ch]->Fill ( vec_track_can[t].drifttime );
+
+                    h_Cal_drifttime->Fill ( dt_crr );
+
+
+                    vec_o_test.push_back ( a.drifttime );
+                    vec_x.push_back ( vec_track_can[t].x );
+                    vec_y.push_back ( vec_track_can[t].y );
+                    vec_z.push_back ( vec_track_can[t].z );
+                    vec_layer.push_back ( vec_track_can[t].layer );
+                    vec_straw.push_back ( vec_track_can[t].straw );
+                }
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
+            
+            
             //cout<<vec_tracks.size()<<endl;
             SttTrackHit& b = stt_event->AddTrackHit();
             b.vec_Track = vec_tracks;
             PDAQ_tree->Fill();
             stt_event->TrackClear();
+            vec_o_test.clear();
+            vec_x.clear();
+            vec_y.clear();
+            vec_z.clear();
+            vec_straw.clear();
 
         }
     }
@@ -126,6 +164,35 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     //h_Ch_Dt[1]->Draw();
     // h_Ch_Dta->Draw();
     h_drifttime->Write();
+    h_Cal_drifttime->Write();
+
+    double C =0;
+    int xmin=0;
+    int xmax=0;
+    std::vector<double> vec_drift_radius;
+    double a1[201];
+    double b1[201];
+
+    C = ( h_Cal_drifttime->GetEntries() ) /0.505;
+
+    for ( int x=0; x<=200; x++ ) {
+        TAxis *axis = h_Cal_drifttime->GetXaxis();
+        int bmin = axis->FindBin ( 0.0 );
+        int bmax = axis->FindBin ( x );
+        double drift_radius = ( h_Cal_drifttime->Integral ( bmin,bmax ) ) /C;
+        //vec_drift_radius.push_back ( drift_radius );
+        cout<<x<<"\t"<<drift_radius<<endl;
+        a1[x]=x;
+        b1[x]=drift_radius;
+    }
+
+    TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
+    gDriftRadius->SetName ( "PDAQ_DR" );
+
+    gDriftRadius->Write();
+
+
+
     for ( int chh=0; chh<256; chh++ ) {
 
         h_Cal_Ch_Dt[chh]->Write();

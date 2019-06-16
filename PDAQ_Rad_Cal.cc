@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Bool_t PDAQ_Rad_Cal(void)
+Bool_t PDAQ_Rad_Cal ( void )
 {
     cout << "Open" << endl;
 
@@ -11,11 +11,11 @@ Bool_t PDAQ_Rad_Cal(void)
     PandaSttCal* STT_CAL = 0;
     PandaSttTrack* DT_TRACKS = new PandaSttTrack();
 
-    TFile* file = TFile::Open("d.root","READ");
-	TH1F* DR = new TH1F ( "DR", "DRX", 1000,-0.1, 0.6 );
+    TFile* file = TFile::Open ( "d.root","READ" );
+    TH1F* DR = new TH1F ( "DR", "DRX", 1000,-0.1, 0.6 );
     TTree* tree = 0;
-    file->GetObject("PDAQ_tree", tree);
-    if (!tree) {
+    file->GetObject ( "PDAQ_tree", tree );
+    if ( !tree ) {
         std::cerr << "Tree doesn't exists" << std::endl;
         return 1;
     }
@@ -46,48 +46,45 @@ Bool_t PDAQ_Rad_Cal(void)
     int counterofdt = 0;
     int driftTimeCounter2 = 0;
 
-    tree->SetBranchAddress("DT_TRACKS", &DT_TRACKS);
-    TFile* ftree = new TFile("DT1750.root", "RECREATE");
-    TTree* DR_Tree = new TTree("DR_Tree", "DR_Tree");
+    tree->SetBranchAddress ( "DT_TRACKS", &DT_TRACKS );
+    TFile* ftree = new TFile ( "DT1750.root", "RECREATE" );
+    TTree* DR_Tree = new TTree ( "DR_Tree", "DR_Tree" );
 
-    DR_Tree->Branch("vec_Drifttime", &vec_o_test);
-    DR_Tree->Branch("vec_x", &vec_x);
-    DR_Tree->Branch("vec_y", &vec_y);
-    DR_Tree->Branch("vec_z", &vec_z);
-    DR_Tree->Branch("vec_layer", &vec_layer);
-    DR_Tree->Branch("vec_straw", &vec_straw);
+    DR_Tree->Branch ( "vec_Drifttime", &vec_o_test );
+    DR_Tree->Branch ( "vec_x", &vec_x );
+    DR_Tree->Branch ( "vec_y", &vec_y );
+    DR_Tree->Branch ( "vec_z", &vec_z );
+    DR_Tree->Branch ( "vec_layer", &vec_layer );
+    DR_Tree->Branch ( "vec_straw", &vec_straw );
 
-    Int_t iev = (Int_t)tree->GetEntries();
+    Int_t iev = ( Int_t ) tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl << endl;
 
     cout << DT_TRACKS->stt_track_can.total_track_NTDCHits << endl;
 
-    for (Int_t i = 0; i < iev; i++)
-    {
-        tree->GetEntry(i);
-        if (i % 100 == 0) {
+    for ( Int_t i = 0; i < iev; i++ ) {
+        tree->GetEntry ( i );
+        if ( i % 100 == 0 ) {
             cout << i << endl;
         }
 
-        for (int n = 0; n < DT_TRACKS->stt_track_can.total_track_NTDCHits; n++)
-        {
+        for ( int n = 0; n < DT_TRACKS->stt_track_can.total_track_NTDCHits; n++ ) {
 
 //             std::vector<SttHit> vec_track_can;
             // SttHit* cal_hit  =
             // (SttHit*)STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt(n);
             SttTrackHit& track_hit = DT_TRACKS->stt_track_can.tdc_track_hits[n];
             const std::vector<SttHit> & vec_track_can = track_hit.vec_Track;
-           // cout<<vec_track_can.size()<<endl;
-            for (int t = 0; t < vec_track_can.size(); t++)
-            {
-                vec_o_test1.push_back(vec_track_can[t].drifttime);
-                vec_o_test.push_back(vec_track_can[t].drifttime);
-                vec_x.push_back(vec_track_can[t].x);
-                vec_y.push_back(vec_track_can[t].y);
-                vec_z.push_back(vec_track_can[t].z);
-                vec_layer.push_back(vec_track_can[t].layer);
-                vec_straw.push_back(vec_track_can[t].straw);
-               // cout<<vec_track_can[t].straw<<endl;
+            // cout<<vec_track_can.size()<<endl;
+            for ( int t = 0; t < vec_track_can.size(); t++ ) {
+                vec_o_test1.push_back ( vec_track_can[t].drifttime );
+                vec_o_test.push_back ( vec_track_can[t].drifttime );
+                vec_x.push_back ( vec_track_can[t].x );
+                vec_y.push_back ( vec_track_can[t].y );
+                vec_z.push_back ( vec_track_can[t].z );
+                vec_layer.push_back ( vec_track_can[t].layer );
+                vec_straw.push_back ( vec_track_can[t].straw );
+                // cout<<vec_track_can[t].straw<<endl;
 
                 counterofdt++;
             }
@@ -99,7 +96,7 @@ Bool_t PDAQ_Rad_Cal(void)
             vec_z.clear();
             vec_straw.clear();
 
-	        
+
         }
     }
     cout << "Number of drifttimes :  " << counterofdt << endl;
@@ -109,56 +106,50 @@ Bool_t PDAQ_Rad_Cal(void)
 
     // Only under 220ns.
 
-    for (int r = 0; r < vec_o_test1.size(); r++)
-    {
-        if (vec_o_test1[r] <= 220) {
-            vec_test.push_back(vec_o_test1[r]);
+    for ( int r = 0; r < vec_o_test1.size(); r++ ) {
+        if ( vec_o_test1[r] <= 220 ) {
+            vec_test.push_back ( vec_o_test1[r] );
             driftTimeCounter2++;
         }
     }
 
-    std::sort(vec_test.begin(), vec_test.end());
+    std::sort ( vec_test.begin(), vec_test.end() );
     // cout << "counttts:  " << driftTimeCounter2 << endl;
 
     // Ignore the decimals of the drifttimes.
 
-    for (int t = 0; t < vec_test.size(); t++)
-    {
+    for ( int t = 0; t < vec_test.size(); t++ ) {
         // cout << seeme[t] << endl;
-        int x = (vec_test[t] * 100) / 100;
-        vec_roundoff.push_back(x);
+        int x = ( vec_test[t] * 100 ) / 100;
+        vec_roundoff.push_back ( x );
     }
 
     // Calculate the occurances of each drift time.
 
-    for (int j = 0; j < vec_test.size(); j++)
-    {
+    for ( int j = 0; j < vec_test.size(); j++ ) {
         // cout << vec1[j] << endl;
         int occ_count = 1;
-        int limit = (vec_test.size() - 1);
+        int limit = ( vec_test.size() - 1 );
 
-        while (j < limit && vec_roundoff[j] == vec_roundoff[j + 1])
-        {
+        while ( j < limit && vec_roundoff[j] == vec_roundoff[j + 1] ) {
             occ_count++;
             j++;
         }
-        vec_occurance.push_back(occ_count);
-        vec_pos_DT.push_back(vec_roundoff[j]);
+        vec_occurance.push_back ( occ_count );
+        vec_pos_DT.push_back ( vec_roundoff[j] );
         // cout<< vec_roundoff[j] << "\t" << occ_count <<  endl;
     }
 
     // Calculate the cummulative sum (integral) of the occurances.
 
-    for (int m = 0; m < vec_occurance.size(); m++)
-    {
+    for ( int m = 0; m < vec_occurance.size(); m++ ) {
         int sum = 0;
 
-        for (int k = 0; k < m + 1; k++)
-        {
+        for ( int k = 0; k < m + 1; k++ ) {
             sum += vec_occurance[k];
         }
 
-        vec_cumsum.push_back(sum);
+        vec_cumsum.push_back ( sum );
     }
 
     // Calculate the drift radius.
@@ -174,31 +165,32 @@ Bool_t PDAQ_Rad_Cal(void)
 
     C = max_dr / R;
 
-    for (int e = 0; e < dt_range; e++)
-    {
+    for ( int e = 0; e < dt_range; e++ ) {
 
         drift_radius = vec_cumsum[e] / C;
-        vec_drift_radius.push_back(drift_radius);
+        vec_drift_radius.push_back ( drift_radius );
     }
 
-    for (int l = 0; l < vec_pos_DT.size(); l++)
-    {
-         cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l];
+    for ( int l = 0; l < vec_pos_DT.size(); l++ ) {
+        cout << "Drift Time: "<< vec_pos_DT[l] << "\t" << vec_drift_radius[l];
         // << endl;
-	DR->Fill(vec_drift_radius[l]);
+        DR->Fill ( vec_drift_radius[l] );
         a1[l] = vec_pos_DT[l];
         b1[l] = vec_drift_radius[l];
     }
 
-    TGraph* gDriftRadius = new TGraph(dt_range, a1, b1);
-    gDriftRadius->SetName("PDAQ_DR");
+    TGraph* gDriftRadius = new TGraph ( dt_range, a1, b1 );
+    gDriftRadius->SetName ( "PDAQ_DR" );
 
     gDriftRadius->Write();
     DR_Tree->Write();
-	DR->Write();
+    DR->Write();
     return kTRUE;
 
     ////////////////////
 }
 
-int main() { return PDAQ_Rad_Cal(); }
+int main()
+{
+    return PDAQ_Rad_Cal();
+}

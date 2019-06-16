@@ -6,7 +6,7 @@ Bool_t PDAQ_Spl_Res ( void )
 
     cout << "Opened" << endl;
 
-    TFile* file = TFile::Open ( "DT1750.root", "READ" );
+    TFile* file = TFile::Open ( "d.root", "READ" );
     TTree* tree = 0;
     file->GetObject ( "DR_Tree", tree );
 

@@ -87,8 +87,8 @@ struct histograms{
     TH2F* h_drifttimevsLayer = new TH2F("h_drifttimevsLayer", "h_drifttimevsLayer;Drift Time [ns];Layer", 360, -10, 350,20,0,10);
     
     TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 100000, -50000, 50000);
-    TH1F* h_scint_timediffa = new TH1F("h_scint_timediffa", "h_scint_timediffa;Number of hits", 50000, 0, 50000);
-    TH1F* h_scint_timediffb = new TH1F("h_scint_timediffb", "h_scint_timediffb;Number of hits", 50000, 0, 50000);
+    TH1F* h_scint_timediffa = new TH1F("h_scint_timediffa", "h_scint_timediffa;Time Difference [ns]", 2000, 0, 2000);
+    TH1F* h_scint_timediffb = new TH1F("h_scint_timediffb", "h_scint_timediffb;Time Difference [ns]", 2000, 0, 2000);
 
     TH1F* h_raw_leadtimes = new TH1F("h_raw_leadtimes", "h_raw_leadtimes;", 100000, -100000, 0);
     

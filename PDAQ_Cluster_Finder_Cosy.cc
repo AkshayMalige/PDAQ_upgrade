@@ -401,14 +401,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     //int High_strw[8]= {9,12,6,9,9,12,6,9};
 
     for ( int mh = 0; mh < 8; mh++ ) {
-        h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa", mh+1 ), 700, -100,600 );
-        h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time;Time Over Threshold",mh+1 ), 500, 0, 500,700,0,700 );
-        h->h_pL_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTa", mh+1 ) , Form ( "Layer_%d_TOTa", mh+1 ), 600, -100, 500 );
+        h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa;Drift Time [ns]", mh+1 ), 600, -100,500 );
+        h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time [ns];Time Over Threshold [ns]",mh+1 ), 500, 0, 500,700,0,700 );
+        h->h_pL_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTa", mh+1 ) , Form ( "Layer_%d_TOTa;Time Over Threshold [ns]", mh+1 ), 600, -100, 500 );
         h->h_pL_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multa", mh+1 ) , Form ( "Layer_%d_multa;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
-        h->h_L_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTb", mh+1 ) , Form ( "Layer_%d_DTb", mh+1 ), 600, -100, 500 );
-        h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time;Time Over Threshold",mh+1 ), 500, 0, 500,700,0,700 );
-        h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb", mh+1 ), 600, -100, 500 );
+        h->h_L_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTb", mh+1 ) , Form ( "Layer_%d_DTb;Drift Time [ns]", mh+1 ), 600, -100, 500 );
+        h->h_L_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTb",mh+1 ),Form ( "Layer_%d_DTvsTOTb;Drift Time [ns];Time Over Threshold [ns]",mh+1 ), 500, 0, 500,700,0,700 );
+        h->h_L_TOT[mh] = new TH1F ( Form ( "Layer_%d_TOTb", mh+1 ) , Form ( "Layer_%d_TOTb;Time Over Threshold [ns]", mh+1 ), 600, -100, 500 );
         h->h_L_channel_mult[mh] = new TH2F ( Form ( "Layer_%d_multb", mh+1 ) , Form ( "Layer_%d_multb;Channel;Multiplicity", mh+1 ), 33, 0, 33, 20, 0, 20 );
 
         h->h_pChDiff[mh] = new TH1F ( Form ( "Layer_%d_pChDiff", mh+1 ) , Form ( "Layer_%d_pChDiff", mh+1 ), 5, 0, 5 );
@@ -977,7 +977,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 //                  cout<<vec_corridor1.size()<<"\t"<<vec_stthits.size()<<endl;
                     if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
-                        // PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                        //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                     }
 
                 }
@@ -1010,9 +1010,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_hitmultiplicity4->Draw ( "same" );
     h->h_hitmultiplicity0->SetLineColor ( kBlack );
     h->h_hitmultiplicity1->SetLineColor ( kMagenta );
-    h->h_hitmultiplicity2->SetLineColor ( kBlue );
+    h->h_hitmultiplicity2->SetLineColor ( kTeal-8 );
     h->h_hitmultiplicity3->SetLineColor ( kGreen );
-    h->h_hitmultiplicity4->SetLineColor ( kRed );
+    h->h_hitmultiplicity4->SetLineColor ( kOrange+1 );
     h->h_hitmultiplicity0->SetLineWidth ( 3 );
     h->h_hitmultiplicity1->SetLineWidth ( 3 );
     h->h_hitmultiplicity2->SetLineWidth ( 3 );
@@ -1043,9 +1043,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_tot2->Draw ( "same" );
     h->h_tot3->Draw ( "same" );
     h->h_tot4->Draw ( "same" );
-    h->h_tot0->SetLineColor ( kRed );
+    h->h_tot0->SetLineColor ( kOrange+1 );
     h->h_tot1->SetLineColor ( kMagenta );
-    h->h_tot2->SetLineColor ( kBlue );
+    h->h_tot2->SetLineColor ( kTeal-8 );
     h->h_tot3->SetLineColor ( kGreen );
     h->h_tot4->SetLineColor ( kBlack );
     TLegend* leg1 = new TLegend ( 0.5,0.7,0.9,0.9 );
@@ -1082,8 +1082,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_p_drifttime->Write();
     h->h_drifttime->Write();
     h->h_p_tot->Write();
-    h->h_tot->Write();
+    h->h_scint_timediffa->SetLineColor(kOrange+1);
     h->h_scint_timediffa->Write();
+    h->h_scint_timediffb->SetLineColor(kOrange+1);
     h->h_scint_timediffb->Write();
     h->h_L5_S9LTdiff->Write();
     h->h_pL5_S9LTdiff->Write();
@@ -1141,17 +1142,18 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 //     gEffeciency->Write();
 //     gEffeciency->Draw ( "AB" );
-//     gEffeciency->SetFillColor ( kRed );
+//     gEffeciency->SetFillColor ( kOrange+1 );
 //     gEffeciency->SetFillStyle ( 3007 );
 //     gEffeciency->SetMarkerStyle ( 3 );
-//     gEffeciency->SetMarkerColor ( kRed );
+//     gEffeciency->SetMarkerColor ( kOrange+1 );
 
 
     gEffeciency2->Write();
     gEffeciency2->Draw ( "AB" );
-    gEffeciency2->SetFillColor ( kRed );
+    gEffeciency2->SetFillColor ( kOrange+1 );
     gEffeciency2->SetTitle ( "Efficiency" );
-    gEffeciency2->GetXaxis()->SetTitle ( "Layer" );
+    gEffeciency2->GetXaxis()->SetTitle ( "Number of fired straws" );
+    gEffeciency2->GetXaxis()->SetTitleSize ( 0.045 );
     //gEffeciency2->SetFillStyle ( 3006 );
     // gEffeciency2->SetMarkerStyle ( 3 );
     // gEffeciency2->SetMarkerColor ( kBlack );
@@ -1159,7 +1161,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     //gFrom90Data->Draw("AP");
 
 //     gFrom90Data->SetMarkerStyle ( 3 );
-//     gFrom90Data->SetMarkerColor ( kBlue );
+//     gFrom90Data->SetMarkerColor ( kTeal-8 );
 //     gFrom90Data->Draw ( "same,P" );
 //     gFrom90Data->Write();
 //
@@ -1174,29 +1176,57 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int hh = 0; hh < 8; hh++ ) {
 
-        h->h_pL_layerDT[hh]->Write();
-        h->h_pL_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_dtvstot[hh]->Write();
-        h->h_pL_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_TOT[hh]->Write();
-        h->h_pL_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_channel_mult[hh]->Write();
-        h->h_pL_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
 
-        h->h_L_layerDT[hh]->Write();
+        h->h_pL_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_pL_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_pL_layerDT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_pL_layerDT[hh]->SetLineColor(kOrange+1);
+        h->h_pL_layerDT[hh]->SetLineWidth(2);
+        h->h_pL_layerDT[hh]->Write();
+
         h->h_L_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_L_dtvstot[hh]->Write();
-        h->h_L_dtvstot[hh]->GetXaxis()->SetLabelSize ( 0.045 );
-        h->h_L_dtvstot[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_L_dtvstot[hh]->GetXaxis()->SetNdivisions ( 310 );
-        h->h_L_TOT[hh]->Write();
+        h->h_L_layerDT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_L_layerDT[hh]->SetLineColor(kTeal-8);
+        h->h_L_layerDT[hh]->SetLineWidth(2);
+        h->h_L_layerDT[hh]->Write();
+//------------------------------------------------------------------------
+
+        h->h_pL_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_pL_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_pL_TOT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_pL_TOT[hh]->SetLineColor(kOrange+1);
+        h->h_pL_TOT[hh]->SetLineWidth(2);
+        h->h_pL_TOT[hh]->Write();
+
+
+
         h->h_L_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_L_TOT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_L_TOT[hh]->SetLineColor(kTeal-8);
+        h->h_L_TOT[hh]->SetLineWidth(2);
+        h->h_L_TOT[hh]->Write();
+//------------------------------------------------------------------------
+        h->h_pL_dtvstot[hh]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_pL_dtvstot[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_pL_dtvstot[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_pL_dtvstot[hh]->GetYaxis()->SetTitleSize ( 0.045 );
+        h->h_pL_dtvstot[hh]->GetXaxis()->SetNdivisions ( 5 );
+        h->h_pL_dtvstot[hh]->Write();
+
+        h->h_L_dtvstot[hh]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_L_dtvstot[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_L_dtvstot[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_L_dtvstot[hh]->GetYaxis()->SetTitleSize ( 0.045 );
+        h->h_L_dtvstot[hh]->GetXaxis()->SetNdivisions ( 5 );
+        h->h_L_dtvstot[hh]->Write();
+//------------------------------------------------------------------------
+
+        h->h_pL_channel_mult[hh]->Write();
+
+
+
         h->h_L_channel_mult[hh]->Write();
         h->h_L_channel_mult[hh]->GetXaxis()->SetLabelSize ( 0.045 );
 
@@ -1217,12 +1247,13 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //             h->h_ChDiff[hh]->GetXaxis()->SetBinLabel ( a,str );
 //         }
         Double_t norm2 = h->h_ChDiff[hh]->GetEntries();
-        // h->h_ChDiff[hh]->Scale ( 1/norm2 );
+        h->h_ChDiff[hh]->Scale ( 1/norm2 );
         h->h_ChDiff[hh]->SetLineWidth ( 3 );
+        h->h_ChDiff[hh]->SetLineColor ( kTeal-8 );
         h->h_ChDiff[hh]->GetXaxis()->SetLabelSize ( 0.075 );
         h->h_ChDiff[hh]->GetYaxis()->SetLabelSize ( 0.055 );
         h->h_ChDiff[hh]->SetMarkerSize ( 3 );
-        h->h_ChDiff[hh]->SetMarkerColor ( kRed );
+        h->h_ChDiff[hh]->SetMarkerColor ( kOrange+1 );
         h->h_ChDiff[hh]->Draw ( "h,TEXT60" );
         h->h_ChDiff[hh]->Write();
 
@@ -1234,16 +1265,20 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         DT->cd ( hh+1 );
         h->h_pL_layerDT[hh]->Draw();
         h->h_pL_layerDT[hh]->SetLineWidth ( 2 );
+        h->h_pL_layerDT[hh]->SetLineColor ( kOrange+1 );
+
         h->h_L_layerDT[hh]->Draw ( "same" );
         h->h_L_layerDT[hh]->SetLineWidth ( 2 );
-        h->h_L_layerDT[hh]->SetLineColor ( kRed );
+        h->h_L_layerDT[hh]->SetLineColor ( kTeal-8 );
 
         TOT->cd ( hh+1 );
         h->h_pL_TOT[hh]->Draw();
         h->h_pL_TOT[hh]->SetLineWidth ( 2 );
+        h->h_pL_TOT[hh]->SetLineColor ( kOrange+1 );
+
         h->h_L_TOT[hh]->Draw ( "same" );
         h->h_L_TOT[hh]->SetLineWidth ( 2 );
-        h->h_L_TOT[hh]->SetLineColor ( kRed );
+        h->h_L_TOT[hh]->SetLineColor ( kTeal-8 );
 
         pDTvsTOT->cd ( hh+1 );
         h->h_pL_dtvstot[hh]->Draw ( "colz" );
@@ -1265,19 +1300,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_pLT_Diff[Low_ch[hh]]->Draw ();
         gPad->SetLogy();
 
-
-        //gPad->SetLogy();
-
-
     }
-
-
-
-//     cout<< dt_at_10 - 100<<endl;
-//
-//     cout<<"New  "<<maximum<<"\t"<<DTmin <<"\t"<<dt_at_10<<endl;
-
-
 
 
     std::vector<double> vec_DT_start;
@@ -1323,12 +1346,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         lay_ef2[u]=pl2[u][2]/pl2[u][0];
         lay_index[u]=u+1;
 
-        cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
-        printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][1] ) );
-
-        cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
-        printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][0] ) );
-        cout<<"**********"<<endl;
+//         cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
+//         printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][1] ) );
+// 
+//         cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
+//         printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][0] ) );
+//         cout<<"**********"<<endl;
     }
 
     Lay_ef->cd();
@@ -1337,7 +1360,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     gLayerEff->SetTitle ( "Plane_0" );
     gLayerEff->GetXaxis()->SetTitle ( "Layer" );
     gLayerEff->Write();
-    gLayerEff->SetFillColor ( kRed );
+    gLayerEff->SetFillColor ( kOrange+1 );
 
     Lay_ef1->cd();
     TGraph* gLayerEff2 = new TGraph ( 8, lay_index, lay_ef2 );
@@ -1345,7 +1368,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     gLayerEff2->Draw ( "AB" );
     gLayerEff2->SetTitle ( "Plane_1" );
     gLayerEff2->GetXaxis()->SetTitle ( "Layer" );
-    gLayerEff2->SetFillColor ( kRed );
+    gLayerEff2->SetFillColor ( kOrange+1 );
 
     Lay_ef->Write();
     Lay_ef1->Write();
