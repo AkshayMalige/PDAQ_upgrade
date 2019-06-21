@@ -370,7 +370,6 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         if ( lastRise != 0 && (fabs(time-refTime)<100000)) { // only in case
                                             // there was a
                                             // rising to pair
-
                                             bool doubleHit = false;
 
                                             /* for ( Int_t ui=0;
@@ -416,6 +415,9 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             a->trailTime = ( time );
                                             a->tot = - ( a->leadTime - a->trailTime );
                                             a->isRef = false;
+
+                                            lastRise = 0;
+
                                              //printf("\tHit: %f on channel %d // on %x on %x\n", a->leadTime,channel_nr,tdc_id, sub_id);
                                         }
                                     }
@@ -523,7 +525,6 @@ int main ( int argc, char** argv )
 
     return 0;
 }
-
 
 
 

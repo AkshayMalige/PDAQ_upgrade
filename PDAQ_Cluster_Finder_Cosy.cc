@@ -287,6 +287,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     ChMult=new TCanvas ( "ChMult_Canvas","ChMult_Canvas" );
     ChMult->Divide ( 4,2 );
 
+    TCanvas * ChTOT; //Canvas for ToT
+    ChTOT=new TCanvas ( "ChTOT_Canvas","ChTOT_Canvas" );
+    ChTOT->Divide ( 4,2 );
+
     TCanvas * LtDiff; //Canvas for ToT
     LtDiff=new TCanvas ( "LtDiff_Canvas","LtDiff_Canvas" );
     LtDiff->Divide ( 4,2 );
@@ -302,6 +306,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     TCanvas * ChDiff; //Canvas for ToT
     ChDiff=new TCanvas ( "ChDiff_Canvas","ChDiff_Canvas" );
     ChDiff->Divide ( 4,2 );
+
+    TCanvas * PlaneVsStraw; //Canvas for ToT
+    PlaneVsStraw=new TCanvas ( "PlaneVsStraw_Canvas","PlaneVsStraw_Canvas" );
+    PlaneVsStraw->Divide ( 4,4 );
+
+    TCanvas * PlaneDTTOT; //Canvas for ToT
+    PlaneDTTOT=new TCanvas ( "PlaneDTTOT_Canvas","PlaneDTTOT_Canvas" );
+    PlaneDTTOT->Divide ( 4,4 );
 
     TCanvas *Lay_ef = new TCanvas ( "Lay_ef","Lay_ef",200,10,500,300 );
     TCanvas *Lay_ef1 = new TCanvas ( "Lay_ef1","Lay_ef1",200,10,500,300 );
@@ -400,6 +412,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     //int High_strw[8]= {9,12,6,9,9,12,6,9};
 
+    TH1F* h_Ch_TOT[256];
+    TH1F* h_Cross_TOT[5];
+    TH1F* h_PlaneMult_Straw[15];
+
     for ( int mh = 0; mh < 8; mh++ ) {
         h->h_pL_layerDT[mh] = new TH1F ( Form ( "Layer_%d_DTa", mh+1 ) , Form ( "Layer_%d_DTa;Drift Time [ns]", mh+1 ), 600, -100,500 );
         h->h_pL_dtvstot[mh] = new TH2F ( Form ( "Layer_%d_DTvsTOTa",mh+1 ),Form ( "Layer_%d_DTvsTOTa;Drift Time [ns];Time Over Threshold [ns]",mh+1 ), 500, 0, 500,700,0,700 );
@@ -413,15 +429,24 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         h->h_pChDiff[mh] = new TH1F ( Form ( "Layer_%d_pChDiff", mh+1 ) , Form ( "Layer_%d_pChDiff", mh+1 ), 5, 0, 5 );
 
-        h->h_ChDiff[mh] = new TH1F ( Form ( "Layer_%d_ChDiff", mh+1 ) , Form ( "Layer_%d_ChDiff", mh+1 ), 7, 0, 7 );
+        h->h_ChDiff[mh] = new TH1F ( Form ( "Layer_%d_ChDiff", mh+1 ) , Form ( "Layer_%d_ChDiff", mh+1 ), 6, 0, 6 );
         h->h_straw[mh] = new TH1F ( Form ( "Layer_%d_h_straw", mh+1 ) , Form ( "Layer_%d_h_straw", mh+1 ), 32, 0, 32 );
 
 
     }
 
+    for ( int ca=0; ca<5; ca++ ) {
+        h->h_Cross_TOT[ca] = new TH1F ( Form ( "Case_%d_TOT", ca+1 ) , Form ( "Case_%d_TOT", ca+1 ), 32, 0,32 );
+    }
+    for ( int pl=0; pl<16; pl++ ) {
+        h->h_PlaneMult_Straw[pl] = new TH2F ( Form ( "Plane_%d", pl+1 ) , Form ( "Plane_%d;Channel No.;Layer No.", pl+1 ), 33, 0, 33, 10, 0, 10 );
+        h->h_PlaneMult_DT_TOT[pl] = new TH2F ( Form ( "PlaneDTvTOT_%d", pl+1 ) , Form ( "PlaneDTvTOT_%d;Drift Time [ns];Time Over Threshold [ns]", pl+1 ),500, 0, 500,700,0,700 );
+    }
+
     for ( int ch=0; ch<256; ch++ ) {
         h->h_Ch_Dt[ch] = new TH1F ( Form ( "Ch_%d_Dt", ch+1 ) , Form ( "Ch_%d_Dt", ch+1 ), 700, -100,600 );
         h->h_pLT_Diff[ch] = new TH1F ( Form ( "Ch_%d_LT_diff", ch+1 ) , Form ( "Ch_%d_LT_diff", ch+1 ), 500, 1, 501 );
+        h->h_Ch_TOT[ch] = new TH1F ( Form ( "Ch_%d_TOT", ch+1 ) , Form ( "Ch_%d_TOT", ch+1 ), 700, 0,700 );
     }
 
 
@@ -449,7 +474,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         tree->GetEntry ( i );
 
         std::vector<SttHit> vec_stthits;
-
+        cout<<i<<endl;
 
         bool scint = false;
         bool stt = false;
@@ -503,6 +528,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         //if (STT_CAL->SCI_CAL->sci_raw.totalNTDCHits>0){
 
+       // cout<<SCI_CAL->sci_raw.totalNTDCHits<<endl;
 
         if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
 
@@ -533,11 +559,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //DT = straw - scint
 
                 h->h_hitmultiplicity1->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
-                //printf("\nSCINT : %lf\n",sh->leadTime);
+                //printf ( "\n SCINT : %lf\n",sh->leadTime );
 
                 for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                     SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
-                    //printf("\nStraw : %lf",cal_hit->leadTime);
+                    //printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
                     All_hit_counter++;
                     h->h_scint_timediff->Fill ( cal_hit->leadTime - sh->leadTime );
                     h->h_LTvsLayer0->Fill ( cal_hit->layer, cal_hit->leadTime );
@@ -595,6 +621,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_tot1->Fill ( hitOnLayer[l][r]->tot );
                             //cout<<"Initial : "<<hitOnLayer[l][r]->layer<<"\t"<<hitOnLayer[l][r]->channel<<"\t"<<hitOnLayer[l][r]->leadTime<<endl;
                             //printf("%lf  %lf  %lf \n",sh->leadTime,hitOnLayer[l][r]->leadTime,hitOnLayer[l][r]->leadTime - sh->leadTime);
+                            //printf ( "YYYYY:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",hitOnLayer[l][r]->tdcid,hitOnLayer[l][r]->layer,hitOnLayer[l][r]->straw,hitOnLayer[l][r]->leadTime );
 
                         }
                     }
@@ -609,6 +636,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                                 vec_leadTime.erase ( vec_leadTime.begin() +je+1 );
                                 --je;
+                                
                             }
                         }
                     }
@@ -636,11 +664,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
                             h->h_hitBlock->Fill ( 2 );
                             h->h_p_drifttimevstot->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
-                            //printf ( "STRAW: %i  %i  %lf \n",vec_leadTime_d[jx].layer,vec_leadTime_d[jx].straw,vec_leadTime_d[jx].leadTime );
+                           // printf ( "STRAW: %x  %i  %i  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime );
                         } else {
-                            //vec_leadTime_d.erase ( vec_leadTime_d.begin() + jx );
+
                         }
                     }
+                    //cout<<"\n"<<endl;
 
                     int mult = 0;
                     int layer_eff_count =0;
@@ -708,6 +737,13 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             for ( int aee=0; aee< B_lt.size()-1; aee++ ) {
                                 ch_sq = ( ( B_lt[aee].layer-1 ) * 32 ) +B_lt[aee].straw-1;
                                 h->h_pLT_Diff[ch_sq-1]->Fill ( B_lt[aee+1].leadTime - B_lt[aee].leadTime );
+
+                                if ( ( B_lt[aee+1].leadTime - B_lt[aee].leadTime ) >0 && ( B_lt[aee+1].leadTime - B_lt[aee].leadTime ) <20 ) {
+                                    printf ( "Event : %i, Lay:  %i , Ch  :%i, Lt1 : %lf, Lt2 : %lf ,diff %f \n ",i,B_lt[aee].layer,B_lt[aee].straw,B_lt[aee].leadTime,B_lt[aee+1].leadTime, ( B_lt[aee+1].leadTime - B_lt[aee].leadTime ) );
+                                    //exit;
+
+                                }
+                                h->h_Ch_TOT[ch_sq-1]->Fill ( B_lt[aee+1].tot );
                             }
                         }
                     }
@@ -764,7 +800,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         //printf("dt multiplicity%i \n",MultLayer2[ab]);
                         for ( int bb=0; bb<32; bb++ ) {
                             if ( ChHitsMult2[ab][bb] >0 ) {
-                                h->h_L_channel_mult[ab]->Fill ( bb,ChHitsMult2[ab][bb] );    //Fill(b,dtHitsMult[a][b]);
+                                h->h_L_channel_mult[ab]->Fill ( bb,ChHitsMult2[ab][bb] );
                                 layer_eff_count2++;
                             }
                         }
@@ -831,16 +867,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
 
                         if ( ( ch_hi==true && ch_m1==true && ch_p2 == true && ch_m2==false && ch_p1==false ) || ( ch_hi==true && ch_m1==false && ch_p2 == false && ch_m2==true && ch_p1==true ) ) {
-                            h->h_ChDiff[hc]->Fill ( 6 );
+                            h->h_ChDiff[hc]->Fill ( 5 );
+                            //h->h_Cross_TOT[5]->
                         }
                         if ( ch_hi==true && ch_m2==true && ch_p2==true && ch_m1==false && ch_p1==false ) {
-                            h->h_ChDiff[hc]->Fill ( 5 );
-                        }
-                        if ( ( ch_hi==true && ch_m2==true && ch_m1==false && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p2==true && ch_m1==false && ch_p1==false && ch_m2==false ) ) {
                             h->h_ChDiff[hc]->Fill ( 4 );
                         }
-                        if ( ( ch_hi==true && ch_m1==true && ch_m2==true && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p1==true && ch_p2==true && ch_m1==false && ch_m2==false ) ) {
+                        if ( ( ch_hi==true && ch_m2==true && ch_m1==false && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p2==true && ch_m1==false && ch_p1==false && ch_m2==false ) ) {
                             h->h_ChDiff[hc]->Fill ( 3 );
+                        }
+                        if ( ( ch_hi==true && ch_m1==true && ch_m2==true && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p1==true && ch_p2==true && ch_m1==false && ch_m2==false ) ) {
+                            h->h_ChDiff[hc]->Fill ( 2 );
                         }
                         if ( ch_hi==true && ch_m1==true && ch_p1==true && ch_m2==false && ch_p2==false ) {
                             h->h_ChDiff[hc]->Fill ( 2 );
@@ -865,47 +902,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                     }
 
-
-//                     for ( int x=0; x<8; x++ ) {
-//                         //for(int xx=0; xx<2; xx++){
-//                         int strw =0;
-//                         int strw2 =0;
-//                         for ( int xxx=0; xxx<vec_stthits.size(); xxx++ ) {
-//                             if ( vec_stthits[xxx].layer-1 == x ) {
-//                                 if ( vec_stthits[xxx].plane == 0 ) {
-//                                     pl[x][0]++;
-//                                     strw = vec_stthits[xxx].straw;
-//                                 }
-//                                 if ( strw >0 ) {
-//                                     if ( vec_stthits[xxx].plane == 1 && ( fabs ( vec_stthits[xxx].straw - strw ) ==1 ) ) {
-//                                         pl[x][1]++;
-//                                     }
-//
-//                                     if ( pl[x][0]>0 && pl[x][1]>0 ) {
-//                                         pl[x][2]++;
-//                                     }
-//                                 }
-//
-//
-//
-//                                 if ( vec_stthits[xxx].plane == 1 ) {
-//                                     pl2[x][0]++;
-//                                     strw2 = vec_stthits[xxx].straw;
-//                                 }
-//                                 if ( strw >0 ) {
-//                                     if ( vec_stthits[xxx].plane == 1 && ( fabs ( vec_stthits[xxx].straw - strw2 ) ==1 ) ) {
-//                                         pl2[x][1]++;
-//                                     }
-//
-//                                     if ( pl2[x][0]>0 && pl2[x][1]>0 ) {
-//                                         pl2[x][2]++;
-//                                     }
-//                                 }
-//
-//                             }
-//                         }
-//                     }
-                    // }
 
 //////////////////////////////////corridor/////////////////////////////////////////////////
 
@@ -945,6 +941,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     //cout<<planeCount<<endl;
                     if ( vec_stthits.size() >0 ) {
                         h->h_PlaneMult->Fill ( planeCount );
+                        for ( int j=0; j<vec_stthits.size(); j++ ) {
+                            h->h_PlaneMult_Straw[planeCount-1]->Fill ( vec_stthits[j].straw,vec_stthits[j].layer );
+                            h->h_PlaneMult_DT_TOT[planeCount-1]->Fill ( vec_stthits[j].drifttime,vec_stthits[j].tot );
+                            //cout<<planeCount<<"\t"<<vec_stthits[j].layer<<"\t"<<vec_stthits[j].straw<<endl;
+                        }
                     }
 
                     std::vector<SttHit> vec_corridor1;
@@ -977,7 +978,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 //                  cout<<vec_corridor1.size()<<"\t"<<vec_stthits.size()<<endl;
                     if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake && mult2==8 ) {
-                        //PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                        // PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                     }
 
                 }
@@ -995,7 +996,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 //     cout<< dt_at_10 - 100<<endl;
 //
-
+    cout<<"Plane Mult "<<pl2[0][0]<<"\t"<<pl2[0][1]<<"\t"<<pl2[7][0]<<"\t"<<pl2[7][1]<<endl;
 
     h_STT_Hit_Diff->Write();
     h->h_cluster_size->Write();
@@ -1060,11 +1061,20 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     h->h_drifttimevsLayer->Write();
 
-    h->h_drifttime->Write();
-    h->h_drifttime->GetXaxis()->SetLabelSize ( 0.055 );
+
     h->h_drifttime->GetXaxis()->SetNdivisions ( 310 );
     h->h_drifttime->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_drifttime->GetXaxis()->SetTitleSize ( 0.050 );
     h->h_drifttime->GetYaxis()->SetNdivisions ( 310 );
+    h->h_drifttime->Write();
+
+    h->h_tot->GetXaxis()->SetNdivisions ( 310 );
+    h->h_tot->GetYaxis()->SetNdivisions ( 310 );
+    h->h_tot->GetXaxis()->SetLabelSize ( 0.055 );
+    h->h_tot->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_tot->GetXaxis()->SetTitleSize ( 0.050 );
+    h->h_tot->Write();
+
 
     h->h_scint_mult_b->Write();
     h->h_scint_mult_a->Write();
@@ -1082,10 +1092,20 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_p_drifttime->Write();
     h->h_drifttime->Write();
     h->h_p_tot->Write();
-    h->h_scint_timediffa->SetLineColor(kOrange+1);
+
+
+    h->h_scint_timediffa->SetLineColor ( kOrange+1 );
+    h->h_scint_timediffa->GetXaxis()->SetLabelSize ( 0.055 );
+    h->h_scint_timediffa->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_scint_timediffa->GetXaxis()->SetTitleSize ( 0.050 );
     h->h_scint_timediffa->Write();
-    h->h_scint_timediffb->SetLineColor(kOrange+1);
+
+    h->h_scint_timediffb->SetLineColor ( kOrange+1 );
+    h->h_scint_timediffb->GetXaxis()->SetLabelSize ( 0.055 );
+    h->h_scint_timediffb->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_scint_timediffb->GetXaxis()->SetTitleSize ( 0.050 );
     h->h_scint_timediffb->Write();
+
     h->h_L5_S9LTdiff->Write();
     h->h_pL5_S9LTdiff->Write();
     h->h_pLayerMult->Write();
@@ -1148,12 +1168,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //     gEffeciency->SetMarkerColor ( kOrange+1 );
 
 
-    gEffeciency2->Write();
+
     gEffeciency2->Draw ( "AB" );
     gEffeciency2->SetFillColor ( kOrange+1 );
     gEffeciency2->SetTitle ( "Efficiency" );
     gEffeciency2->GetXaxis()->SetTitle ( "Number of fired straws" );
-    gEffeciency2->GetXaxis()->SetTitleSize ( 0.045 );
+    gEffeciency2->GetXaxis()->SetTitleSize ( 0.050 );
+    gEffeciency2->GetXaxis()->SetLabelSize ( 0.055 );
+    gEffeciency2->GetYaxis()->SetLabelSize ( 0.055 );
+    gEffeciency2->GetYaxis()->SetRangeUser ( 0,0.65 );
+    gEffeciency2->Write();
+
     //gEffeciency2->SetFillStyle ( 3006 );
     // gEffeciency2->SetMarkerStyle ( 3 );
     // gEffeciency2->SetMarkerColor ( kBlack );
@@ -1171,6 +1196,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //     gFrom95Data->Write();
 
     h->h_PlaneMult->Scale ( 1/scint_event );
+    h->h_PlaneMult->GetXaxis()->SetTitleSize ( 0.050 );
+    h->h_PlaneMult->GetXaxis()->SetTitleSize ( 0.050 );
+    h->h_PlaneMult->GetXaxis()->SetLabelSize ( 0.055 );
+    h->h_PlaneMult->GetYaxis()->SetLabelSize ( 0.055 );
     h->h_PlaneMult->Write();
 
 
@@ -1180,23 +1209,23 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_pL_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_pL_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
         h->h_pL_layerDT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
-        h->h_pL_layerDT[hh]->SetLineColor(kOrange+1);
-        h->h_pL_layerDT[hh]->SetLineWidth(2);
+        h->h_pL_layerDT[hh]->SetLineColor ( kOrange+1 );
+        h->h_pL_layerDT[hh]->SetLineWidth ( 2 );
         h->h_pL_layerDT[hh]->Write();
 
         h->h_L_layerDT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_layerDT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
         h->h_L_layerDT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
-        h->h_L_layerDT[hh]->SetLineColor(kTeal-8);
-        h->h_L_layerDT[hh]->SetLineWidth(2);
+        h->h_L_layerDT[hh]->SetLineColor ( kTeal-8 );
+        h->h_L_layerDT[hh]->SetLineWidth ( 2 );
         h->h_L_layerDT[hh]->Write();
 //------------------------------------------------------------------------
 
         h->h_pL_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_pL_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_TOT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
-        h->h_pL_TOT[hh]->SetLineColor(kOrange+1);
-        h->h_pL_TOT[hh]->SetLineWidth(2);
+        h->h_pL_TOT[hh]->GetXaxis()->SetTitleSize ( 0.05 );
+        h->h_pL_TOT[hh]->SetLineColor ( kOrange+1 );
+        h->h_pL_TOT[hh]->SetLineWidth ( 2 );
         h->h_pL_TOT[hh]->Write();
 
 
@@ -1204,21 +1233,21 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_L_TOT[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_TOT[hh]->GetYaxis()->SetLabelSize ( 0.045 );
         h->h_L_TOT[hh]->GetXaxis()->SetTitleSize ( 0.045 );
-        h->h_L_TOT[hh]->SetLineColor(kTeal-8);
-        h->h_L_TOT[hh]->SetLineWidth(2);
+        h->h_L_TOT[hh]->SetLineColor ( kTeal-8 );
+        h->h_L_TOT[hh]->SetLineWidth ( 2 );
         h->h_L_TOT[hh]->Write();
 //------------------------------------------------------------------------
         h->h_pL_dtvstot[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_pL_dtvstot[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_pL_dtvstot[hh]->GetXaxis()->SetTitleSize ( 0.045 );
-        h->h_pL_dtvstot[hh]->GetYaxis()->SetTitleSize ( 0.045 );
+        h->h_pL_dtvstot[hh]->GetXaxis()->SetTitleSize ( 0.05 );
+        h->h_pL_dtvstot[hh]->GetYaxis()->SetTitleSize ( 0.05 );
         h->h_pL_dtvstot[hh]->GetXaxis()->SetNdivisions ( 5 );
         h->h_pL_dtvstot[hh]->Write();
 
         h->h_L_dtvstot[hh]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_L_dtvstot[hh]->GetYaxis()->SetLabelSize ( 0.045 );
-        h->h_L_dtvstot[hh]->GetXaxis()->SetTitleSize ( 0.045 );
-        h->h_L_dtvstot[hh]->GetYaxis()->SetTitleSize ( 0.045 );
+        h->h_L_dtvstot[hh]->GetXaxis()->SetTitleSize ( 0.05 );
+        h->h_L_dtvstot[hh]->GetYaxis()->SetTitleSize ( 0.05 );
         h->h_L_dtvstot[hh]->GetXaxis()->SetNdivisions ( 5 );
         h->h_L_dtvstot[hh]->Write();
 //------------------------------------------------------------------------
@@ -1250,8 +1279,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_ChDiff[hh]->Scale ( 1/norm2 );
         h->h_ChDiff[hh]->SetLineWidth ( 3 );
         h->h_ChDiff[hh]->SetLineColor ( kTeal-8 );
-        h->h_ChDiff[hh]->GetXaxis()->SetLabelSize ( 0.075 );
-        h->h_ChDiff[hh]->GetYaxis()->SetLabelSize ( 0.055 );
+        h->h_ChDiff[hh]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_ChDiff[hh]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_ChDiff[hh]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_ChDiff[hh]->GetYaxis()->SetTitleSize ( 0.045 );
         h->h_ChDiff[hh]->SetMarkerSize ( 3 );
         h->h_ChDiff[hh]->SetMarkerColor ( kOrange+1 );
         h->h_ChDiff[hh]->Draw ( "h,TEXT60" );
@@ -1292,6 +1323,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         ChMult->cd ( hh+1 );
         h->h_L_channel_mult[hh]->Draw ( "colz" );
 
+        ChTOT->cd ( hh+1 );
+        h->h_Ch_TOT[High_ch[hh]]->Draw ();
+
         LtDiff->cd ( hh+1 );
         h->h_pLT_Diff[High_ch[hh]]->Draw ();
         gPad->SetLogy();
@@ -1309,20 +1343,47 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int cha=0; cha<256; cha++ ) {
         //h->h_Ch_Dt[cha]->Scale ( 1/total_particles );
-        h->h_Ch_Dt[cha]->Write();
-        h->h_Ch_Dt[cha]->GetXaxis()->SetLabelSize ( 0.045 );
-        h->h_Ch_Dt[cha]->GetYaxis()->SetLabelSize ( 0.045 );
+//         h->h_Ch_Dt[cha]->Write();
+//         h->h_Ch_Dt[cha]->GetXaxis()->SetLabelSize ( 0.045 );
+//         h->h_Ch_Dt[cha]->GetYaxis()->SetLabelSize ( 0.045 );
 
         h->h_pLT_Diff[cha]->Scale ( 1/total_particles );
-        h->h_pLT_Diff[cha]->Write();
         h->h_pLT_Diff[cha]->GetXaxis()->SetLabelSize ( 0.045 );
         h->h_pLT_Diff[cha]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetTitle ( "Time Diff [ns]" );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetNdivisions ( 5 );
+        h->h_pLT_Diff[cha]->Write();
+
+        h->h_Ch_TOT[cha]->Scale ( 1/total_particles );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_Ch_TOT[cha]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetTitle ( "Time Over Threshold [ns]" );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetNdivisions ( 5 );
+        h->h_Ch_TOT[cha]->Write();
     }
 
 //     for(int dot=0; dot<vec_DT_start.size(); dot++){
 //       printf("Channel : %i   DT_crr: %d \n",dot,vec_DT_start[dot]-dt_at_10);
 //     }
+    for ( int x=0; x<16; x++ ) {
 
+        h->h_PlaneMult_Straw[x]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_PlaneMult_Straw[x]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_PlaneMult_Straw[x]->GetXaxis()->SetTitleSize ( 0.05 );
+        h->h_PlaneMult_Straw[x]->GetYaxis()->SetTitleSize ( 0.05 );
+        h->h_PlaneMult_Straw[x]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_PlaneMult_DT_TOT[x]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_PlaneMult_DT_TOT[x]->GetXaxis()->SetTitleSize ( 0.05 );
+        h->h_PlaneMult_DT_TOT[x]->GetYaxis()->SetTitleSize ( 0.05 );
+        h->h_PlaneMult_DT_TOT[x]->Write();
+        h->h_PlaneMult_DT_TOT[x]->Write();
+        PlaneVsStraw->cd ( x+1 );
+        h->h_PlaneMult_Straw[x]->Draw ( "colz" );
+        PlaneDTTOT->cd ( x+1 );
+        h->h_PlaneMult_DT_TOT[x]->Draw ( "colz" );
+    }
 
 
     DT->Write();
@@ -1333,8 +1394,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     ChMult->Write();
     LtDiff->Write();
     LtDiffLow->Write();
+    ChTOT->Write();
     ChDiff->Write();
     Eff->Write();
+    PlaneVsStraw->Write();
+    PlaneDTTOT->Write();
 
 
     double lay_ef[8];
@@ -1345,14 +1409,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         lay_ef[u]=pl2[u][2]/pl2[u][1];
         lay_ef2[u]=pl2[u][2]/pl2[u][0];
         lay_index[u]=u+1;
-
-//         cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
-//         printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][1] ) );
-// 
-//         cout<<pl[u][0]<<"\t"<<pl[u][1]<<"\t"<<pl[u][2]<<endl;
-//         printf ( "%2.2f\n", ( pl[u][2] ) / ( pl[u][0] ) );
-//         cout<<"**********"<<endl;
     }
+
+
+
 
     Lay_ef->cd();
     TGraph* gLayerEff = new TGraph ( 8, lay_index, lay_ef );
@@ -1403,30 +1463,9 @@ int main ( int argc, char** argv )
     return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//go4/trb3
+//source trb3login
+//hldprint -filename -tdc 0x64ff -skip 1000 -num 100 | more
 
 
 
