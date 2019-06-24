@@ -1153,7 +1153,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     std::vector<float> B;
     std::vector<float> C;
     B = eff_job ( 0.95 );
-    C = eff_job ( 0.97 );
+
+
+    for ( int r=0; r<16; r++ ) {
+        from_data[r]= h->h_Layer_eff->GetBinContent ( r );
+        from_corridor[r]= h->h_Layer_eff3->GetBinContent ( r );
+        index[r] =r-1;
+    }
+
+    C = eff_job ( pow ( from_corridor[13],0.08333 ) );
 
     float from_90per[B.size()];
     float from_95per[C.size()];
@@ -1165,11 +1173,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     }
 
 
-    for ( int r=0; r<16; r++ ) {
-        from_data[r]= h->h_Layer_eff->GetBinContent ( r );
-        from_corridor[r]= h->h_Layer_eff3->GetBinContent ( r );
-        index[r] =r-1;
-    }
+
 
     Eff->cd();
     TGraph* gEffeciency = new TGraph ( 16, index , from_data );
@@ -1198,18 +1202,18 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     gEffeciency2->GetYaxis()->SetLabelSize ( 0.055 );
     gEffeciency2->GetYaxis()->SetRangeUser ( 0,1 );
 
-    double eff_perC = pow(from_corridor[13],0.08333333);
+    double eff_perC = pow ( from_corridor[13],0.08333 );
     //printf("%i \n",(int)(eff_perC));
     stringstream ss;
     ss << eff_perC;
     TString str = ss.str();
     TPaveText *pt = new TPaveText ( 0.2, 0.2, .8, .8 );
-    pt->AddText ( str  );
-   // pt->SetFillColor(0);
-  //  pt->AddText ( "They are added to the pave using the AddText method." );
+    pt->AddText ( str );
+    // pt->SetFillColor(0);
+    //  pt->AddText ( "They are added to the pave using the AddText method." );
     //pt->AddLine ( .0,.5,1.,.5 );
-  //  pt->AddText ( "Even complex TLatex formulas can be added:" );
-  //  pt->AddText ( "F(t) = #sum_{i=-#infty}^{#infty}A(i)cos#[]{#frac{i}{t+i}}" );
+    //  pt->AddText ( "Even complex TLatex formulas can be added:" );
+    //  pt->AddText ( "F(t) = #sum_{i=-#infty}^{#infty}A(i)cos#[]{#frac{i}{t+i}}" );
     pt->Draw ( "same" );
 
 
