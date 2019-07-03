@@ -134,11 +134,15 @@ struct histograms{
     TH1F* h_Ch_Dt[256];
     TH1F* h_pLT_Diff[256];
     TH1F* h_Ch_TOT[256];
-    TH1F* h_Cross_TOT[5];
     TH2F* h_PlaneMult_Straw[16];
     TH2F* h_PlaneMult_DT_TOT[16];
     
-
+    TH1F* h_Cross_TOT[4]; 
+    TH1F* h_Cross_DT[4];
+//     TH2F* h_Cross_DTvTOT[3];
+//     TH2F* h_Cross_TOTvTOT[3];
+//     TH2F* h_Cross_DTvDT[3];
+   
     
 };
 

@@ -10,12 +10,12 @@ bool f_sttHitCompareCell ( SttHit a, SttHit b )
     return ( a.straw < b.straw );
 }
 
-VecSttHit GetPairs ( VecSttHit vec_get_pairs )
+VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
 {
     VecSttHit vec_fpair_clu;
     std::sort ( vec_get_pairs.begin(), vec_get_pairs.end(), f_sttHitCompareCell );
 
-    for ( Int_t sa = 0; sa < vec_get_pairs.size(); sa++ ) {
+    for ( int sa = 0; sa < vec_get_pairs.size(); sa++ ) {
         if ( sa < vec_get_pairs.size() - 1 ) {
             if ( fabs ( vec_get_pairs[sa].straw - vec_get_pairs[sa + 1].straw ) ==
                     1 ) {
@@ -26,12 +26,18 @@ VecSttHit GetPairs ( VecSttHit vec_get_pairs )
                 if ( fabs ( vec_get_pairs[sa - 1].straw -
                             vec_get_pairs[sa].straw ) == 1 ) {
                     vec_fpair_clu.push_back ( vec_get_pairs[sa] );
+                } else {
+                    h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
+                    h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
                 }
             }
         } else if ( sa == vec_get_pairs.size() - 1 ) {
             if ( fabs ( vec_get_pairs[sa - 1].straw - vec_get_pairs[sa].straw ) ==
                     1 ) {
                 vec_fpair_clu.push_back ( vec_get_pairs[sa] );
+            } else {
+                h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
+                h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
             }
         }
     }
@@ -58,6 +64,56 @@ void add_tuples ( const std::vector<std::vector<VecSttHit>>& vectors,
         }
     }
 }
+
+std::vector<VecSttHit> bestPair ( std::vector<VecSttHit> vec_pair ,histograms* h )
+{
+//     for ( int b=0; b<vec_pair.size(); b++ ) {
+//         printf ( "Pair %i\n",b+1 );
+//         for ( int c=0; c<vec_pair[b].size(); c++ ) {
+//             printf ( "%i %f %f %f\n",vec_pair.at ( b ).at ( c ).straw,vec_pair.at ( b ).at ( c ).tot,vec_pair.at ( b ).at ( c ).drifttime,vec_pair.at ( b ).at ( c ).leadTime );
+//         }
+//         printf ( "\n\n" );
+//     }
+
+    std::vector<int> index;
+    int No_pairs = vec_pair.size();
+    for ( int a =0; a<No_pairs-1; a++ ) {
+        if ( vec_pair.at ( a ).at ( 1 ).straw == vec_pair.at ( a+1 ).at ( 0 ).straw ) {
+            h->h_Cross_TOT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).tot );
+            h->h_Cross_DT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime );
+
+            h->h_Cross_TOT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).tot );
+            h->h_Cross_DT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime );
+
+            h->h_Cross_TOT[2]->Fill ( vec_pair.at ( a +1).at ( 1 ).tot );
+            h->h_Cross_DT[2]->Fill ( vec_pair.at ( a +1).at ( 1 ).drifttime );
+            
+            if ( vec_pair.at ( a ).at ( 0 ).tot > vec_pair.at ( a+1 ).at ( 1 ).tot ) {
+                index.push_back ( a );
+            } else {
+                index.push_back ( a+1 );
+            }
+        }
+    }
+    int offset =0;
+    for ( int b=0; b<index.size(); b++ ) {
+        //printf ( "Indexs : %i \t",index[b] );
+        vec_pair.erase ( vec_pair.begin() +index[b]-offset );
+        offset++;
+    }
+//     printf ( "\n" );
+// 
+//     for ( int b=0; b<vec_pair.size(); b++ ) {
+//         printf ( "Pair %i\n",b+1 );
+//         for ( int c=0; c<vec_pair[b].size(); c++ ) {
+//             printf ( "%i \n",vec_pair.at ( b ).at ( c ).straw );
+//         }
+//         printf ( "\n\n" );
+//     }
+//     printf ( "**************************************************\n" );
+    return vec_pair;
+}
+
 
 std::vector<std::vector<VecSttHit>>
                                  make_tuples ( const std::vector<std::vector<VecSttHit>>& vectors )
@@ -190,8 +246,11 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     //////////////////////////////////////////////////////////////////////////
 
     for ( int j = 0; j < vec_layer.size(); j++ ) {
-        if ( vec_layer[j].size() > 1 ) {
-            vec_player = GetPairs ( vec_layer[j] );
+        if ( vec_layer[j].size() ==1 ) {
+            h->h_Cross_TOT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).tot );
+            h->h_Cross_DT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).drifttime );
+        } else if ( vec_layer[j].size() > 1 ) {
+            vec_player = GetPairs ( vec_layer[j],h );
         }
         vec_pair_layer.push_back ( vec_player );
         vec_player.clear();
@@ -205,11 +264,13 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     for ( int j = 0; j < vec_pair_layer.size(); j++ ) {
         if ( vec_pair_layer[j].size() > 1 ) {
             VecSttHit vec_imi = vec_pair_layer[j];
-            vec_clayer = clusterfinder ( vec_pair_layer[j] );
+           // cout<<"Layer "<< j+1<<endl;
+            vec_clayer = bestPair ( clusterfinder ( vec_pair_layer[j] ), h );
         }
         vec_cluster_layer.push_back ( vec_clayer );
         vec_clayer.clear();
     }
+  //  cout<<"############################################################################"<<endl;
 
 
     int track_sanity = 0;
@@ -392,91 +453,27 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         //     b->Chix = smallestX;
         //     b->Chiy = smallestY;
         // printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
-        float refTime = 0;
-        float refDiff = 0;
-        bool scintSep = false;
-//         double scint_time_diffF = 0;
-//         double scint_time_diffB = 0;
 
-        bool found_pair = false;
-        /* for ( int rt = 0; rt < SCI_CAL->sci_raw.totalNTDCHits; rt++ ) {
-                 SciHit* sh = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( rt );
-                 Float_t dt = meanTime - sh->leadTime;
-                 // 	refDiff = (sh->leadTime - meanTime);
-                 refDiff = dt;
-                 refTime = sh->leadTime; // printf("  scint = %f   dt = %f\n",
-                 // refTime, dt);
-        //                         if ( dt <= 200 and dt > 0 ) {
-        //                                 found_pair = true;
-        //                                 break;
-        //                         }
-         }
-        //                 if ( !found_pair ) {
-        //                         return false;
-        //                 }
-         h->h_scint_mult->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
-         if ( SCI_CAL->sci_raw.totalNTDCHits > 0 )
-                 for ( int ct = 0; ct < SCI_CAL->sci_raw.totalNTDCHits - 1; ct++ ) {
-                         SciHit* d1 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( ct );
-                         SciHit* d2 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( ct + 1 );
-                         if ( ct > 0 ) {
-                                 SciHit* d3 = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( ct - 1 );
-                                 scint_time_diffB = fabs ( d3->leadTime - d1->leadTime );
-                         } else {
-                                 scint_time_diffB = 500;
-                         }
-                         scint_time_diffF = fabs ( d2->leadTime - d1->leadTime );
-                         h->h_scint_timediff->Fill ( scint_time_diffF );
-                 }*/
-        //cout<<"Scint : "<<scint_time_diffF<<"\t"<<scint_time_diffB<<endl;
-        //if ( scint_time_diffF >= 250 && scint_time_diffB >= 250 ) {
         SttTrackHit& b = stt_event->AddTrackHit();
         b.vec_Track = vec_tracks;
         b.trackId = i;
         b.trackSize = vec_tracks.size();
         b.Px0 = smallestP0;
         b.Px1 = smallestP1;
-        b.DriftT = refDiff;
-        // b->scint_time_diff = scint_time_diff;
-        // cout<<"hit"<<endl;
+
 
         for ( Int_t tq = 0; tq < vec_tracks.size(); tq++ ) {
-            // vec_tracks[tq].drifttime =  max_dt_offset+(meanTime - (
-            // vec_tracks[tq].leadTime ) ) ;
-            //vec_tracks[tq].drifttime =  - ( refTime - ( vec_tracks[tq].leadTime ) );
-            //vec_tracks[tq].drifttime =  vec_tracks[tq].drifttime;
-            //vec_tracks[tq].meanDriftTime = - ( meanTime - ( vec_tracks[tq].leadTime ) );
-            //h->h_drifttimevstot->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
             h->h_tot4->Fill ( vec_tracks[tq].tot );
-           // h->h_layerDT[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime );
             h->h_L_dtvstot[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
-            //if ( vec_tracks[tq].plane==0 ) {
             h->h_drifttimevsLayer->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer );
-//             } else {
-//                 h->h_drifttimevsplane->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer+0.5 );
-//             }
             h->h_drifttime->Fill ( vec_tracks[tq].drifttime );
-
             if ( vec_tracks[tq].tdcid==0x6400||vec_tracks[tq].tdcid==0x6410||vec_tracks[tq].tdcid==0x6411 ) {
                 h->h_drifttimeTRB1->Fill ( vec_tracks[tq].drifttime );
             } else {
                 h->h_drifttimeTRB2->Fill ( vec_tracks[tq].drifttime );
             }
             h->h_hitBlock->Fill ( 4 );
-
-            // printf("MAX:%d  LT:%f  ST:%f  MT:%f  SDT:%f
-            // SMDT:%f\n",max_dt_offset,vec_tracks[tq].leadTime,refTime,meanTime,vec_tracks[tq].drifttime,vec_tracks[tq].meanDriftTime);
-            // cout<<max_dt_offset<<"\tLT:\t"<<vec_tracks[tq].leadTime<<"\tST:\t"<<refTime<<"\tMT:\t"<<meanTime<<"\tDT:\t"<<vec_tracks[tq].drifttime<<"\tMDT:\t"<<vec_tracks[tq].meanDriftTime<<endl;
-            // for (int ac=0; ac< vec_tracks.size(); ac++)
-            // 	{
-            // printf("TDC : %x , Layer: %d , Straw: %d  ,LeadTime:%3.2f,
-            // Meantime: %3.2f, DriftTime: %3.2f\n",vec_tracks[tq].tdcid,
-            // vec_tracks[tq].layer,vec_tracks[tq].straw,vec_tracks[tq].leadTime,meanTime,
-            // vec_tracks[tq].drifttime);
-            // 	}
-            // 	printf("\n*********************\n");
         }
-        //}
 
         vec_Chi2x.clear();
         vec_Chi2y.clear();
