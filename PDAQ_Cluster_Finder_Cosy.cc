@@ -437,9 +437,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     for ( int mc = 0; mc < 4; mc++ ) {
       h->h_Cross_TOT[mc] = new TH1F ( Form ( "Case_%d_TOT", mc+1 ) , Form ( "Case_%d_TOT", mc+1 ), 3000, 0,3000 );
       h->h_Cross_DT[mc] = new TH1F ( Form ( "Case_%d_DT", mc+1 ) , Form ( "Case_%d_dT", mc+1 ), 500, 0,500 );
-//       h->h_Cross_DTvTOT[mc] = new TH2F ( Form ( "Case_%d_DTvsTOTb",mc+1 ),Form ( "Case_%d_DTvsTOTb;Drift Time [ns];Time Over Threshold [ns]",mc+1 ), 500, 0, 500,700,0,700 );
-//       h->h_Cross_TOTvTOT[mc] = new TH2F ( Form ( "Case_%d_TOTvsTOTb",mc+1 ),Form ( "Case_%d_TOTvsTOTb;Time Over Threshold [ns] [ns];Time Over Threshold [ns]",mc+1 ), 1000, 0, 1000,1000,0,1000 );
-//       h->h_Cross_DTvDT[mc] = new TH2F ( Form ( "Case_%d_DTvsDT",mc+1 ),Form ( "Case_%d_DTvsDT;Time Over Threshold [ns] [ns];Time Over Threshold [ns]",mc+1 ), 1000, 0, 1000,1000,0,1000 );
+      h->h_Cross_DTvTOT[mc] = new TH2F ( Form ( "Cross_%d_DTvsTOT",mc+1 ),Form ( "Cross_%d_DTvsTOT;Drift Time [ns];Time Over Threshold [ns]",mc+1 ), 500, 0, 500,4000,0,4000 );
+    }
+    
+    
+    for(int mk=0; mk<2; mk++){
+        
+        h->h_Cross_TOTvTOT[mk] = new TH2F ( Form ( "Cross_%d_TOTvsTOT",mk+1 ),Form ( "Cross_%d_TOTvsTOT1;Time Over Threshold [ns];Time Over Threshold [ns]",mk+1 ), 4000, 0, 4000,4000,0,4000 );
+        h->h_Cross_DTvDT[mk] = new TH2F ( Form ( "Cross_%d_DTvsDT",mk+1 ),Form ( "Cross_%d_DTvsDT;Drift Time [ns];Drift Time [ns]",mk+1 ), 500, 0, 500,500,0,500 );
+        h->h_Cross_DTsum[mk] = new TH1F ( Form ( "Cross_%d_DTa", mk+1 ) , Form ( "Cross_%d_DTa;Drift Time [ns]", mk+1 ), 600, -100,500 );
     }
     
 
@@ -1217,17 +1223,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     double eff_perC = pow ( from_corridor[13],0.08333 );
     //printf("%i \n",(int)(eff_perC));
-    stringstream ss;
-    ss << eff_perC;
-    TString str = ss.str();
-    TPaveText *pt = new TPaveText ( 0.2, 0.2, .8, .8 );
-    pt->AddText ( str );
+//     stringstream ss;
+//     ss << eff_perC;
+//     TString str = ss.str();
+//     TPaveText *pt = new TPaveText ( 0.2, 0.2, .8, .8 );
+//     pt->AddText ( str );
     // pt->SetFillColor(0);
     //  pt->AddText ( "They are added to the pave using the AddText method." );
     //pt->AddLine ( .0,.5,1.,.5 );
     //  pt->AddText ( "Even complex TLatex formulas can be added:" );
     //  pt->AddText ( "F(t) = #sum_{i=-#infty}^{#infty}A(i)cos#[]{#frac{i}{t+i}}" );
-    pt->Draw ( "same" );
+    //pt->Draw ( "same" );
 
 
     gEffeciency2->Write();
@@ -1475,6 +1481,14 @@ for (int xc=0; xc<4; xc++){
   
       h->h_Cross_DT[xc]->Write();
       h->h_Cross_TOT[xc]->Write();
+      h->h_Cross_DTvTOT[xc]->Write();
+}
+
+for (int xd=0; xd<2; xd++){
+    
+    h->h_Cross_TOTvTOT[xd]->Write();
+    h->h_Cross_DTvDT[xd]->Write();
+    h->h_Cross_DTsum[xd]->Write();
 }
 
 

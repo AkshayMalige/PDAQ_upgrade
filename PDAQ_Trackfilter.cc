@@ -27,8 +27,8 @@ VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
                             vec_get_pairs[sa].straw ) == 1 ) {
                     vec_fpair_clu.push_back ( vec_get_pairs[sa] );
                 } else {
-                    h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
-                    h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
+                  //  h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
+                   // h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
                 }
             }
         } else if ( sa == vec_get_pairs.size() - 1 ) {
@@ -36,8 +36,8 @@ VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
                     1 ) {
                 vec_fpair_clu.push_back ( vec_get_pairs[sa] );
             } else {
-                h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
-                h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
+              //  h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
+              //  h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
             }
         }
     }
@@ -85,8 +85,21 @@ std::vector<VecSttHit> bestPair ( std::vector<VecSttHit> vec_pair ,histograms* h
             h->h_Cross_TOT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).tot );
             h->h_Cross_DT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime );
 
-            h->h_Cross_TOT[2]->Fill ( vec_pair.at ( a +1).at ( 1 ).tot );
-            h->h_Cross_DT[2]->Fill ( vec_pair.at ( a +1).at ( 1 ).drifttime );
+            h->h_Cross_TOT[3]->Fill ( vec_pair.at ( a +1).at ( 1 ).tot );
+            h->h_Cross_DT[3]->Fill ( vec_pair.at ( a +1).at ( 1 ).drifttime );
+            
+            h->h_Cross_TOTvTOT[0]->Fill(vec_pair.at ( a +1).at ( 0 ).tot,vec_pair.at ( a +1).at ( 1 ).tot);
+            h->h_Cross_TOTvTOT[1]->Fill(vec_pair.at ( a +1).at ( 0 ).tot,vec_pair.at ( a +1).at ( 1 ).tot);
+            
+            h->h_Cross_DTvDT[0]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime,vec_pair.at ( a +1).at ( 1 ).drifttime);
+            h->h_Cross_DTvDT[1]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime,vec_pair.at ( a +1).at ( 1 ).drifttime);
+            
+            h->h_Cross_DTsum[0]->Fill(vec_pair.at ( a ).at ( 0 ).drifttime + vec_pair.at ( a ).at ( 1 ).drifttime);
+            h->h_Cross_DTsum[1]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime + vec_pair.at ( a +1).at ( 1 ).drifttime);
+            
+            h->h_Cross_DTvTOT[1]->Fill(vec_pair.at ( a ).at ( 0 ).drifttime,vec_pair.at ( a).at ( 0 ).tot);
+            h->h_Cross_DTvTOT[2]->Fill(vec_pair.at ( a ).at ( 1 ).drifttime,vec_pair.at ( a).at ( 1 ).tot);
+            h->h_Cross_DTvTOT[3]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime,vec_pair.at ( a +1).at ( 0 ).tot);
             
             if ( vec_pair.at ( a ).at ( 0 ).tot > vec_pair.at ( a+1 ).at ( 1 ).tot ) {
                 index.push_back ( a );
@@ -249,6 +262,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         if ( vec_layer[j].size() ==1 ) {
             h->h_Cross_TOT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).tot );
             h->h_Cross_DT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).drifttime );
+            h->h_Cross_DTvTOT[0]->Fill(vec_layer.at ( j ).at ( 0 ).drifttime,vec_layer.at ( j ).at ( 0 ).tot);
         } else if ( vec_layer[j].size() > 1 ) {
             vec_player = GetPairs ( vec_layer[j],h );
         }
