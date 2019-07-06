@@ -83,10 +83,8 @@ Bool_t PDAQ_Spl_Res ( void )
     tree->SetBranchAddress ( "vec_z", &vec_z );
     tree->SetBranchAddress ( "vec_layer", &vec_layer );
     tree->SetBranchAddress ( "vec_straw", &vec_straw );
-    //     tree->SetBranchAddress("vec_fee", &vec_fee);
-    //     tree->SetBranchAddress("vec_fee_ch", &vec_fee_ch);
-    //     tree->SetBranchAddress("vec_tdc_ch", &vec_tdc_ch);
-    //
+
+    
     TGraph* gDR = new TGraph ( 220, a1, b1 );
     gDR = ( TGraph* ) file->Get ( "PDAQ_DR" );
 

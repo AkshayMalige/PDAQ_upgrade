@@ -57,7 +57,8 @@ struct histograms{
     TH1F* h_pLayer_eff = new TH1F ( "h_pLayer_eff", "h_pLayer_eff;Number of fired straws", 30, 0, 30 );
     TH1F* h_Layer_eff = new TH1F ( "h_Layer_eff", "h_Layer_eff;Number of fired straws", 30, 0, 30 );
     TH1F* h_Layer_eff2 = new TH1F ( "h_Layer_eff2", "h_Layer_eff2;Number of fired straws", 30, 0, 30 );
-    TH1F* h_Layer_eff3 = new TH1F ( "h_Layer_eff3", "h_Layer_eff3;Number of fired straws", 30, 0, 30 );
+    TH1F* h_Layer_effPlane = new TH1F ( "h_Layer_effPlane", "h_Layer_effPlane;Number of fired planes", 30, 0, 30 );
+    TH1F* h_Layer_effStraw = new TH1F ( "h_Layer_effStraw", "h_Layer_effStraw;Number of fired straws", 30, 0, 30 );
     TH1F* h_sq_ch = new TH1F ( "h_sq_ch", "h_sq_ch;channel", 300, 0, 300 );
 
     
@@ -137,13 +138,16 @@ struct histograms{
     TH2F* h_PlaneMult_Straw[16];
     TH2F* h_PlaneMult_DT_TOT[16];
     
-    TH1F* h_Cross_TOT[4]; 
-    TH1F* h_Cross_DT[4];    
-    TH2F* h_Cross_DTvTOT[4];
+    TH1F* h_Cross_TOT[5]; 
+    TH1F* h_Cross_DT[5];    
+    TH2F* h_Cross_DTvTOT[5];
     
-    TH2F* h_Cross_TOTvTOT[2];
-    TH2F* h_Cross_DTvDT[2];
-    TH1F* h_Cross_DTsum[2];
+    TH2F* h_Cross_TOTvTOT[3];
+    TH2F* h_Cross_DTvDT[3];
+    TH1F* h_Cross_DTsum[3];
+    
+    TH1F* h_CrossCase = new TH1F ( "h_CrossCase" ,"h_CrossCase", 3, 0, 3 );
+    TH1F* h_CrossMaxTOT = new TH1F ( "h_CrossMaxTOT" ,"h_CrossMaxTOT", 3, 0, 3 );
    
     
 };

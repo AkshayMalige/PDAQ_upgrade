@@ -20,6 +20,7 @@ VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
             if ( fabs ( vec_get_pairs[sa].straw - vec_get_pairs[sa + 1].straw ) ==
                     1 ) {
                 vec_fpair_clu.push_back ( vec_get_pairs[sa] );
+
             }
 
             else if ( sa > 0 ) {
@@ -27,8 +28,11 @@ VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
                             vec_get_pairs[sa].straw ) == 1 ) {
                     vec_fpair_clu.push_back ( vec_get_pairs[sa] );
                 } else {
-                  //  h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
-                   // h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
+                    h->h_Cross_TOT[0]->Fill ( vec_get_pairs[sa].tot );
+                    h->h_Cross_DT[0]->Fill ( vec_get_pairs[sa].drifttime );
+                    h->h_Cross_DTvTOT[0]->Fill ( vec_get_pairs[sa].drifttime,vec_get_pairs[sa].tot );
+                    h->h_CrossCase->Fill ( 0 );
+
                 }
             }
         } else if ( sa == vec_get_pairs.size() - 1 ) {
@@ -36,8 +40,10 @@ VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
                     1 ) {
                 vec_fpair_clu.push_back ( vec_get_pairs[sa] );
             } else {
-              //  h->h_Cross_TOT[2]->Fill ( vec_get_pairs[sa].tot );
-              //  h->h_Cross_DT[2]->Fill ( vec_get_pairs[sa].tot );
+                h->h_Cross_TOT[0]->Fill ( vec_get_pairs[sa].tot );
+                h->h_Cross_DT[0]->Fill ( vec_get_pairs[sa].drifttime );
+                h->h_Cross_DTvTOT[0]->Fill ( vec_get_pairs[sa].drifttime,vec_get_pairs[sa].tot );
+                h->h_CrossCase->Fill ( 0 );
             }
         }
     }
@@ -77,35 +83,68 @@ std::vector<VecSttHit> bestPair ( std::vector<VecSttHit> vec_pair ,histograms* h
 
     std::vector<int> index;
     int No_pairs = vec_pair.size();
-    for ( int a =0; a<No_pairs-1; a++ ) {
-        if ( vec_pair.at ( a ).at ( 1 ).straw == vec_pair.at ( a+1 ).at ( 0 ).straw ) {
-            h->h_Cross_TOT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).tot );
-            h->h_Cross_DT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime );
+    if ( No_pairs == 1 ) {
+        h->h_Cross_TOT[4]->Fill ( vec_pair.at ( 0 ).at ( 0 ).tot );
+        h->h_Cross_DT[4]->Fill ( vec_pair.at ( 0 ).at ( 0 ).drifttime );
+        h->h_Cross_DTvTOT[4]->Fill ( vec_pair.at ( 0 ).at ( 0 ).drifttime,vec_pair.at ( 0 ).at ( 0 ).tot );
+        h->h_Cross_TOT[4]->Fill ( vec_pair.at ( 0 ).at ( 1 ).tot );
+        h->h_Cross_DT[4]->Fill ( vec_pair.at ( 0 ).at ( 1 ).drifttime );
+        h->h_Cross_DTvTOT[4]->Fill ( vec_pair.at ( 0 ).at ( 1 ).drifttime,vec_pair.at ( 0 ).at ( 1 ).tot );
+        h->h_CrossCase->Fill ( 1 );
+        h->h_Cross_TOTvTOT[2]->Fill ( vec_pair.at ( 0 ).at ( 0 ).tot,vec_pair.at ( 0 ).at ( 1 ).tot );
+        h->h_Cross_DTvDT[2]->Fill ( vec_pair.at ( 0 ).at ( 0 ).drifttime,vec_pair.at ( 0 ).at ( 1 ).drifttime );
+        h->h_Cross_DTsum[2]->Fill ( vec_pair.at ( 0  ).at ( 0 ).drifttime + vec_pair.at ( 0 ).at ( 1 ).drifttime );
+    } else {
+        for ( int a =0; a<No_pairs-1; a++ ) {
+            if ( vec_pair.at ( a ).at ( 1 ).straw == vec_pair.at ( a+1 ).at ( 0 ).straw ) {
+                h->h_Cross_TOT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).tot );
+                h->h_Cross_DT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime );
 
-            h->h_Cross_TOT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).tot );
-            h->h_Cross_DT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime );
+                h->h_Cross_TOT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).tot );
+                h->h_Cross_DT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime );
 
-            h->h_Cross_TOT[3]->Fill ( vec_pair.at ( a +1).at ( 1 ).tot );
-            h->h_Cross_DT[3]->Fill ( vec_pair.at ( a +1).at ( 1 ).drifttime );
-            
-            h->h_Cross_TOTvTOT[0]->Fill(vec_pair.at ( a +1).at ( 0 ).tot,vec_pair.at ( a +1).at ( 1 ).tot);
-            h->h_Cross_TOTvTOT[1]->Fill(vec_pair.at ( a +1).at ( 0 ).tot,vec_pair.at ( a +1).at ( 1 ).tot);
-            
-            h->h_Cross_DTvDT[0]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime,vec_pair.at ( a +1).at ( 1 ).drifttime);
-            h->h_Cross_DTvDT[1]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime,vec_pair.at ( a +1).at ( 1 ).drifttime);
-            
-            h->h_Cross_DTsum[0]->Fill(vec_pair.at ( a ).at ( 0 ).drifttime + vec_pair.at ( a ).at ( 1 ).drifttime);
-            h->h_Cross_DTsum[1]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime + vec_pair.at ( a +1).at ( 1 ).drifttime);
-            
-            h->h_Cross_DTvTOT[1]->Fill(vec_pair.at ( a ).at ( 0 ).drifttime,vec_pair.at ( a).at ( 0 ).tot);
-            h->h_Cross_DTvTOT[2]->Fill(vec_pair.at ( a ).at ( 1 ).drifttime,vec_pair.at ( a).at ( 1 ).tot);
-            h->h_Cross_DTvTOT[3]->Fill(vec_pair.at ( a +1).at ( 0 ).drifttime,vec_pair.at ( a +1).at ( 0 ).tot);
-            
-            if ( vec_pair.at ( a ).at ( 0 ).tot > vec_pair.at ( a+1 ).at ( 1 ).tot ) {
-                index.push_back ( a );
+                h->h_Cross_TOT[3]->Fill ( vec_pair.at ( a +1 ).at ( 1 ).tot );
+                h->h_Cross_DT[3]->Fill ( vec_pair.at ( a +1 ).at ( 1 ).drifttime );
+
+                h->h_Cross_TOTvTOT[0]->Fill ( vec_pair.at ( a ).at ( 0 ).tot,vec_pair.at ( a ).at ( 1 ).tot );
+                h->h_Cross_TOTvTOT[1]->Fill ( vec_pair.at ( a +1 ).at ( 0 ).tot,vec_pair.at ( a +1 ).at ( 1 ).tot );
+
+                h->h_Cross_DTvDT[0]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime,vec_pair.at ( a ).at ( 1 ).drifttime );
+                h->h_Cross_DTvDT[1]->Fill ( vec_pair.at ( a +1 ).at ( 0 ).drifttime,vec_pair.at ( a +1 ).at ( 1 ).drifttime );
+
+                h->h_Cross_DTsum[0]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime + vec_pair.at ( a ).at ( 1 ).drifttime );
+                h->h_Cross_DTsum[1]->Fill ( vec_pair.at ( a +1 ).at ( 0 ).drifttime + vec_pair.at ( a +1 ).at ( 1 ).drifttime );
+
+                h->h_Cross_DTvTOT[1]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime,vec_pair.at ( a ).at ( 0 ).tot );
+                h->h_Cross_DTvTOT[2]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime,vec_pair.at ( a ).at ( 1 ).tot );
+                h->h_Cross_DTvTOT[3]->Fill ( vec_pair.at ( a +1 ).at ( 1 ).drifttime,vec_pair.at ( a +1 ).at ( 1 ).tot );
+                h->h_CrossCase->Fill ( 2 );
+
+                if ( vec_pair.at ( a ).at ( 1 ).drifttime > vec_pair.at ( a ).at ( 0 ).drifttime && vec_pair.at ( a+1 ).at ( 0 ).drifttime > vec_pair.at ( a+1 ).at ( 1 ).drifttime ) {
+                    h->h_CrossMaxTOT->Fill ( 1 );
+                } else {
+                    h->h_CrossMaxTOT->Fill ( 0 );
+                }
+
+                if ( vec_pair.at ( a ).at ( 0 ).tot > vec_pair.at ( a+1 ).at ( 1 ).tot ) {
+                    index.push_back ( a );
+                } else {
+                    index.push_back ( a+1 );
+                }
             } else {
-                index.push_back ( a+1 );
+                h->h_Cross_TOT[4]->Fill ( vec_pair.at ( a ).at ( 0 ).tot );
+                h->h_Cross_DT[4]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime );
+                h->h_Cross_DTvTOT[4]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime,vec_pair.at ( a ).at ( 0 ).tot );
+                h->h_Cross_TOT[4]->Fill ( vec_pair.at ( a ).at ( 1 ).tot );
+                h->h_Cross_DT[4]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime );
+                h->h_Cross_DTvTOT[4]->Fill ( vec_pair.at ( a ).at ( 1 ).drifttime,vec_pair.at ( a ).at ( 1 ).tot );
+                h->h_CrossCase->Fill ( 1 );
+                h->h_Cross_TOTvTOT[2]->Fill ( vec_pair.at ( a ).at ( 0 ).tot,vec_pair.at ( a ).at ( 1 ).tot );
+                h->h_Cross_DTvDT[2]->Fill ( vec_pair.at ( a ).at ( 0 ).drifttime,vec_pair.at ( a ).at ( 1 ).drifttime );
+                h->h_Cross_DTsum[2]->Fill ( vec_pair.at ( a  ).at ( 0 ).drifttime + vec_pair.at ( a ).at ( 1 ).drifttime );
+
             }
+
         }
     }
     int offset =0;
@@ -115,7 +154,7 @@ std::vector<VecSttHit> bestPair ( std::vector<VecSttHit> vec_pair ,histograms* h
         offset++;
     }
 //     printf ( "\n" );
-// 
+//
 //     for ( int b=0; b<vec_pair.size(); b++ ) {
 //         printf ( "Pair %i\n",b+1 );
 //         for ( int c=0; c<vec_pair[b].size(); c++ ) {
@@ -202,10 +241,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     // 	printf("\n*********************\n");
     //}
 
-    int max_cluster_intake = 0;
 
-    // max_cluster_intake = ftGeomPar->getClusterLimit();
-    //     float max_dt_offset = ftGeomPar->getDTOffset();
     int stations = ftGeomPar->getModules();
     int MAX_FT_TOTAL_LAYERS = 0;
 
@@ -256,13 +292,12 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     VecSttHit vec_player;
     vec_player.clear();
 
-    //////////////////////////////////////////////////////////////////////////
-
     for ( int j = 0; j < vec_layer.size(); j++ ) {
         if ( vec_layer[j].size() ==1 ) {
             h->h_Cross_TOT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).tot );
             h->h_Cross_DT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).drifttime );
-            h->h_Cross_DTvTOT[0]->Fill(vec_layer.at ( j ).at ( 0 ).drifttime,vec_layer.at ( j ).at ( 0 ).tot);
+            h->h_Cross_DTvTOT[0]->Fill ( vec_layer.at ( j ).at ( 0 ).drifttime,vec_layer.at ( j ).at ( 0 ).tot );
+            h->h_CrossCase->Fill ( 0 );
         } else if ( vec_layer[j].size() > 1 ) {
             vec_player = GetPairs ( vec_layer[j],h );
         }
@@ -278,13 +313,13 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     for ( int j = 0; j < vec_pair_layer.size(); j++ ) {
         if ( vec_pair_layer[j].size() > 1 ) {
             VecSttHit vec_imi = vec_pair_layer[j];
-           // cout<<"Layer "<< j+1<<endl;
+            // cout<<"Layer "<< j+1<<endl;
             vec_clayer = bestPair ( clusterfinder ( vec_pair_layer[j] ), h );
         }
         vec_cluster_layer.push_back ( vec_clayer );
         vec_clayer.clear();
     }
-  //  cout<<"############################################################################"<<endl;
+    //  cout<<"############################################################################"<<endl;
 
 
     int track_sanity = 0;
@@ -362,7 +397,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             }
 
             TF1* f1 = new TF1 ( "f1", "pol1" );
-            TF1* f2 = new TF1 ( "f2", "pol1" );
+            // TF1* f2 = new TF1 ( "f2", "pol1" );
             TGraph* chiX = new TGraph ( vec_ClustersX.size(), clusterArrayX, clusterArrayZx );
             chiX->Fit ( f1, "q" );
             chi_valueX = f1->GetChisquare();
@@ -374,21 +409,21 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             vec_P0.push_back ( p0 );
             vec_P1.push_back ( p1 );
 
-            TGraph* chiY =
-                new TGraph ( vec_ClustersY.size(), clusterArrayY, clusterArrayZy );
-            chiY->Fit ( f2, "q" );
-            chi_valueY = f2->GetChisquare();
-            vec_Chi2y.push_back ( chi_valueY );
-            Double_t pp0 = f2->GetParameter ( 0 );
-            Double_t pp1 = f2->GetParameter ( 1 );
-
-            vec_PP0.push_back ( pp0 );
-            vec_PP1.push_back ( pp1 );
+//             TGraph* chiY =
+//                 new TGraph ( vec_ClustersY.size(), clusterArrayY, clusterArrayZy );
+//             chiY->Fit ( f2, "q" );
+//             chi_valueY = f2->GetChisquare();
+//             vec_Chi2y.push_back ( chi_valueY );
+//             Double_t pp0 = f2->GetParameter ( 0 );
+//             Double_t pp1 = f2->GetParameter ( 1 );
+//
+//             vec_PP0.push_back ( pp0 );
+//             vec_PP1.push_back ( pp1 );
 
             delete f1;
-            delete f2;
+            // delete f2;
             delete chiX;
-            delete chiY;
+            // delete chiY;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////
@@ -420,21 +455,21 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         Float_t smallestPP0 = vec_PP0[0];
         Float_t smallestPP1 = vec_PP1[0];
 
-        Int_t chi_indexY = 0;
-
-        for ( Int_t cj = 0; cj < vec_Chi2y.size(); cj++ ) {
-
-            if ( smallestY > vec_Chi2y[cj] ) {
-                smallestY = vec_Chi2y[cj];
-                chi_indexY = cj;
-            }
-            if ( smallestPP0 > vec_PP0[cj] ) {
-                smallestPP0 = vec_PP0[cj];
-            }
-            if ( smallestPP1 > vec_PP1[cj] ) {
-                smallestPP1 = vec_PP1[cj];
-            }
-        }
+//         Int_t chi_indexY = 0;
+//
+//         for ( Int_t cj = 0; cj < vec_Chi2y.size(); cj++ ) {
+//
+//             if ( smallestY > vec_Chi2y[cj] ) {
+//                 smallestY = vec_Chi2y[cj];
+//                 chi_indexY = cj;
+//             }
+//             if ( smallestPP0 > vec_PP0[cj] ) {
+//                 smallestPP0 = vec_PP0[cj];
+//             }
+//             if ( smallestPP1 > vec_PP1[cj] ) {
+//                 smallestPP1 = vec_PP1[cj];
+//             }
+//         }
 
         for ( Int_t ck = 0; ck < vec_All_X.at ( chi_indexX ).size(); ck++ ) {
             vec_tracks.push_back ( vec_All_X.at ( chi_indexX ).at ( ck ) );
@@ -445,9 +480,9 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
         // printf("\n$$$$$$$$$$$$$$$$$$$$$$$$$\n");
 
-        for ( Int_t cl = 0; cl < vec_All_Y.at ( chi_indexY ).size(); cl++ ) {
-            vec_tracks.push_back ( vec_All_Y.at ( chi_indexY ).at ( cl ) );
-        }
+//         for ( Int_t cl = 0; cl < vec_All_Y.at ( chi_indexY ).size(); cl++ ) {
+//             vec_tracks.push_back ( vec_All_Y.at ( chi_indexY ).at ( cl ) );
+//         }
         double sumLeadTime = 0;
         double meanTime = 0;
 

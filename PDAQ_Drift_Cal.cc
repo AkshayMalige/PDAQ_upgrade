@@ -87,10 +87,12 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     for ( int chh=0; chh<256; chh++ ) {
         h_Ch_Dt[chh] = ( TH1F* ) inFile.Get ( Form ( "Ch_%d_Dt",chh+1 ) );
 
-        if ( h_Ch_Dt[chh]->GetBinContent ( h_Ch_Dt[chh]->GetMaximumBin() ) >=20 ) {
-            vec_DT_start.push_back ( DTmin - ( h_Ch_Dt[chh]->FindFirstBinAbove ( ( h_Ch_Dt[chh]->GetBinContent ( h_Ch_Dt[chh]->GetMaximumBin() ) ) /10,1 ) ) );
-        } else {
-            vec_DT_start.push_back ( 0 );
+        if ( h_Ch_Dt[chh]->GetEntries() >0 ) {
+            if ( h_Ch_Dt[chh]->GetBinContent ( h_Ch_Dt[chh]->GetMaximumBin() ) >=20 ) {
+                vec_DT_start.push_back ( DTmin - ( h_Ch_Dt[chh]->FindFirstBinAbove ( ( h_Ch_Dt[chh]->GetBinContent ( h_Ch_Dt[chh]->GetMaximumBin() ) ) /10,1 ) ) );
+            } else {
+                vec_DT_start.push_back ( 0 );
+            }
         }
 
     }
@@ -132,31 +134,29 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_tracks.push_back ( a );
                     h_Cal_Ch_Dt[sq_ch]->Fill ( a.drifttime );
                     h_Dt[sq_ch]->Fill ( vec_track_can[t].drifttime );
-
                     h_Cal_drifttime->Fill ( dt_crr );
 
-
-//                     vec_o_test.push_back ( a.drifttime );
-//                     vec_x.push_back ( vec_track_can[t].x );
-//                     vec_y.push_back ( vec_track_can[t].y );
-//                     vec_z.push_back ( vec_track_can[t].z );
-//                     vec_layer.push_back ( vec_track_can[t].layer );
-//                     vec_straw.push_back ( vec_track_can[t].straw );
+                    vec_o_test.push_back ( a.drifttime );
+                    vec_x.push_back ( vec_track_can[t].x );
+                    vec_y.push_back ( vec_track_can[t].y );
+                    vec_z.push_back ( vec_track_can[t].z );
+                    vec_layer.push_back ( vec_track_can[t].layer );
+                    vec_straw.push_back ( vec_track_can[t].straw );
                 }
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
-            
-            
+
+
             //cout<<vec_tracks.size()<<endl;
             SttTrackHit& b = stt_event->AddTrackHit();
             b.vec_Track = vec_tracks;
             PDAQ_tree->Fill();
             stt_event->TrackClear();
-//             vec_o_test.clear();
-//             vec_x.clear();
-//             vec_y.clear();
-//             vec_z.clear();
-//             vec_straw.clear();
+            vec_o_test.clear();
+            vec_x.clear();
+            vec_y.clear();
+            vec_z.clear();
+            vec_straw.clear();
 
         }
     }
