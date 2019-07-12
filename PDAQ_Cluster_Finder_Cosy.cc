@@ -1241,33 +1241,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     gEffeciency2->GetYaxis()->SetRangeUser ( 0,1 );
 
     double eff_perC = pow ( from_corridor[13],0.08333 );
-    //printf("%i \n",(int)(eff_perC));
-//     stringstream ss;
-//     ss << eff_perC;
-//     TString str = ss.str();
-//     TPaveText *pt = new TPaveText ( 0.2, 0.2, .8, .8 );
-//     pt->AddText ( str );
-    // pt->SetFillColor(0);
-    //  pt->AddText ( "They are added to the pave using the AddText method." );
-    //pt->AddLine ( .0,.5,1.,.5 );
-    //  pt->AddText ( "Even complex TLatex formulas can be added:" );
-    //  pt->AddText ( "F(t) = #sum_{i=-#infty}^{#infty}A(i)cos#[]{#frac{i}{t+i}}" );
-    //pt->Draw ( "same" );
 
-
-    gEffeciency2->Write();
-
-    //gEffeciency2->SetFillStyle ( 3006 );
-    // gEffeciency2->SetMarkerStyle ( 3 );
-    // gEffeciency2->SetMarkerColor ( kBlack );
-
-    //gFrom90Data->Draw("AP");
-
-//     gFrom90Data->SetMarkerStyle ( 3 );
-//     gFrom90Data->SetMarkerColor ( kTeal-8 );
-//     gFrom90Data->Draw ( "same,P" );
-//     gFrom90Data->Write();
-//
     gFrom95Data->SetMarkerStyle ( 23 );
     gFrom95Data->SetMarkerColor ( kTeal-8 );
     gFrom95Data->SetMarkerSize ( 2.5 );

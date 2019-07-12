@@ -152,10 +152,12 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             b.vec_Track = vec_tracks;
             PDAQ_tree->Fill();
             stt_event->TrackClear();
+            vec_tracks.clear();
             vec_o_test.clear();
             vec_x.clear();
             vec_y.clear();
             vec_z.clear();
+            vec_layer.clear();
             vec_straw.clear();
 
         }
