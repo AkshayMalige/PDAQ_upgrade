@@ -103,8 +103,6 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 //     }
 
 
-
-
     for ( Int_t i = 0; i < iev; i++ ) {
         tree->GetEntry ( i );
 

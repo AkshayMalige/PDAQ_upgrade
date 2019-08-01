@@ -148,6 +148,16 @@ struct histograms{
     
     TH1F* h_CrossCase = new TH1F ( "h_CrossCase" ,"h_CrossCase", 3, 0, 3 );
     TH1F* h_CrossMaxTOT = new TH1F ( "h_CrossMaxTOT" ,"h_CrossMaxTOT", 3, 0, 3 );
+    
+    TH1F* h_Corr_Layer_Mult = new TH1F ( "h_Corr_Layer_Mult", "h_Corr_Layer_Mult;Number of fired layers", 10, 0, 10 );
+    TH1F* h_Corr_Plane_Mult = new TH1F ( "h_Corr_Plane_Mult", "h_Corr_Plane_Mult;Number of fired straws", 18, 0, 18 );
+    TH1F* h_Corr_Channel_Mult = new TH1F ( "h_Corr_Channel_Mult", "h_Corr_Channel_Mult;Number of fired straws", 30, 0, 30 );
+    
+    TH1F* h_CrossTalkCase[2];
+    TH2F* h_CrossTalkDT_TOT[2];
+    TH2F* h_CrossTalkDT_DT[2];
+    TH1F* h_High_TOT_Layer = new TH1F ( "h_High_TOT_Layer", "h_High_TOT_Layer;Layer", 9, 0, 9 );
+    TH1F* h_High_TOT_Ratio = new TH1F ( "h_High_TOT_Ratio", "h_High_TOT_Ratio;Layer", 2, 0, 2 );
    
     
 };

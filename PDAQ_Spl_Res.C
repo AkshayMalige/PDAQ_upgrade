@@ -6,7 +6,7 @@ Bool_t PDAQ_Spl_Res ( void )
 
     cout << "Opened" << endl;
 
-    TFile* file = TFile::Open ( "d.root", "READ" );
+    TFile* file = TFile::Open ( "d15.root", "READ" );
     TTree* tree = 0;
     file->GetObject ( "PDAQ_tree", tree );
 
@@ -136,7 +136,6 @@ Bool_t PDAQ_Spl_Res ( void )
                 delete ( vec_dr_xaxis[w][v] );
                 delete ( vec_dr_yaxis[w][v] );
             }
-        }
 
         // vector<SttHit*> vec_hits;
         vec_hits.clear();
@@ -146,6 +145,7 @@ Bool_t PDAQ_Spl_Res ( void )
 
         char buff[200];
         sprintf ( buff, "can_%d", i );
+        }
         //TCanvas* c1 = new TCanvas ( buff );
 
         sprintf ( buff, "h_%d", i );

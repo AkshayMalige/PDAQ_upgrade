@@ -181,19 +181,20 @@ std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
             if ( a >=1 ) {
                 SciHit* l = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( a -1 );
                 if ( a==SCI_CAL->sci_raw.totalNTDCHits-2 ) {
-                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+//                     if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit /*&& ( l2->leadTime - l->leadTime ) <=600 && ( l3->leadTime - l2->leadTime ) <=600*/ )  {
                         B.push_back ( l2 );
                         B.push_back ( l3 );
-                    } else if ( ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+                    } else if ( ( l3->leadTime - l2->leadTime ) >=scint_diff_limit /*&& ( l3->leadTime - l2->leadTime ) <=600*/ ) {
                         B.push_back ( l3 );
                     }
                 } else {
-                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit ) {
+                    if ( ( l2->leadTime - l->leadTime ) >=scint_diff_limit && ( l3->leadTime - l2->leadTime ) >=scint_diff_limit /*&& ( l2->leadTime - l->leadTime ) <=600 && ( l3->leadTime - l2->leadTime ) <=600*/ ) {
                         B.push_back ( l2 );
                     }
                 }
 
-            } else if ( a==0 && l3->leadTime-l2->leadTime >=scint_diff_limit ) {
+            } else if ( a==0 && l3->leadTime-l2->leadTime >=scint_diff_limit /*&& l3->leadTime-l2->leadTime <=600*/ ) {
                 B.push_back ( l2 );
             }
 
@@ -385,7 +386,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     int Layer_eq_4_counter = 0;
     int vec_LT_g7_counter = 0;
     int vec_LT_l250_counter = 0;
-    int final_counter = 0;
+    double final_counter = 0;
 
     float max_lead_time_diff = 0;
     int min_track_hits = 0;
@@ -445,9 +446,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_Cross_DTvTOT[mc] = new TH2F ( Form ( "Cross_%d_DTvsTOT",mc+1 ),Form ( "Cross_%d_DTvsTOT;Drift Time [ns];Time Over Threshold [ns]",mc+1 ), 500, 0, 500,4000,0,4000 );
     }
 
+    for ( int kc =0; kc<2 ; kc++ ) {
+        h->h_CrossTalkCase[kc]=new TH1F ( Form ( "Cross_TlkCase%d", kc+1 ) , Form ( "Cross_TlkCase%d", kc+1 ), 3, 0,3 );
+        h->h_CrossTalkDT_TOT[kc]=new TH2F ( Form ( "h_CrossTalkDT_TOT%d",kc+1 ),Form ( "h_CrossTalkDT_TOT%d;Drift Time [ns];Time Over Threshold [ns]",kc+1 ), 500, 0,500,4000,0,4000 );
+        h->h_CrossTalkDT_DT[kc]= new TH2F ( Form ( "h_CrossTalkDT_DT%d",kc+1 ),Form ( "h_CrossTalkDT_DT%d;Drift Time [ns];Drift Time [ns]",kc+1 ), 500, 0, 500,500,0,500 );
+    }
+
 
     for ( int mk=0; mk<3; mk++ ) {
-
         h->h_Cross_TOTvTOT[mk] = new TH2F ( Form ( "Cross_%d_TOTvsTOT",mk+1 ),Form ( "Cross_%d_TOTvsTOT1;Time Over Threshold [ns];Time Over Threshold [ns]",mk+1 ), 4000, 0, 4000,4000,0,4000 );
         h->h_Cross_DTvDT[mk] = new TH2F ( Form ( "Cross_%d_DTvsDT",mk+1 ),Form ( "Cross_%d_DTvsDT;Drift Time [ns];Drift Time [ns]",mk+1 ), 500, 0, 500,500,0,500 );
         h->h_Cross_DTsum[mk] = new TH1F ( Form ( "Cross_%d_DTSum", mk+1 ) , Form ( "Cross_%d_DTSum;Drift Time [ns]", mk+1 ), 600, -100,500 );
@@ -511,7 +517,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         tree->GetEntry ( i );
 
         std::vector<SttHit> vec_stthits;
-        //cout<<i<<endl;
+        // cout<<i<<endl;
 
         bool scint = false;
         bool stt = false;
@@ -563,11 +569,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             }
         }
 
-        //if (STT_CAL->SCI_CAL->sci_raw.totalNTDCHits>0){
-
-        // cout<<SCI_CAL->sci_raw.totalNTDCHits<<endl;
-
-        if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
+        if ( SCI_CAL->sci_raw.totalNTDCHits ==1 ) {
 
 
             vec_scihits =  ex_Scint_pileup ( SCI_CAL ) ;
@@ -575,16 +577,25 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
             if ( vec_scihits.size() >=2 ) {
                 for ( int a=0; a< vec_scihits.size()-1; a++ ) {
-                    //if
                     h->h_scint_timediffb->Fill ( vec_scihits[a+1]->leadTime - vec_scihits[a]->leadTime );
                 }
             }
 
+//         cout<<"______________________"<<endl;
+//         cout<<SCI_CAL->sci_raw.totalNTDCHits<<endl;
+//         if ( SCI_CAL->sci_raw.totalNTDCHits ==1 ) {
+//             SciHit* ho = ( SciHit* ) SCI_CAL->sci_raw.adc_hits->ConstructedAt ( 0 );
+//             vec_scihits.push_back ( ho );
+//
+//             cout<<"\t"<<vec_scihits.size()<<endl;
+
+
 
             h->h_scint_mult_a->Fill ( vec_scihits.size() );
             //printf("\nSIZE : %i\n",vec_scihits.size());
+            scint_event+=vec_scihits.size();
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
-                scint_event++;
+
                 SciHit* sh = vec_scihits[sn];
                 h->h_scnt_plup_cnts->Fill ( 2 );
                 h->h_ShitBlock->Fill ( 1 );
@@ -690,9 +701,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             ChHitsMult[la][ma] = 0;
                         }
                     }
+                    bool high_tot=false;
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
 
-                        if ( vec_leadTime[jx].leadTime - sh->leadTime >-100 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
+                        if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
                             h->h_pL_dtvstot[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
@@ -703,12 +715,22 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
                             h->h_hitBlock->Fill ( 2 );
                             h->h_p_drifttimevstot->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
+                            if ( vec_leadTime[jx].tot>800 ) {
+                                high_tot=true;
+                            }
                             // printf ( "STRAW: %x  %i  %i  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime );
                         } else {
 
                         }
                     }
-                    //cout<<"\n"<<endl;
+                    //   if ( high_tot==true ) {
+//                       cout<<"SIZE  : "<<vec_leadTime.size()<<endl;
+//                       for (int t=0; t<vec_leadTime.size(); t++){
+//                         cout<<vec_leadTime[t].tot<<"\t"<<vec_leadTime[t].layer<<"\t"<<vec_leadTime[t].straw<<endl;
+//                       }
+//                     }
+//                     high_tot==false;
+//                     cout<<"*************************************************\n"<<endl;
 
                     int mult = 0;
                     int layer_eff_count =0;
@@ -751,8 +773,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             //cout<<vec_L5S9.size() <<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
                         }
                     }
-
-
 
                     for ( int l=0; l<8; l++ ) {
 
@@ -856,14 +876,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             //cout<<vec_L5S9.size() <<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
                         }
                     }
-
-
-
-
-
-//////////////////////////////////corridor/////////////////////////////////////////////////
-
-//////////////////////////////////////////// end - corridor ////////////////////////////////////////////////////
 
                     int plane =0;
                     int cell =0;
@@ -1018,24 +1030,66 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
 
                     int MultLayer3[8];
+                    int MultPlane3[16];
+                    int MultChannel3[300];
+                    int str_channel=0;
+                    int str_plane=0;
                     for ( int w=0; w<8; w++ ) {
                         MultLayer3[w]=0;
                     }
+                    for ( int ww=0; ww<16; ww++ ) {
+                        MultPlane3[ww]=0;
+                    }
+                    for ( int www=0; www<300; www++ ) {
+                        MultChannel3[www]=0;
+                    }
+
                     for ( int jk=0; jk<vec_corridor.size(); jk++ ) {
                         MultLayer3[vec_corridor[jk].layer-1]++;
-                    }
-                    int mult3 = 0;
-                    for ( int ab=0; ab<8; ab++ ) {
-                        if ( MultLayer3[ab]> 0 ) {
-                            mult3++;
+                        str_plane = ( vec_corridor[jk].layer-1 ) *2 +vec_corridor[jk].plane;
+                        str_channel = ( ( ( vec_corridor[jk].layer-1 ) * 32 ) +vec_corridor[jk].straw-1 )-1;
+                        MultPlane3[str_plane]++;
+                        MultChannel3[str_channel]++;
+                        if (vec_corridor[jk].tot>800){
+                          h->h_High_TOT_Layer->Fill(vec_corridor[jk].layer);
                         }
                     }
 
+                    int CLmult3 = 0;
+                    int CPmult3 = 0;
+                    int CSmult3 = 0;
+                    for ( int ab=0; ab<8; ab++ ) {
+                        if ( MultLayer3[ab]> 0 ) {
+                            CLmult3++;
+                        }
+                    }
+                    for ( int abb=0; abb<16; abb++ ) {
+                        if ( MultPlane3[abb]> 0 ) {
+                            CPmult3++;
+                        }
+                    }
+                    for ( int abd=0; abd<300; abd++ ) {
+                        if ( MultChannel3[abd]> 0 ) {
+                            CSmult3++;
+                        }
+                    }
+
+                    if ( CLmult3>0 ) {
+                        h->h_Corr_Layer_Mult->Fill ( CLmult3 );
+                    }
+                    if ( CPmult3>0 ) {
+                        h->h_Corr_Plane_Mult->Fill ( CPmult3 );
+                    }
+                    if ( CSmult3>0 ) {
+                        h->h_Corr_Channel_Mult->Fill ( CSmult3 );
+                    }
 
                     //cout<<"SIZE  : "<<vec_stthits.size()<<endl;
-                    if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && mult3==8 ) {
+                    if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
                         PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                        final_counter++;
                     }
+                    // }
                 }
             }
         }
@@ -1200,16 +1254,16 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
     for ( int r=0; r<16; r++ ) {
-        
+
         from_corridor[r]= h->h_Layer_effPlane->GetBinContent ( r );
         index[r] =r-1;
     }
-    
-    for (int rr =0; rr< 30; rr++){
-      from_corridor_straw[rr]= h->h_Layer_effStraw->GetBinContent ( rr );
-      index2[rr] =rr-1;
+
+    for ( int rr =0; rr< 30; rr++ ) {
+        from_corridor_straw[rr]= h->h_Layer_effStraw->GetBinContent ( rr );
+        index2[rr] =rr-1;
     }
-    
+
 
     C = eff_job ( pow ( from_corridor[13],0.08333 ) );
 
@@ -1537,6 +1591,25 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     Lay_ef->Write();
     Lay_ef1->Write();
+
+
+    h->h_Corr_Layer_Mult->Scale ( 1/h->h_Corr_Layer_Mult->GetEntries() );
+    h->h_Corr_Layer_Mult->Write();
+    h->h_Corr_Plane_Mult->Scale ( 1/h->h_Corr_Plane_Mult->GetEntries() );
+    h->h_Corr_Plane_Mult->Write();
+    h->h_Corr_Channel_Mult->Scale ( 1/h->h_Corr_Channel_Mult->GetEntries() );
+    h->h_Corr_Channel_Mult->Write();
+
+
+    for ( int y=0; y<2; y++ ) {
+        h->h_CrossTalkCase[y]->Scale ( 1/final_counter );
+        h->h_CrossTalkCase[y]->Write();
+        h->h_CrossTalkDT_TOT[y]->Write();
+        h->h_CrossTalkDT_DT[y]->Write();
+    }
+    h->h_High_TOT_Layer->Scale(1/h->h_High_TOT_Layer->GetEntries());
+    h->h_High_TOT_Layer->Write();
+
     PDAQ_tree->Write();
     //Ttree->Close();
     //inFile.Close();
@@ -1571,6 +1644,8 @@ int main ( int argc, char** argv )
 //go4/trb3
 //source trb3login
 //hldprint -filename -tdc 0x64ff -skip 1000 -num 100 | more
+
+
 
 
 
