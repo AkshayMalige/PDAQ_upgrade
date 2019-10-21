@@ -1,22 +1,33 @@
 #include "PDAQ_Spl_Res.h"
 using namespace std;
 
-Bool_t PDAQ_Spl_Res ( void )
+
+Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
+
+//Bool_t PDAQ_Spl_Res ( void )
 {
 
     cout << "Opened" << endl;
 
-    TFile* file = TFile::Open ( "d.root", "READ" );
-    TTree* tree = 0;
-    file->GetObject ( "DR_Tree", tree );
+
+    TFile inFile ( intree );
+    TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
+    if ( !tree ) {
+        std::cerr << "Tree PDAQ_tree was not found\n";
+        std::exit ( 1 );
+    }
+
+//     TFile* file = TFile::Open ( "d15.root", "READ" );
+//     TTree* tree = 0;
+//     file->GetObject ( "PDAQ_tree", tree );
 
     //     TFile * file = TFile::Open("PDAQ_Stt_Tracks.root", "READ");
     //     TTree* tree = 0;
     //     file->GetObject("PDAQ_EMC_STT_cluster_analysis", tree);
-    if ( !tree ) {
-        std::cerr << "Tree doesn't exists" << std::endl;
-        return 1;
-    }
+//     if ( !tree ) {
+//         std::cerr << "Tree doesn't exists" << std::endl;
+//         return 1;
+//     }
     tree->Print();
 
     TF1* f1 = new TF1 ( "f1", "pol1" );
@@ -24,7 +35,7 @@ Bool_t PDAQ_Spl_Res ( void )
 //     TF1* f3 = new TF1 ( "f3", "pol1" );
 //     TF1* f4 = new TF1 ( "f4", "pol1" );
 
-    TFile* driftfile1 = new TFile ( "XYZ_Coordinates100k.root", "RECREATE" );
+    TFile* driftfile1 = new TFile ( outtree, "RECREATE" );
     // TFile* driftfile2 = new TFile("Y_Coordinates.root", "RECREATE");
     Double_t theta_X = 0;
 
@@ -83,12 +94,11 @@ Bool_t PDAQ_Spl_Res ( void )
     tree->SetBranchAddress ( "vec_z", &vec_z );
     tree->SetBranchAddress ( "vec_layer", &vec_layer );
     tree->SetBranchAddress ( "vec_straw", &vec_straw );
-    //     tree->SetBranchAddress("vec_fee", &vec_fee);
-    //     tree->SetBranchAddress("vec_fee_ch", &vec_fee_ch);
-    //     tree->SetBranchAddress("vec_tdc_ch", &vec_tdc_ch);
-    //
+
+
     TGraph* gDR = new TGraph ( 220, a1, b1 );
-    gDR = ( TGraph* ) file->Get ( "PDAQ_DR" );
+    gDR = ( TGraph* ) inFile.Get ( "PDAQ_DR" );
+   // gDR = ( TGraph* ) file->Get ( "PDAQ_DR" );
 
     // Double_t strawY[8];
     // Double_t strawZ[8];
@@ -138,19 +148,19 @@ Bool_t PDAQ_Spl_Res ( void )
                 delete ( vec_dr_xaxis[w][v] );
                 delete ( vec_dr_yaxis[w][v] );
             }
+
+            // vector<SttHit*> vec_hits;
+            vec_hits.clear();
+            vec_hits_new.clear();
+
+
+
+            char buff[200];
+            sprintf ( buff, "can_%d", i );
         }
-
-        // vector<SttHit*> vec_hits;
-        vec_hits.clear();
-        vec_hits_new.clear();
-
-        Int_t oc_count = 0;
-
-        char buff[200];
-        sprintf ( buff, "can_%d", i );
         //TCanvas* c1 = new TCanvas ( buff );
 
-        sprintf ( buff, "h_%d", i );
+        // sprintf ( buff, "h_%d", i );
 
 
         /*        TH2I* h = new TH2I ( buff, "h;x,y [cm];z [cm]", x_bins, x_min,x_max, z_bins, z_min, z_max );
@@ -207,6 +217,7 @@ Bool_t PDAQ_Spl_Res ( void )
         }
 
         // Filter to get only the sets having unique Z values
+        Int_t oc_count = 0;
 
         if ( vec_hits.size() > 0 ) {
             for ( Int_t u = 0; u < vec_hits.size() - 1; u++ ) {
@@ -568,8 +579,8 @@ Bool_t PDAQ_Spl_Res ( void )
                     rotatedX =A1[k]+ ( dradius* sin ( theeta ) );
                     rotatedY = A2[k] - ( dradius* ( 1-cos ( theeta ) ) );
                     //X_short = ( fabs ( centerTotrack -   vec_strawX[k] ) ) - rotatedX  ;
-	      staticRes = ((p1*A1[k]) - A2[k] + p0)/(sqrt((p1*p1)+1));
-	      //cout<<"stat :"<<staticRes<<endl;
+                    staticRes = ( ( p1*A1[k] ) - A2[k] + p0 ) / ( sqrt ( ( p1*p1 ) +1 ) );
+                    //cout<<"stat :"<<staticRes<<endl;
                     hx->Fill ( staticRes );
                     h_theeta_X->Fill ( theta_X, X_short );
                     vec_Xtheta.push_back ( theta_X );
@@ -835,9 +846,27 @@ Bool_t PDAQ_Spl_Res ( void )
     return kTRUE;
 }
 
-int main()
+int main ( int argc, char** argv )
 {
-    return PDAQ_Spl_Res();
+
+    if ( argc >= 3 )
+
+        if ( !argv[3] ) {
+            printf ( "\n\nNote : One Million Events will be processed. To change "
+                     "add the number of events to be processed after the ouput "
+                     "file name.\n" );
+            // atoi(argv[3]) == 1000;
+            sleep ( 2 );
+            -         PDAQ_Spl_Res ( argv[1], argv[2], 100000000 );
+        } else {
+            PDAQ_Spl_Res ( argv[1], argv[2], atoi ( argv[3] ) );
+        }
+
+    else {
+        return 1;
+    }
+
+    return 0;
 }
 
 

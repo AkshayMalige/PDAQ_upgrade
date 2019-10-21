@@ -14,7 +14,7 @@ list(APPEND CMAKE_MODULE_PATH $ENV{ROOTSYS})
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
 find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist Physics Matrix RIO Tree Cint Graf)
 
-include(RootNewMacros)
+#include(RootNewMacros)
 include_directories(${ROOT_INCLUDE_DIRS})
 
 
@@ -38,11 +38,11 @@ ROOT_GENERATE_DICTIONARY(G__PDAQ_cc
 	 ${HDRS}
 	 LINKDEF LinkDef.h)
 #ROOT_GENERATE_ROOTMAP(PDAQ LINKDEF LinkDef.h)
-add_custom_command(
-	OUTPUT rootmap
-	COMMAND rlibmap -o libPDAQ.rootmap -l libPDAQ -c ../LinkDef.h
-	DEPENDS LinkDef.h rlibmap)
-add_custom_target(libPDAQ.rootmap ALL DEPENDS rootmap PDAQ)
+#add_custom_command(
+	#OUTPUT rootmap
+	#COMMAND rlibmap -o libPDAQ.rootmap -l libPDAQ -c ../LinkDef.h
+	#DEPENDS LinkDef.h rlibmap)
+#add_custom_target(libPDAQ.rootmap ALL DEPENDS rootmap PDAQ)
 
 add_library(PDAQ SHARED ${SRCS} G__PDAQ_cc.cxx)
 
@@ -74,5 +74,5 @@ target_link_libraries(pdaq_drift_cal PDAQ ${ROOT_LIBRARIES})
 add_executable(pdaq_rad_cal PDAQ_Rad_Cal.cc)
 target_link_libraries(pdaq_rad_cal PDAQ ${ROOT_LIBRARIES})
 
-add_executable(pdaq_spatial_resolution PDAQ_Spl_Res.C)
+add_executable(pdaq_spatial_resolution PDAQ_Spl_Res.cc)
 target_link_libraries(pdaq_spatial_resolution PDAQ ${ROOT_LIBRARIES})

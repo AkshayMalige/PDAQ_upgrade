@@ -28,6 +28,9 @@
 #include "TEllipse.h"
 using namespace std;
 
-Bool_t PDAQ_Spl_Res(void);
+//Bool_t PDAQ_Spl_Res(void);
+
+Bool_t PDAQ_Spl_Res(char* intree, char* outtree, int maxEvents);
+
 
 #endif

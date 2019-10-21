@@ -126,7 +126,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             for ( int t = 0; t < vec_track_can.size(); t++ ) {
                 sq_ch = ( ( vec_track_can[t].layer-1 ) * 32 ) +vec_track_can[t].straw-1;
                 dt_crr = vec_track_can[t].drifttime + vec_DT_start[sq_ch];
-                if ( dt_crr>0.0 && dt_crr<=200.0 ) {
+                if ( dt_crr>0.0 && dt_crr<=250.0 ) {
                     a = vec_track_can[t];
                     a.drifttime = dt_crr;
                     vec_tracks.push_back ( a );
