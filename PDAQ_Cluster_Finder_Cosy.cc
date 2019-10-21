@@ -1603,11 +1603,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int y=0; y<2; y++ ) {
         h->h_CrossTalkCase[y]->Scale ( 1/final_counter );
+	h->h_CrossTalkCase[y]->SetLineWidth(3);
+	h->h_CrossTalkCase[y]->SetLineColor(kOrange+1);
+	h->h_CrossTalkCase[y]->SetFillColor(kOrange+1);
         h->h_CrossTalkCase[y]->Write();
         h->h_CrossTalkDT_TOT[y]->Write();
         h->h_CrossTalkDT_DT[y]->Write();
     }
     h->h_High_TOT_Layer->Scale(1/h->h_High_TOT_Layer->GetEntries());
+	h->h_High_TOT_Layer->SetLineWidth(3);
+	h->h_High_TOT_Layer->SetLineColor(kOrange+1);
+	h->h_High_TOT_Layer->SetFillColor(kOrange+1);
     h->h_High_TOT_Layer->Write();
 
     PDAQ_tree->Write();
