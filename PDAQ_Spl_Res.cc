@@ -1,6 +1,16 @@
 #include "PDAQ_Spl_Res.h"
+#include "string.h"
+#include "TStyle.h"
+#include <bits/stdc++.h>
+
 using namespace std;
 
+string convertToString (char *a , int size)
+{
+    string s(a);
+    
+    return s;
+}
 
 Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
@@ -130,6 +140,13 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     for ( Int_t i = 0; i < iev; i++ ) {
         Int_t count = 0;
         Int_t count1 = 0;
+        
+        if ( i == maxEvents ) {
+            break;
+        }
+        if ( i % 1000 == 0 ) {
+            cout << i << endl;
+        }
 
         tree->GetEntry ( i );
         cout << endl;
@@ -818,6 +835,15 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //       emc->SetLineColor(0);
     // emc->SetLineWidth(2);
     hx->Write();
+    TF1* fh = new TF1("fh", "gaus",  -0.3, 0.3);
+    hx->Fit(fh);
+    int a_size = sizeof(outtree)/sizeof(char);
+    TString s_a = convertToString(outtree,a_size)+".png";
+    gStyle->SetOptFit(1101);
+    hx->Draw();
+    
+    c1->SaveAs(s_a,"png");
+    
     //h->Write();
     //hy->Write();
     h_theeta_X->Write();

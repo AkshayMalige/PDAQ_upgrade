@@ -18,6 +18,7 @@
 #include <TNamed.h>
 #include <TObject.h>
 #include <math.h>
+#include "TMultiGraph.h"
 
 using namespace std;
 
@@ -136,7 +137,7 @@ gTp35Th20->SetLineWidth(2);
    mg1->Draw("AL");
      
 
-leg = new TLegend(0.7,0.7,0.9,0.9);
+TLegend *leg = new TLegend(0.7,0.7,0.9,0.9);
 
 
 //leg->SetHeader("Input High Voltage");
