@@ -23,6 +23,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     std::vector<double> vec_straw;
     std::vector<double> vec_fee_ch;
     std::vector<double> vec_tdc_ch;
+    std::vector<double> vec_plane;
+
 
     TFile inFile ( intree );
     TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
@@ -59,6 +61,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     PDAQ_tree->Branch ( "vec_z", &vec_z );
     PDAQ_tree->Branch ( "vec_layer", &vec_layer );
     PDAQ_tree->Branch ( "vec_straw", &vec_straw );
+    PDAQ_tree->Branch ( "vec_plane", &vec_plane );
+
 
     TH1F* h_Ch_Dt[256];
     TH1F* h_drifttime = new TH1F ( "h_drifttime", "h_drifttime;Drift Time [ns]", 800, -100,700 );
@@ -140,6 +144,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_z.push_back ( vec_track_can[t].z );
                     vec_layer.push_back ( vec_track_can[t].layer );
                     vec_straw.push_back ( vec_track_can[t].straw );
+		    vec_plane.push_back (vec_track_can[t].plane);
                 }
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
@@ -157,6 +162,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             vec_z.clear();
             vec_layer.clear();
             vec_straw.clear();
+	    vec_plane.clear();
 
         }
     }
