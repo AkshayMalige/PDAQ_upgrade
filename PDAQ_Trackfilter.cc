@@ -500,9 +500,9 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
         // printf("smallest chix :%2.3f\n", smallestX);
 
-        Float_t smallestY = vec_Chi2y[0];
-        Float_t smallestPP0 = vec_PP0[0];
-        Float_t smallestPP1 = vec_PP1[0];
+//         Float_t smallestY = vec_Chi2y[0];
+//         Float_t smallestPP0 = vec_PP0[0];
+//         Float_t smallestPP1 = vec_PP1[0];
 
 //         Int_t chi_indexY = 0;
 //

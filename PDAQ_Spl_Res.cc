@@ -865,6 +865,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //       emc->Draw("P");
 //       emc->Write();
     Z_value->Write();
+    driftfile1->Close();
+  
     // emc->Write();
     // DR->Draw();
     // cout<<"count in Layer1+layer3 : "<< count<<"\t"<<"count in Layer2+layer4

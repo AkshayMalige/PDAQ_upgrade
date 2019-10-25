@@ -206,6 +206,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
     }
     PDAQ_tree->Write();
+    Ttree->Close();
 
     return kTRUE;
 

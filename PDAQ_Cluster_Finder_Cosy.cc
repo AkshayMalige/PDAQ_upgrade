@@ -1617,7 +1617,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_High_TOT_Layer->Write();
 
     PDAQ_tree->Write();
-    //Ttree->Close();
+    Ttree->Close();
     //inFile.Close();
     printf ( "Total Hits processed : %f Repeated Hits in an Event : %f\n\n", All_repeat, repeat );
     printf ( "In_File: %s   Out_File:  %s\n", intree, outtree );

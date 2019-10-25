@@ -334,6 +334,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
     } // over events
     h_TRB_ref_diff->Write();
     PDAQ_tree->Write();
+    Ttree->Close();
     cout << "Repeated entries  :" << repeat << "/" << All_repeat << endl;
     cout << "Good Hits : " << good_counter << endl;
     printf ( "In_File: %s   Out_File:  %s\n", intree, outtree );

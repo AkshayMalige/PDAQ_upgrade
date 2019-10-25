@@ -12,7 +12,7 @@ include_directories(${MyProject_SOURCE_DIR})
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 list(APPEND CMAKE_MODULE_PATH $ENV{ROOTSYS})
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
-find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist Physics Matrix RIO Tree Cint Graf)
+find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist Physics Matrix RIO Tree Graf OPTIONAL_COMPONENTS Cint Cling)
 
 #include(RootNewMacros)
 include_directories(${ROOT_INCLUDE_DIRS})
