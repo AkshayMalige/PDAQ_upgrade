@@ -144,7 +144,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_z.push_back ( vec_track_can[t].z );
                     vec_layer.push_back ( vec_track_can[t].layer );
                     vec_straw.push_back ( vec_track_can[t].straw );
-		    vec_plane.push_back (vec_track_can[t].plane);
+                    vec_plane.push_back (vec_track_can[t].plane);
                 }
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }

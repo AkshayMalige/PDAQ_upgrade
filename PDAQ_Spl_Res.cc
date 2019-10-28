@@ -49,12 +49,20 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     // TFile* driftfile2 = new TFile("Y_Coordinates.root", "RECREATE");
     Double_t theta_X = 0;
 
-    TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 500, -1, 4 );
+    TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 400, -2, 2 );
     TH1F* hy = new TH1F ( "hy", "Spatial_Resolution_X", 500, -1, 4 );
     TH1F* DR = new TH1F ( "dr", "drift_radius", 350, 0, 350 );
     TH2F* h_theeta_X = new TH2F ( "h_theeta_X", "h_theeta_X", 50, 0, 5, 20, 0, 2 );
 
     TH1F* Z_value = new TH1F ( "Z_value", "dummy", 5, 0, 5 );
+    
+    TH2F* h_dx[18];
+    TH1F* h_res_plane[18];
+    
+    for ( int mc = 0; mc < 18; mc++ ) {
+        h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -0.1, 0.1,100,0,1 );
+        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d",mc+1), 400, -2, 2 );
+    }
 
     std::vector<double>* vec_Drifttime = 0;
     std::vector<double>* vec_x = 0;
@@ -62,6 +70,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     std::vector<double>* vec_z = 0;
     std::vector<double>* vec_layer = 0;
     std::vector<double>* vec_straw = 0;
+    std::vector<double>* vec_plane = 0;
+
     //     std::vector<double>* vec_module;
     //     std::vector<double>* vec_fee;
     //     std::vector<double>* vec_fee_ch;
@@ -104,6 +114,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     tree->SetBranchAddress ( "vec_z", &vec_z );
     tree->SetBranchAddress ( "vec_layer", &vec_layer );
     tree->SetBranchAddress ( "vec_straw", &vec_straw );
+    tree->SetBranchAddress ("vec_plane",&vec_plane);
 
 
     TGraph* gDR = new TGraph ( 220, a1, b1 );
@@ -135,6 +146,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
     TCanvas* c1 = new TCanvas ( "c1","c1" );
     TH2I* h = new TH2I ( "name", "h;x,y [cm];z [cm]", x_bins, x_min,x_max, z_bins, z_min, z_max );
+    
     //c1->cd();
     h->Draw();
     for ( Int_t i = 0; i < iev; i++ ) {
@@ -197,6 +209,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
             //a->fee = vec_fee->at(n);
             //a->fee_channel = vec_fee_ch->at(n);
             //a->channel = vec_tdc_ch->at(n);
+            a->plane = vec_plane->at(n);
             a->straw = vec_straw->at ( n );
 
             vec_hits.push_back ( a );
@@ -327,6 +340,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_x1->y = vec_hits_new[j]->y;
                     new_x1->z = vec_hits_new[j]->z;
                     new_x1->layer = vec_hits_new[j]->layer;
+                    new_x1->plane = vec_hits_new[j]->plane;
                     //                     new_x1->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_x1->fee = vec_hits_new[j]->fee;
@@ -340,6 +354,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_x2->y = vec_hits_new[j]->y;
                     new_x2->z = vec_hits_new[j]->z;
                     new_x2->layer = vec_hits_new[j]->layer;
+                    new_x2->plane = vec_hits_new[j]->plane;
                     //                     new_x2->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_x2->fee = vec_hits_new[j]->fee;
@@ -369,6 +384,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_y1->z = vec_hits_new[j]->z;
                     new_y1->x = vec_hits_new[j]->x;
                     new_y1->layer = vec_hits_new[j]->layer;
+                    new_y1->plane = vec_hits_new[j]->plane;
                     //                     new_y1->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_y1->fee = vec_hits_new[j]->fee;
@@ -387,6 +403,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_y2->z = vec_hits_new[j]->z;
                     new_y2->x = vec_hits_new[j]->x;
                     new_y2->layer = vec_hits_new[j]->layer;
+                    new_y2->plane = vec_hits_new[j]->plane;
                     //                     new_y2->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_y2->fee = vec_hits_new[j]->fee;
@@ -425,7 +442,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
             std::vector<Double_t> chiX_array;
             Double_t chi_value;
 
-            vector<vector<Double_t>> myCombination;
+            vector<vector<SttHit*>> myCombination;
             myCombination.clear();
 
             Double_t dSlope0 = 0;
@@ -447,7 +464,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //                 cout<<no_comb_x<<endl;
 //                 cout<<"{";
 
-                vector<Double_t> vt;
+                std::vector<SttHit*> vt;
                 vt.clear();
 
                 for ( Int_t coo = 0; coo < count; coo++ ) {
@@ -460,7 +477,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
 //                     cout<<"   STRAW_LOC@@@@@@@@@@@@@@@@&&&&&&&&&:"<<vec_dr_xaxis[comb_idx][coo]->x<<"   " ;
 
-                    vt.push_back ( vec_dr_xaxis[comb_idx][coo]->x );
+                    vt.push_back ( vec_dr_xaxis[comb_idx][coo] );
                 }
 
                 myCombination.push_back ( vt );
@@ -484,9 +501,11 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                 TGraph* chiX = new TGraph ( vt.size(), A1, A2 );
                 chiX->Fit ( f1, "q" );
                 chi_value = f1->GetChisquare();
+                
+
                 // cout<<"\nX chi value"<<chi_value<<endl;
 
-                chiX_array[co] = chi_value;
+                chiX_array[co] = chi_value/vt.size();
                 delete chiX;
             }
 
@@ -507,10 +526,10 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
 //             cout << "\n\n"
 //                  << "BEST COMBINATION  :";
-            for ( Int_t gdd = 0; gdd < count; gdd++ ) {
-                //cout << "\t " << myCombination.at ( chi_index ).at ( gdd ) << " ";
-                Ex[gdd] = myCombination.at ( chi_index ).at ( gdd );
-            }
+//             for ( Int_t gdd = 0; gdd < count; gdd++ ) {
+//                 //cout << "\t " << myCombination.at ( chi_index ).at ( gdd ) << " ";
+//                 Ex[gdd] = myCombination.at ( chi_index ).at ( gdd );
+//             }
             //cout << "\n\n\n" << endl;
 
             //cout << "\n SMALLEST ChiSquar  :" << smallest << "(" << chi_index<< ")" << endl;
@@ -518,7 +537,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
             for ( Int_t coo = 0; coo < count; coo++ ) {
                 int bit_idx = ( 1 << coo );
                 int comb_idx = ( chi_index & bit_idx ) ? 1 : 0;
-
+                
+                Ex[coo] = myCombination.at ( chi_index ).at ( coo )->x;
                 A1[coo] = vec_dr_xaxis[comb_idx][coo]->x;
                 A2[coo] = vec_dr_xaxis[comb_idx][coo]->z;
             }
@@ -602,6 +622,12 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     h_theeta_X->Fill ( theta_X, X_short );
                     vec_Xtheta.push_back ( theta_X );
                     vec_Xsr.push_back ( X_short );
+                    
+                   // cout<<"dx : "<<centerTotrack<<"\tx : "<<A1[k]-xperfect3[k]<<endl;
+                  //  cout<<( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane<<endl;
+                    int plane_dx = ( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane;
+                    h_dx[plane_dx]->Fill(A1[k]-xperfect3[k],centerTotrack);
+                    h_res_plane[plane_dx]->Fill(staticRes);
                     //cout<<"DR_co :"<<rotatedX<<" vec_strawX :"<<vec_strawX[k]<<" dSlope0 : "<<dSlope0 <<" dConst0 :"<<dConst0 <<" X_perpX : "<< X_perpX<<" centerTotrack : "<< centerTotrack<<" X_short : "<<X_short<<endl;
 
                 }
@@ -835,15 +861,32 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //       emc->SetLineColor(0);
     // emc->SetLineWidth(2);
     hx->Write();
-    TF1* fh = new TF1("fh", "gaus",  -0.3, 0.3);
-    hx->Fit(fh);
+    TF1* fh = new TF1("fh", "gaus",  -0.2, 0.2);
+    hx->Fit(fh,"R");
+
     int a_size = sizeof(outtree)/sizeof(char);
     TString s_a = convertToString(outtree,a_size)+".png";
     gStyle->SetOptFit(1101);
-    hx->Draw();
-    
+    hx->Draw();   
     c1->SaveAs(s_a,"png");
     
+   
+    double plane_res_array[17];
+    double plane_indx_array[17];
+    for (int dx=0; dx<17; dx++){
+        h_dx[dx]->Write();  
+        h_res_plane[dx]->Write();
+        plane_indx_array[dx]=dx;
+        plane_res_array[dx]= h_res_plane[dx]->GetXaxis()->GetBinCenter(h_res_plane[dx]->GetMaximumBin());
+        
+    }
+    
+    TGraph* gPlaneRes = new TGraph ( 17, plane_indx_array, plane_res_array );
+    gPlaneRes->SetName ( "Plane_Reseduals" );
+
+    gPlaneRes->Write();
+
+   
     //h->Write();
     //hy->Write();
     h_theeta_X->Write();
@@ -866,7 +909,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //       emc->Write();
     Z_value->Write();
     driftfile1->Close();
-  
+
     // emc->Write();
     // DR->Draw();
     // cout<<"count in Layer1+layer3 : "<< count<<"\t"<<"count in Layer2+layer4
