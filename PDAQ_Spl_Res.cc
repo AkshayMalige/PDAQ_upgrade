@@ -48,8 +48,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     TFile* driftfile1 = new TFile ( outtree, "RECREATE" );
     // TFile* driftfile2 = new TFile("Y_Coordinates.root", "RECREATE");
     Double_t theta_X = 0;
-
-    TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 400, -2, 2 );
+    
+    TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 200, -5, 5 );
     TH1F* hy = new TH1F ( "hy", "Spatial_Resolution_X", 500, -1, 4 );
     TH1F* DR = new TH1F ( "dr", "drift_radius", 350, 0, 350 );
     TH2F* h_theeta_X = new TH2F ( "h_theeta_X", "h_theeta_X", 50, 0, 5, 20, 0, 2 );
@@ -60,8 +60,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     TH1F* h_res_plane[18];
     
     for ( int mc = 0; mc < 18; mc++ ) {
-        h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -0.1, 0.1,100,0,1 );
-        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d",mc+1), 400, -2, 2 );
+        h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -1, 1,100,0,10 );
+        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d",mc+1), 200, -5, 5 );
     }
 
     std::vector<double>* vec_Drifttime = 0;
@@ -617,6 +617,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     rotatedY = A2[k] - ( dradius* ( 1-cos ( theeta ) ) );
                     //X_short = ( fabs ( centerTotrack -   vec_strawX[k] ) ) - rotatedX  ;
                     staticRes = ( ( p1*A1[k] ) - A2[k] + p0 ) / ( sqrt ( ( p1*p1 ) +1 ) );
+                    staticRes = staticRes*10; //Cm to mm
                     //cout<<"stat :"<<staticRes<<endl;
                     hx->Fill ( staticRes );
                     h_theeta_X->Fill ( theta_X, X_short );
@@ -626,7 +627,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                    // cout<<"dx : "<<centerTotrack<<"\tx : "<<A1[k]-xperfect3[k]<<endl;
                   //  cout<<( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane<<endl;
                     int plane_dx = ( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane;
-                    h_dx[plane_dx]->Fill(A1[k]-xperfect3[k],centerTotrack);
+                    h_dx[plane_dx]->Fill((A1[k]-xperfect3[k])*10,centerTotrack*10); //cm to mm
                     h_res_plane[plane_dx]->Fill(staticRes);
                     //cout<<"DR_co :"<<rotatedX<<" vec_strawX :"<<vec_strawX[k]<<" dSlope0 : "<<dSlope0 <<" dConst0 :"<<dConst0 <<" X_perpX : "<< X_perpX<<" centerTotrack : "<< centerTotrack<<" X_short : "<<X_short<<endl;
 
@@ -860,21 +861,30 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //       emc->SetMarkerColor(2);
 //       emc->SetLineColor(0);
     // emc->SetLineWidth(2);
-    hx->Write();
-    TF1* fh = new TF1("fh", "gaus",  -0.2, 0.2);
+    
+    TF1* fh = new TF1("fh", "gaus",  -2.5, 2.5);
     hx->Fit(fh,"R");
 
     int a_size = sizeof(outtree)/sizeof(char);
     TString s_a = convertToString(outtree,a_size)+".png";
     gStyle->SetOptFit(1101);
+    hx->GetXaxis()->SetTitle("Residuals [mm]");
     hx->Draw();   
     c1->SaveAs(s_a,"png");
+    hx->Write();
     
    
     double plane_res_array[17];
     double plane_indx_array[17];
     for (int dx=0; dx<17; dx++){
-        h_dx[dx]->Write();  
+        h_dx[dx]->GetXaxis()->SetTitle("Distance to the track from the straw center [mm]");
+        h_dx[dx]->GetYaxis()->SetTitle("Shortest distance to the track from the straw center [mm]");
+        h_dx[dx]->Write(); 
+        
+        h_res_plane[dx]->GetXaxis()->SetTitle("Residual [mm]");
+        h_res_plane[dx]->Fit(fh,"RQ");
+        gStyle->SetOptFit(1101);
+        h_res_plane[dx]->Draw();
         h_res_plane[dx]->Write();
         plane_indx_array[dx]=dx;
         plane_res_array[dx]= h_res_plane[dx]->GetXaxis()->GetBinCenter(h_res_plane[dx]->GetMaximumBin());
@@ -882,8 +892,17 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     }
     
     TGraph* gPlaneRes = new TGraph ( 17, plane_indx_array, plane_res_array );
-    gPlaneRes->SetName ( "Plane_Reseduals" );
+    gPlaneRes->SetName ( "Plane_Residuals" );
+    gPlaneRes->Draw("AP");
+    gPlaneRes->GetXaxis()->SetTitle("Plane no");
+    gPlaneRes->GetXaxis()->SetTitle("Maximum of the Residuals [mm]");
 
+    gPlaneRes->GetXaxis()->SetRangeUser(-2,18);
+    gPlaneRes->GetYaxis()->SetRangeUser(-1,1);
+    gPlaneRes->SetMarkerColor(kOrange+1);
+    gPlaneRes->SetMarkerStyle(15);
+    gPlaneRes->SetMarkerSize(4);
+    
     gPlaneRes->Write();
 
    
