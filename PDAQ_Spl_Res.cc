@@ -50,18 +50,27 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     Double_t theta_X = 0;
     
     TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 200, -5, 5 );
+    TH1F* hdx = new TH1F ( "hdx", "res_non_corrected", 200, -5, 5 );
     TH1F* hy = new TH1F ( "hy", "Spatial_Resolution_X", 500, -1, 4 );
     TH1F* DR = new TH1F ( "dr", "drift_radius", 350, 0, 350 );
-    TH2F* h_theeta_X = new TH2F ( "h_theeta_X", "h_theeta_X", 50, 0, 5, 20, 0, 2 );
+    TH1F* h_theeta_X = new TH1F ( "h_theeta_X", "h_theeta_X", 400, -2, 2 );
+    
+    TH1F* hx_slope = new TH1F ( "hx_slope", "Slope_X", 1000, -0.5, 0.5 );
+    TH1F* hx_const = new TH1F ( "hx_const", "Constant_X", 1000, 0, 50 );
 
     TH1F* Z_value = new TH1F ( "Z_value", "dummy", 5, 0, 5 );
+
     
-    TH2F* h_dx[18];
+    TH1F* h_dx[18];
     TH1F* h_res_plane[18];
+    TH2F* h_Dr_vs_dr[18];
     
     for ( int mc = 0; mc < 18; mc++ ) {
-        h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -1, 1,100,0,10 );
-        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d",mc+1), 200, -5, 5 );
+        //h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -1, 1,100,0,10 );
+        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d;dr [mm]",mc+1), 200, -5, 5 );
+        h_dx[mc] = new TH1F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d;dx [mm]",mc+1),100,-5,5 );
+        h_Dr_vs_dr[mc] = new TH2F ( Form("h_Dr_vs_dr_%d",mc+1), Form("h_Dr_vs_dr_%d;Drift radius [mm];dr [mm]",mc+1),60, 0,6,100,-1,1 );
+
     }
 
     std::vector<double>* vec_Drifttime = 0;
@@ -457,6 +466,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
             Double_t rotatedY =0;
             Double_t staticRes =0;
 
+            Double_t residue =0;
+
             int no_comb_x = pow ( 2, count );
             chiX_array.resize ( no_comb_x );
 
@@ -523,6 +534,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
             }
 
             Double_t Ex[50];
+            SttHit* hit[50];
 
 //             cout << "\n\n"
 //                  << "BEST COMBINATION  :";
@@ -541,6 +553,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                 Ex[coo] = myCombination.at ( chi_index ).at ( coo )->x;
                 A1[coo] = vec_dr_xaxis[comb_idx][coo]->x;
                 A2[coo] = vec_dr_xaxis[comb_idx][coo]->z;
+                hit[coo] = myCombination.at ( chi_index ).at ( coo );
             }
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -554,11 +567,18 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
             if ( vec_dr_xaxis[0].size() != 0 ) {
 
-                xfit = new TGraph ( count, Ex, A2 );
+               /* xfit = new TGraph ( count, Ex, A2 );
                 xfit1 = new TGraph ( vec_hits_new.size(), strawX, strawZ );
 
                 xfit->GetXaxis()->SetLimits ( x_min, x_max );
-                xfit->GetYaxis()->SetLimits ( z_min, z_max );
+                xfit->GetYaxis()->SetLimits ( z_min, z_max ); */
+               
+                
+                xfit = new TGraph ( count,A2, Ex );
+                xfit1 = new TGraph ( vec_hits_new.size(), strawZ, strawX );
+
+                xfit->GetYaxis()->SetLimits ( x_min, x_max );
+                xfit->GetXaxis()->SetLimits ( z_min, z_max );
 
                 xfit->GetXaxis()->SetTitle ( "X Axix [cm]" );
                 xfit->GetYaxis()->SetTitle ( "Z Axix [cm]" );
@@ -581,57 +601,60 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                 xfit->Fit ( f1, "q" );
 
                 f1 = xfit->GetFunction ( "f1" );
-                Double_t p0 = f1->GetParameter ( 0 );
-                Double_t p1 = f1->GetParameter ( 1 );
-                theta_X = atan ( p1 );
+                Double_t trck_constant = f1->GetParameter ( 0 ); //constant - c
+                Double_t trck_slope = f1->GetParameter ( 1 ); //slope    - m
+                theta_X = atan ( trck_slope );
+                hx_slope->Fill(trck_slope);
+                hx_const->Fill(trck_constant);
                 // cout<< " THETA X  : "<< theta_X <<endl;
                 // emcX_arry[i] = (70 - p0) / p1;
-                vec_emcX.push_back ( ( 70 - p0 ) / p1 );
+            //    vec_emcX.push_back ( ( 70 - p0 ) / p1 );
+                cout<<"slope : "<<trck_slope<<"\tconstant : "<<trck_constant<<"\tTheta :"<<(tanh(trck_slope)*180)/3.1415926<<endl;
+               // if (trck_slope > 80 || trck_slope < -80)
+                h_theeta_X->Fill((tanh(trck_slope)*180)/3.1415926);
+              //  {
+                    for ( Int_t k = 0; k < count; k++ ) {
 
-                for ( Int_t k = 0; k < count; k++ ) {
 
-//                     xperfect3[k] = ( A2[k] - p0 ) / p1;
-//                     dSlope0 = - ( 1 / p1 ); //gives the slope of the perp line
-//                     dConst0 = vec_strawZx[k] + ( vec_strawX[k] / p1 ); //get the constant c in y=mx+c
-//                     X_perpX = ( dConst0 - p0 ) / ( p1 + ( 1 / p1 ) ); // at the point where the perpendicular meets the track, the equation of lines becomes the same hence x = (c2 - c1)/(m1-m2)
-//                     X_perpY = ( dSlope0 * X_perpX ) + dConst0; // y coordinate at the point where the perpendicular meets the track line.
-//                     X_short = ( fabs ( sqrt ( ( ( vec_strawX[k] - X_perpX ) * ( vec_strawX[k] - X_perpX ) ) + ( ( vec_strawZx[k] - X_perpY ) * ( vec_strawZx[k] - X_perpY ) ) ) ) ) - ( fabs ( vec_strawX[k] - A1[k] ) );
-//                     hx->Fill ( X_short );
-//                     //hx->Fill (xperfect3[k] - A1[k] );
-//                     h_theeta_X->Fill ( theta_X, X_short );
-//                     vec_Xtheta.push_back ( theta_X );
-//                     vec_Xsr.push_back ( X_short );
+                        //********************************** Calculate residual ******************************************
+                        
+                        centerTotrack= fabs((trck_slope * vec_strawZx[k]) - vec_strawX[k] + trck_constant) / ( sqrt ( 1 + ( trck_slope * trck_slope ) ) ) ; //((m * Px) - Py + C)/(sqrt(1+(m*m))) distance b/w a point and line. reference in the downloaded pdf.
+                        
+                        dradius = fabs ( vec_strawX[k] - A1[k] );
+                        
+                        residue = (centerTotrack-dradius) * 10; // Cm to mm
+                        
+                        //********************************** Calculate residual ******************************************
+                        cout<<centerTotrack<<"\t"<<dradius<<"\t"<<residue<<endl;
+                        
+                        xperfect3[k] = ( A2[k] - trck_constant ) / trck_slope; //x coo of the fit track
+                        
+                        dSlope0 = - ( 1 / trck_slope ); //gives the slope of the perp line
+                        
+                        dConst0 = vec_strawZx[k] + ( vec_strawX[k] / trck_slope ); //get the constant c in y=mx+c
+                        
+                        X_perpX = ( dConst0 - trck_constant ) / ( trck_slope - dSlope0 );// at the point where the perpendicular meets the track, the equation of lines becomes the same hence x = (c2 - c1)/(m1-m2)
+                        
+                        X_perpY = ( dSlope0 * X_perpX ) + dConst0; // y coordinate at the point where the perpendicular meets the track line.
 
-                    //****************************************************************************
-                    xperfect3[k] = ( A2[k] - p0 ) / p1; //x coo of the fit track
-                    dSlope0 = - ( 1 / p1 ); //gives the slope of the perp line
-                    dConst0 = vec_strawZx[k] + ( vec_strawX[k] / p1 ); //get the constant c in y=mx+c
-                    X_perpX = ( dConst0 - p0 ) / ( p1 + ( 1 / p1 ) );
-                    //( p0 - dConst0 ) / ( p1 - dSlope0 ); // at the point where the perpendicular meets the track, the equation of lines becomes the same hence x = (c2 - c1)/(m1-m2)
-                    X_perpY = ( dSlope0 * X_perpX ) + dConst0; // y coordinate at the point where the perpendicular meets the track line.
-                    centerTotrack = fabs ( sqrt ( ( ( vec_strawX[k] -X_perpX ) * ( vec_strawX[k] -X_perpX ) ) + ( ( vec_strawZx[k] - X_perpY ) * ( vec_strawZx[k] - X_perpY ) ) ) );
-                    X_short = centerTotrack - ( fabs ( vec_strawX[k] - A1[k] ) );
-                    dradius = fabs ( vec_strawX[k] - A1[k] );
-                    theeta = atan ( ( dSlope0-p1 ) / ( 1+ ( dSlope0*p1 ) ) );
-                    rotatedX =A1[k]+ ( dradius* sin ( theeta ) );
-                    rotatedY = A2[k] - ( dradius* ( 1-cos ( theeta ) ) );
-                    //X_short = ( fabs ( centerTotrack -   vec_strawX[k] ) ) - rotatedX  ;
-                    staticRes = ( ( p1*A1[k] ) - A2[k] + p0 ) / ( sqrt ( ( p1*p1 ) +1 ) );
-                    staticRes = staticRes*10; //Cm to mm
-                    //cout<<"stat :"<<staticRes<<endl;
-                    hx->Fill ( staticRes );
-                    h_theeta_X->Fill ( theta_X, X_short );
-                    vec_Xtheta.push_back ( theta_X );
-                    vec_Xsr.push_back ( X_short );
-                    
-                   // cout<<"dx : "<<centerTotrack<<"\tx : "<<A1[k]-xperfect3[k]<<endl;
-                  //  cout<<( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane<<endl;
-                    int plane_dx = ( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane;
-                    h_dx[plane_dx]->Fill((A1[k]-xperfect3[k])*10,centerTotrack*10); //cm to mm
-                    h_res_plane[plane_dx]->Fill(staticRes);
-                    //cout<<"DR_co :"<<rotatedX<<" vec_strawX :"<<vec_strawX[k]<<" dSlope0 : "<<dSlope0 <<" dConst0 :"<<dConst0 <<" X_perpX : "<< X_perpX<<" centerTotrack : "<< centerTotrack<<" X_short : "<<X_short<<endl;
+                        hx->Fill ( residue );
+                        hdx->Fill((xperfect3[k]-A1[k])*10);
+                        
+                        int plane_dx = ( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane;
+                        h_res_plane[plane_dx]->Fill( residue );                    
+                        h_dx[plane_dx]->Fill((xperfect3[k]-A1[k])*10); //cm to mm
+                        h_Dr_vs_dr[plane_dx]->Fill(dradius*10,residue);
 
-                }
+                    /* 
+                        if (xperfect3[k] > vec_strawX[k]){
+                            cout<<"\tRight :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                        }
+                        else {
+                            cout<<"\tLeft :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                        }*/
+
+                    }
+                //}
                 //cout << "\n\n" << endl;
             }
 
@@ -868,20 +891,24 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     int a_size = sizeof(outtree)/sizeof(char);
     TString s_a = convertToString(outtree,a_size)+".png";
     gStyle->SetOptFit(1101);
-    hx->GetXaxis()->SetTitle("Residuals [mm]");
+    hx->GetXaxis()->SetTitle("Residuals dr[mm]");
     hx->Draw();   
     c1->SaveAs(s_a,"png");
     hx->Write();
     
+    hdx->Fit(fh,"R");
+    hdx->GetXaxis()->SetTitle("dx [mm]");
+    hdx->Draw();
+    hdx->Write();
    
     double plane_res_array[17];
     double plane_indx_array[17];
     for (int dx=0; dx<17; dx++){
-        h_dx[dx]->GetXaxis()->SetTitle("Distance to the track from the straw center [mm]");
-        h_dx[dx]->GetYaxis()->SetTitle("Shortest distance to the track from the straw center [mm]");
+        h_dx[dx]->GetXaxis()->SetTitle("Distance to the track from the straw center dx [mm]");
+        //h_dx[dx]->GetYaxis()->SetTitle("Shortest distance to the track from the straw center [mm]");
         h_dx[dx]->Write(); 
         
-        h_res_plane[dx]->GetXaxis()->SetTitle("Residual [mm]");
+        h_res_plane[dx]->GetXaxis()->SetTitle("Residual dr [mm]");
         h_res_plane[dx]->Fit(fh,"RQ");
         gStyle->SetOptFit(1101);
         h_res_plane[dx]->Draw();
@@ -889,7 +916,16 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
         plane_indx_array[dx]=dx;
         plane_res_array[dx]= h_res_plane[dx]->GetXaxis()->GetBinCenter(h_res_plane[dx]->GetMaximumBin());
         
+        h_Dr_vs_dr[dx]->Write();
+        
     }
+    
+                       /*     hx->Fill ( residue );  //dr
+                        hdx->Fill((xperfect3[k]-A1[k])*10); //dx
+                        h_res_plane[plane_dx]->Fill( residue );          //dr          
+                        h_dx[plane_dx]->Fill((xperfect3[k]-A1[k])*10); //cm to mm //dx
+                        h_Dr_vs_dr[plane_dx]->Fill(dradius*10,residue); //dr  */
+    
     
     TGraph* gPlaneRes = new TGraph ( 17, plane_indx_array, plane_res_array );
     gPlaneRes->SetName ( "Plane_Residuals" );
@@ -904,6 +940,9 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     gPlaneRes->SetMarkerSize(4);
     
     gPlaneRes->Write();
+    
+    hx_slope->Write();
+    hx_const->Write();
 
    
     //h->Write();
