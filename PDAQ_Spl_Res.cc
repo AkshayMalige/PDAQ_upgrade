@@ -49,8 +49,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     // TFile* driftfile2 = new TFile("Y_Coordinates.root", "RECREATE");
     Double_t theta_X = 0;
     
-    TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 200, -5, 5 );
-    TH1F* hdx = new TH1F ( "hdx", "res_non_corrected", 200, -5, 5 );
+    TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 500, -5, 5 );
+    TH1F* hdx = new TH1F ( "hdx", "res_non_corrected", 100, -10, 10 );
     TH1F* hy = new TH1F ( "hy", "Spatial_Resolution_X", 500, -1, 4 );
     TH1F* DR = new TH1F ( "dr", "drift_radius", 350, 0, 350 );
     TH1F* h_theeta_X = new TH1F ( "h_theeta_X", "h_theeta_X", 400, -2, 2 );
@@ -59,19 +59,44 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     TH1F* hx_const = new TH1F ( "hx_const", "Constant_X", 1000, 0, 50 );
 
     TH1F* Z_value = new TH1F ( "Z_value", "dummy", 5, 0, 5 );
+    
+    TH2F* h_XfvsZ = new TH2F ( "h_XfvsZ", "h_XfvsZ", 500, 0, 500,7,-10,600 );
 
+    
+    TH1F* h_dt[2];
+    TH1F* h_tot[2];
+    TH1F* h_thet_plane[2];
+    TH1F* h_thet_res[2];
+    TH1F* h_orientation[2];
+    TH1F* h_thet_straw_x[2];
+
+    
     
     TH1F* h_dx[18];
     TH1F* h_res_plane[18];
     TH2F* h_Dr_vs_dr[18];
     
+    for (int mb=0; mb<2; mb++){
+        h_dt[mb] = new TH1F (Form("h_dt%i",mb+1),Form("h_dt%i;Drift Time [ns]",mb+1),500, 0, 500);
+        h_tot[mb] = new TH1F (Form("h_tot%i",mb+1),Form("h_tot%i;TOT [ns]",mb+1),500, 0, 500);
+        h_thet_plane[mb] = new TH1F (Form("h_thet_plane%i",mb+1),Form("h_thet_plane%i;Plane No",mb+1),18, 0,18);
+        h_thet_res[mb] = new TH1F (Form("h_thet_res%i",mb+1),Form("h_thet_res%i;dr [mm]",mb+1),200, -5, 5);
+        h_orientation[mb] = new TH1F (Form("h_orientation%i",mb+1),Form("h_orientation%i;L/R",mb+1),3, 0, 3);
+        h_thet_straw_x[mb] = new TH1F (Form("h_thet_straw_x%i",mb+1),Form("h_thet_straw_x%i;dr [mm]",mb+1),100, 0, 50);
+
+        
+    }
+    
     for ( int mc = 0; mc < 18; mc++ ) {
         //h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -1, 1,100,0,10 );
         h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d;dr [mm]",mc+1), 200, -5, 5 );
-        h_dx[mc] = new TH1F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d;dx [mm]",mc+1),100,-5,5 );
+        h_dx[mc] = new TH1F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d;dx [mm]",mc+1),100,-10,10 );
         h_Dr_vs_dr[mc] = new TH2F ( Form("h_Dr_vs_dr_%d",mc+1), Form("h_Dr_vs_dr_%d;Drift radius [mm];dr [mm]",mc+1),60, 0,6,100,-1,1 );
 
     }
+    
+    TCanvas * Ct; //Canvas for ToT
+    Ct=new TCanvas ( "Ct","Ct" );
 
     std::vector<double>* vec_Drifttime = 0;
     std::vector<double>* vec_x = 0;
@@ -80,6 +105,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     std::vector<double>* vec_layer = 0;
     std::vector<double>* vec_straw = 0;
     std::vector<double>* vec_plane = 0;
+    std::vector<double>* vec_tot = 0;
 
     //     std::vector<double>* vec_module;
     //     std::vector<double>* vec_fee;
@@ -124,6 +150,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     tree->SetBranchAddress ( "vec_layer", &vec_layer );
     tree->SetBranchAddress ( "vec_straw", &vec_straw );
     tree->SetBranchAddress ("vec_plane",&vec_plane);
+    tree->SetBranchAddress ("vec_tot",&vec_tot);
 
 
     TGraph* gDR = new TGraph ( 220, a1, b1 );
@@ -214,7 +241,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
             a->y = vec_y->at ( n );
             a->z = vec_z->at ( n );
             a->layer = vec_layer->at ( n );
-            //a->module = vec_module->at(n);
+            a->tot = vec_tot->at(n);
             //a->fee = vec_fee->at(n);
             //a->fee_channel = vec_fee_ch->at(n);
             //a->channel = vec_tdc_ch->at(n);
@@ -350,7 +377,9 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_x1->z = vec_hits_new[j]->z;
                     new_x1->layer = vec_hits_new[j]->layer;
                     new_x1->plane = vec_hits_new[j]->plane;
-                    //                     new_x1->module =
+                    new_x1->straw = vec_hits_new[j]->straw;
+                    new_x1->tot = vec_hits_new[j]->tot;
+                    new_x1->drifttime = vec_hits_new[j]->drifttime;
                     //                     vec_hits_new[j]->module;
                     //                     new_x1->fee = vec_hits_new[j]->fee;
                     //                     new_x1->fee_channel =
@@ -364,6 +393,9 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_x2->z = vec_hits_new[j]->z;
                     new_x2->layer = vec_hits_new[j]->layer;
                     new_x2->plane = vec_hits_new[j]->plane;
+                    new_x2->straw = vec_hits_new[j]->straw;
+                    new_x2->tot = vec_hits_new[j]->tot;
+                    new_x2->drifttime = vec_hits_new[j]->drifttime;
                     //                     new_x2->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_x2->fee = vec_hits_new[j]->fee;
@@ -394,6 +426,9 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_y1->x = vec_hits_new[j]->x;
                     new_y1->layer = vec_hits_new[j]->layer;
                     new_y1->plane = vec_hits_new[j]->plane;
+                    new_y1->straw = vec_hits_new[j]->straw;
+                    new_y1->tot = vec_hits_new[j]->tot;
+                    new_y1->drifttime = vec_hits_new[j]->drifttime;
                     //                     new_y1->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_y1->fee = vec_hits_new[j]->fee;
@@ -413,6 +448,9 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                     new_y2->x = vec_hits_new[j]->x;
                     new_y2->layer = vec_hits_new[j]->layer;
                     new_y2->plane = vec_hits_new[j]->plane;
+                    new_y2->straw = vec_hits_new[j]->straw;
+                    new_y2->tot = vec_hits_new[j]->tot;
+                    new_y2->drifttime = vec_hits_new[j]->drifttime;
                     //                     new_y2->module =
                     //                     vec_hits_new[j]->module;
                     //                     new_y2->fee = vec_hits_new[j]->fee;
@@ -554,6 +592,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                 A1[coo] = vec_dr_xaxis[comb_idx][coo]->x;
                 A2[coo] = vec_dr_xaxis[comb_idx][coo]->z;
                 hit[coo] = myCombination.at ( chi_index ).at ( coo );
+                
             }
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -603,15 +642,15 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                 f1 = xfit->GetFunction ( "f1" );
                 Double_t trck_constant = f1->GetParameter ( 0 ); //constant - c
                 Double_t trck_slope = f1->GetParameter ( 1 ); //slope    - m
-                theta_X = atan ( trck_slope );
+                theta_X = ((atan ( trck_slope)) * 180) / 3.1415926 ;
                 hx_slope->Fill(trck_slope);
                 hx_const->Fill(trck_constant);
                 // cout<< " THETA X  : "<< theta_X <<endl;
                 // emcX_arry[i] = (70 - p0) / p1;
             //    vec_emcX.push_back ( ( 70 - p0 ) / p1 );
-                cout<<"slope : "<<trck_slope<<"\tconstant : "<<trck_constant<<"\tTheta :"<<(tanh(trck_slope)*180)/3.1415926<<endl;
+              //  cout<<"slope : "<<trck_slope<<"\tconstant : "<<trck_constant<<"\tTheta :"<<theta_X<<endl;
                // if (trck_slope > 80 || trck_slope < -80)
-                h_theeta_X->Fill((tanh(trck_slope)*180)/3.1415926);
+                h_theeta_X->Fill(theta_X);
               //  {
                     for ( Int_t k = 0; k < count; k++ ) {
 
@@ -625,25 +664,66 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                         residue = (centerTotrack-dradius) * 10; // Cm to mm
                         
                         //********************************** Calculate residual ******************************************
-                        cout<<centerTotrack<<"\t"<<dradius<<"\t"<<residue<<endl;
+                       // cout<<centerTotrack<<"\t"<<dradius<<"\t"<<residue<<endl;
+                   //    cout<<"layer : "<<hit[k]->layer<<"  plane :  "<<hit[k]->plane<<"  straw : "<<hit[k]->straw<<"  tot : "<<hit[k]->tot<<"  dt  : "<<hit[k]->drifttime<<"  c_t : "<<centerTotrack<<"  dr : "<<dradius<<" res : "<<residue<<endl;
+
                         
-                        xperfect3[k] = ( A2[k] - trck_constant ) / trck_slope; //x coo of the fit track
+                       // xperfect3[k] = ( A2[k] - trck_constant ) / trck_slope; //x coo of the fit track
+                       
+                       //xperfect3[k] = ( A1[k] - trck_constant ) / trck_slope;
+                       xperfect3[k] = (trck_slope*A2[k])+trck_constant;
                         
-                        dSlope0 = - ( 1 / trck_slope ); //gives the slope of the perp line
+                       // cout<<"Z tk: "<<A1[k]<<"\t Cnst tk : "<<trck_constant<<"\t X tk : "<<xperfect3[k]<<"\t Slp tk : "<< trck_slope <<"\t"<<(xperfect3[k]-trck_constant)/trck_slope<<endl; 
+ 
+                       // dSlope0 = - ( 1 / trck_slope ); //gives the slope of the perp line
                         
-                        dConst0 = vec_strawZx[k] + ( vec_strawX[k] / trck_slope ); //get the constant c in y=mx+c
+                       // dConst0 = vec_strawZx[k] + ( vec_strawX[k] / trck_slope ); //get the constant c in y=mx+c
                         
-                        X_perpX = ( dConst0 - trck_constant ) / ( trck_slope - dSlope0 );// at the point where the perpendicular meets the track, the equation of lines becomes the same hence x = (c2 - c1)/(m1-m2)
+                       // X_perpX = ( dConst0 - trck_constant ) / ( trck_slope - dSlope0 );// at the point where the perpendicular meets the track, the equation of lines becomes the same hence x = (c2 - c1)/(m1-m2)
                         
-                        X_perpY = ( dSlope0 * X_perpX ) + dConst0; // y coordinate at the point where the perpendicular meets the track line.
+                      //  X_perpY = ( dSlope0 * X_perpX ) + dConst0; // y coordinate at the point where the perpendicular meets the track line.
 
                         hx->Fill ( residue );
-                        hdx->Fill((xperfect3[k]-A1[k])*10);
+                        hdx->Fill((xperfect3[k]-vec_strawX[k])*10);
                         
                         int plane_dx = ( myCombination.at ( chi_index ).at ( k )->layer-1 ) *2 +myCombination.at ( chi_index ).at ( k )->plane;
                         h_res_plane[plane_dx]->Fill( residue );                    
-                        h_dx[plane_dx]->Fill((xperfect3[k]-A1[k])*10); //cm to mm
+                        h_dx[plane_dx]->Fill((xperfect3[k]-vec_strawX[k])*10); //cm to mm
                         h_Dr_vs_dr[plane_dx]->Fill(dradius*10,residue);
+                        h_XfvsZ->Fill(xperfect3[k]*10,vec_strawZx[k]*10);
+                        
+                        if(theta_X < 0.3 && theta_X > -0.3 ){
+                            h_dt[0]->Fill(hit[k]->drifttime);
+                            h_tot[0]->Fill(hit[k]->tot);                            
+                            h_thet_plane[0]->Fill(plane_dx);
+                            h_thet_res[0]->Fill(residue);
+                            h_thet_straw_x[0]->Fill(vec_strawX[k]);
+                            if (xperfect3[k] > vec_strawX[k]){
+                                h_orientation[0]->Fill(0);
+                                //cout<<"\tGOOD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                            }
+                            else {
+                                h_orientation[0]->Fill(1);
+                                //cout<<"\tGOOD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                            }
+                        }
+                        else {
+                            h_dt[1]->Fill(hit[k]->drifttime);
+                            h_tot[1]->Fill(hit[k]->tot); 
+                            
+                            h_thet_plane[1]->Fill(plane_dx);
+                            h_thet_res[1]->Fill(residue);
+                            h_thet_straw_x[1]->Fill(vec_strawX[k]);
+                            if (xperfect3[k] > vec_strawX[k]){
+                                h_orientation[1]->Fill(0);
+                                //cout<<"\tBAD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                            }
+                            else {
+                                h_orientation[1]->Fill(1);
+                                //cout<<"\tBAD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                            }
+                            
+                        }
 
                     /* 
                         if (xperfect3[k] > vec_strawX[k]){
@@ -900,6 +980,9 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     hdx->GetXaxis()->SetTitle("dx [mm]");
     hdx->Draw();
     hdx->Write();
+    h_XfvsZ->Write();
+    
+    
    
     double plane_res_array[17];
     double plane_indx_array[17];
@@ -947,6 +1030,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
    
     //h->Write();
     //hy->Write();
+    h_theeta_X->GetXaxis()->SetTitle("Theta [deg]");
     h_theeta_X->Write();
 
     //c1->Write();
@@ -966,6 +1050,50 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 //       emc->Draw("P");
 //       emc->Write();
     Z_value->Write();
+    
+    for (int i =0; i<2; i++){
+        h_dt[i]->Write();
+        h_tot[i]->Write();
+        h_thet_plane[i]->Write();
+        h_thet_res[i]->Write();
+        h_orientation[i]->Write();
+        h_thet_straw_x[i]->Write();
+
+    }
+    
+    TH1F * projh2X;
+
+    Int_t  z_bins_arr[4]={0,2,4,6};
+    const EColor colours[] = {kBlue,kRed,kGreen,kBlack};
+    Ct->cd();
+    
+    TLegend* leg = new TLegend ( 0.5,0.7,0.9,0.9 );
+    leg->SetHeader ( "ProjX" );
+    leg->SetFillColor ( 1 );
+    
+    for (int b=0; b<4; b++)
+    { // loop over centrality
+         // canvas
+
+
+
+	    projh2X = (TH1F*) h_XfvsZ->ProjectionX(Form("Layer_%i",b),z_bins_arr[b],z_bins_arr[b]+1);
+	    projh2X->Draw("same");
+        projh2X->SetLineWidth(2);
+	    projh2X->SetLineColor(colours[b]);
+	    leg->AddEntry (projh2X,Form("Layer_%d",b+1),"lep" );
+
+	
+
+
+//        Ct[b]->GetYaxis()->SetRangeUser(0,proj_noOp);
+        
+    }
+    leg->SetFillStyle ( 0 );
+    leg->Draw();
+    Ct->Write();
+    
+    
     driftfile1->Close();
 
     // emc->Write();

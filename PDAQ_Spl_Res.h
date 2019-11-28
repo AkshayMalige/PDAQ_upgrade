@@ -26,6 +26,8 @@
 #include <TROOT.h>
 #include "TObject.h"
 #include "TEllipse.h"
+#include "TLegend.h"
+
 using namespace std;
 
 //Bool_t PDAQ_Spl_Res(void);

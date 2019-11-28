@@ -15,6 +15,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     Stt_Track_Event* stt_event = & ( DT_TRACKS->stt_track_can );
 
     std::vector<double> vec_o_test;
+    std::vector<double> vec_tot;
     std::vector<double> vec_x;
     std::vector<double> vec_y;
     std::vector<double> vec_z;
@@ -62,6 +63,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     PDAQ_tree->Branch ( "vec_layer", &vec_layer );
     PDAQ_tree->Branch ( "vec_straw", &vec_straw );
     PDAQ_tree->Branch ( "vec_plane", &vec_plane );
+    PDAQ_tree->Branch ( "vec_tot", &vec_tot );
 
 
     TH1F* h_Ch_Dt[256];
@@ -130,7 +132,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             for ( int t = 0; t < vec_track_can.size(); t++ ) {
                 sq_ch = ( ( vec_track_can[t].layer-1 ) * 32 ) +vec_track_can[t].straw-1;
                 dt_crr = vec_track_can[t].drifttime + vec_DT_start[sq_ch];
-                if ( dt_crr>0.0 && dt_crr<=250.0 ) {
+                if ( dt_crr>0.0 && dt_crr<=200.0 ) {
                     a = vec_track_can[t];
                     a.drifttime = dt_crr;
                     vec_tracks.push_back ( a );
@@ -145,6 +147,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_layer.push_back ( vec_track_can[t].layer );
                     vec_straw.push_back ( vec_track_can[t].straw );
                     vec_plane.push_back (vec_track_can[t].plane);
+                    vec_tot.push_back(vec_track_can[t].tot);
                 }
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
@@ -162,7 +165,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             vec_z.clear();
             vec_layer.clear();
             vec_straw.clear();
-	    vec_plane.clear();
+            vec_tot.clear();
+            vec_plane.clear();
 
         }
     }
