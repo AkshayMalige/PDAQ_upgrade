@@ -27,6 +27,7 @@
 #include "TObject.h"
 #include "TEllipse.h"
 #include "TLegend.h"
+#include "TLine.h"
 
 using namespace std;
 

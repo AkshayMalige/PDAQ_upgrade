@@ -76,3 +76,6 @@ target_link_libraries(pdaq_rad_cal PDAQ ${ROOT_LIBRARIES})
 
 add_executable(pdaq_spatial_resolution PDAQ_Spl_Res.cc)
 target_link_libraries(pdaq_spatial_resolution PDAQ ${ROOT_LIBRARIES})
+
+add_executable(pdaq_resolution PDAQ_Res.cc)
+target_link_libraries(pdaq_resolution PDAQ ${ROOT_LIBRARIES})

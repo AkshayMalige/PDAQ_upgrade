@@ -60,7 +60,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
     TH1F* Z_value = new TH1F ( "Z_value", "dummy", 5, 0, 5 );
     
-    TH2F* h_XfvsZ = new TH2F ( "h_XfvsZ", "h_XfvsZ", 500, 0, 500,7,-10,600 );
+    TH2F* h_XfvsZ = new TH2F ( "h_XfvsZ", "h_XfvsZ;X of track fit X_{f} [mm]; Z [mm]", 500, 0, 500,7,-10,600 );
 
     
     TH1F* h_dt[2];
@@ -75,28 +75,35 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     TH1F* h_dx[18];
     TH1F* h_res_plane[18];
     TH2F* h_Dr_vs_dr[18];
+    TH1F* h_plane_str_no[18];
+
     
     for (int mb=0; mb<2; mb++){
         h_dt[mb] = new TH1F (Form("h_dt%i",mb+1),Form("h_dt%i;Drift Time [ns]",mb+1),500, 0, 500);
         h_tot[mb] = new TH1F (Form("h_tot%i",mb+1),Form("h_tot%i;TOT [ns]",mb+1),500, 0, 500);
         h_thet_plane[mb] = new TH1F (Form("h_thet_plane%i",mb+1),Form("h_thet_plane%i;Plane No",mb+1),18, 0,18);
-        h_thet_res[mb] = new TH1F (Form("h_thet_res%i",mb+1),Form("h_thet_res%i;dr [mm]",mb+1),200, -5, 5);
+        h_thet_res[mb] = new TH1F (Form("h_thet_res%i",mb+1),Form("h_thet_res%i;dr [mm]",mb+1),500, -5, 5);
         h_orientation[mb] = new TH1F (Form("h_orientation%i",mb+1),Form("h_orientation%i;L/R",mb+1),3, 0, 3);
         h_thet_straw_x[mb] = new TH1F (Form("h_thet_straw_x%i",mb+1),Form("h_thet_straw_x%i;dr [mm]",mb+1),100, 0, 50);
-
         
+            
     }
     
     for ( int mc = 0; mc < 18; mc++ ) {
         //h_dx[mc] = new TH2F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d",mc+1), 1000, -1, 1,100,0,10 );
-        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d;dr [mm]",mc+1), 200, -5, 5 );
+        h_res_plane[mc] = new TH1F ( Form("h_res_plane%d",mc+1), Form("h_res_plane%d;dr [mm]",mc+1), 500, -5, 5 );
         h_dx[mc] = new TH1F ( Form("h_dx_Plane_%d",mc+1), Form("h_dx_Plane_%d;dx [mm]",mc+1),100,-10,10 );
         h_Dr_vs_dr[mc] = new TH2F ( Form("h_Dr_vs_dr_%d",mc+1), Form("h_Dr_vs_dr_%d;Drift radius [mm];dr [mm]",mc+1),60, 0,6,100,-1,1 );
+        
+        h_plane_str_no[mc] = new TH1F (Form("h_plane_str_no%i",mc+1),Form("h_plane_str_no%i;Straw No.",mc+1),60, 0, 60);
 
     }
     
     TCanvas * Ct; //Canvas for ToT
     Ct=new TCanvas ( "Ct","Ct" );
+    
+    TCanvas * xf_z; //Canvas for ToT
+    xf_z=new TCanvas ( "xf_z","xf_z" );
 
     std::vector<double>* vec_Drifttime = 0;
     std::vector<double>* vec_x = 0;
@@ -666,7 +673,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                         //********************************** Calculate residual ******************************************
                        // cout<<centerTotrack<<"\t"<<dradius<<"\t"<<residue<<endl;
                    //    cout<<"layer : "<<hit[k]->layer<<"  plane :  "<<hit[k]->plane<<"  straw : "<<hit[k]->straw<<"  tot : "<<hit[k]->tot<<"  dt  : "<<hit[k]->drifttime<<"  c_t : "<<centerTotrack<<"  dr : "<<dradius<<" res : "<<residue<<endl;
-
+//cout<<hit[k]->straw<<endl;
                         
                        // xperfect3[k] = ( A2[k] - trck_constant ) / trck_slope; //x coo of the fit track
                        
@@ -674,6 +681,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                        xperfect3[k] = (trck_slope*A2[k])+trck_constant;
                         
                        // cout<<"Z tk: "<<A1[k]<<"\t Cnst tk : "<<trck_constant<<"\t X tk : "<<xperfect3[k]<<"\t Slp tk : "<< trck_slope <<"\t"<<(xperfect3[k]-trck_constant)/trck_slope<<endl; 
+                       
+                    //   cout<<"Lay :"<<hit[k]->layer<<" Strw :"<<hit[k]->straw<<" Hit X :"<<hit[k]->x<<" Hit Z :"<<hit[k]->z<<" A1 :"<<A1[k]<<" A2 :"<<A2[k]<<" Tk X :"<<xperfect3[k]<<" DT :"<<hit[k]->drifttime<<endl;
  
                        // dSlope0 = - ( 1 / trck_slope ); //gives the slope of the perp line
                         
@@ -691,6 +700,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                         h_dx[plane_dx]->Fill((xperfect3[k]-vec_strawX[k])*10); //cm to mm
                         h_Dr_vs_dr[plane_dx]->Fill(dradius*10,residue);
                         h_XfvsZ->Fill(xperfect3[k]*10,vec_strawZx[k]*10);
+                        h_plane_str_no[plane_dx]->Fill(hit[k]->straw);
                         
                         if(theta_X < 0.3 && theta_X > -0.3 ){
                             h_dt[0]->Fill(hit[k]->drifttime);
@@ -700,11 +710,11 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                             h_thet_straw_x[0]->Fill(vec_strawX[k]);
                             if (xperfect3[k] > vec_strawX[k]){
                                 h_orientation[0]->Fill(0);
-                                //cout<<"\tGOOD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                cout<<"\tGOOD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                             else {
                                 h_orientation[0]->Fill(1);
-                                //cout<<"\tGOOD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                cout<<"\tGOOD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                         }
                         else {
@@ -716,11 +726,11 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                             h_thet_straw_x[1]->Fill(vec_strawX[k]);
                             if (xperfect3[k] > vec_strawX[k]){
                                 h_orientation[1]->Fill(0);
-                                //cout<<"\tBAD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                cout<<"\tBAD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                             else {
                                 h_orientation[1]->Fill(1);
-                                //cout<<"\tBAD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                cout<<"\tBAD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                             
                         }
@@ -979,10 +989,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     hdx->Fit(fh,"R");
     hdx->GetXaxis()->SetTitle("dx [mm]");
     hdx->Draw();
+    hdx->GetXaxis()->SetTitle("Distance to the track from the straw center dx [mm]");
     hdx->Write();
-    h_XfvsZ->Write();
-    
-    
    
     double plane_res_array[17];
     double plane_indx_array[17];
@@ -1000,7 +1008,7 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
         plane_res_array[dx]= h_res_plane[dx]->GetXaxis()->GetBinCenter(h_res_plane[dx]->GetMaximumBin());
         
         h_Dr_vs_dr[dx]->Write();
-        
+        h_plane_str_no[dx]->Write();        
     }
     
                        /*     hx->Fill ( residue );  //dr
@@ -1072,26 +1080,30 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
     leg->SetFillColor ( 1 );
     
     for (int b=0; b<4; b++)
-    { // loop over centrality
-         // canvas
-
-
-
+    { 
 	    projh2X = (TH1F*) h_XfvsZ->ProjectionX(Form("Layer_%i",b),z_bins_arr[b],z_bins_arr[b]+1);
 	    projh2X->Draw("same");
         projh2X->SetLineWidth(2);
 	    projh2X->SetLineColor(colours[b]);
 	    leg->AddEntry (projh2X,Form("Layer_%d",b+1),"lep" );
-
-	
-
-
-//        Ct[b]->GetYaxis()->SetRangeUser(0,proj_noOp);
-        
+       
     }
     leg->SetFillStyle ( 0 );
     leg->Draw();
     Ct->Write();
+    
+    xf_z->cd();
+    h_XfvsZ->Draw("colz");
+
+    double ln_x =17.4;
+    for (int l=0; l<32; l++)
+    {
+        TLine *line = new TLine(ln_x*10,0,ln_x*10,600);
+        line->Draw("same");
+        line->SetLineColor(kRed);
+        ln_x = ln_x+0.505;
+    }
+    xf_z->Write();
     
     
     driftfile1->Close();
@@ -1108,18 +1120,21 @@ int main ( int argc, char** argv )
 
     if ( argc >= 3 )
 
-        if ( !argv[3] ) {
+        if ( !argv[3] ) 
+        {
             printf ( "\n\nNote : One Million Events will be processed. To change "
                      "add the number of events to be processed after the ouput "
                      "file name.\n" );
-            // atoi(argv[3]) == 1000;
             sleep ( 2 );
-            -         PDAQ_Spl_Res ( argv[1], argv[2], 100000000 );
-        } else {
+            PDAQ_Spl_Res ( argv[1], argv[2], 100000000 );
+        } 
+        else 
+        {
             PDAQ_Spl_Res ( argv[1], argv[2], atoi ( argv[3] ) );
         }
 
-    else {
+    else 
+    {
         return 1;
     }
 
