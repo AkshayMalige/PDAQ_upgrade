@@ -105,9 +105,10 @@ std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
         // cout<<vec_corr.size()<<endl;
 
         delete f1;
+        delete cor;
 
         int mult = 0;
-        int layer_eff_count =0;
+    /*    int layer_eff_count =0;
         int layer_eff_count2 =0;
 
         for ( int kb=0; kb<8; kb++ ) {
@@ -124,7 +125,7 @@ std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
             }
         }
         h->h_Layer_effPlane->Fill ( layer_eff_count -4 );
-        h->h_Layer_effStraw->Fill ( layer_eff_count2 -4 );
+        h->h_Layer_effStraw->Fill ( layer_eff_count2 -4 );*/
 
     }
 

@@ -21,6 +21,7 @@ ClassImp(SttHit)
     straw = 0;
     cell = 0;
     meanDriftTime = 0;
+    driftposition = 0;
 
     // cell2 = 0;
     x = 0;

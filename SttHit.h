@@ -12,9 +12,10 @@ class SttHit : public SttRawHit
     // double trailTime;
     // double tot;
     double drifttime;
-    double DriftRadius;
-    double meanDriftTime;
-
+            double DriftRadius;
+            double meanDriftTime;
+    double driftposition;
+    
     short station;
     short plane;
     short layer;

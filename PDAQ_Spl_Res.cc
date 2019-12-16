@@ -130,6 +130,8 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
 
     std::vector<double> vec_Xsr;
     std::vector<double> vec_Ysr;
+    
+    
 
     Double_t a1[230];
     Double_t b1[230];
@@ -710,11 +712,11 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                             h_thet_straw_x[0]->Fill(vec_strawX[k]);
                             if (xperfect3[k] > vec_strawX[k]){
                                 h_orientation[0]->Fill(0);
-                                cout<<"\tGOOD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                //cout<<"\tGOOD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                             else {
                                 h_orientation[0]->Fill(1);
-                                cout<<"\tGOOD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                //cout<<"\tGOOD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                         }
                         else {
@@ -726,11 +728,11 @@ Bool_t PDAQ_Spl_Res ( char* intree, char* outtree, int maxEvents )
                             h_thet_straw_x[1]->Fill(vec_strawX[k]);
                             if (xperfect3[k] > vec_strawX[k]){
                                 h_orientation[1]->Fill(0);
-                                cout<<"\tBAD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                                //cout<<"\tBAD_Right :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                             else {
                                 h_orientation[1]->Fill(1);
-                                cout<<"\tBAD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
+                               // cout<<"\tBAD_Left :- "<<"DR : "<<dradius<<"\tstrawX "<< vec_strawX[k] <<"\tXe:"<< A1[k] <<"\tXf :"<<xperfect3[k]<<"\tXf-Xe :"<<(xperfect3[k]-A1[k])*10<<endl;
                             }
                             
                         }
