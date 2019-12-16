@@ -90,8 +90,12 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     tree->SetBranchAddress ("vec_plane",&vec_plane);
     tree->SetBranchAddress ("vec_tot",&vec_tot);
     
+  // TFile* gcrr_file = new TFile ( "er.root", "READ" ); 
+  // TGraph* gDR = ( TGraph* ) gcrr_file->Get ( "Dt_Correction1" );
     TGraph* gDR = ( TGraph* ) inFile.Get ( "PDAQ_DR" );
+    gDR->SetName("gDR");
     
+    driftfile1->cd();
     
     TH1F* hx = new TH1F ( "hx", "Spatial_Resolution_X", 500, -5, 5 );
     TH1F* hdx = new TH1F ( "hdx", "res_non_corrected", 500, -5, 5 );
@@ -100,11 +104,15 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     TH1F* hx_slope = new TH1F ( "hx_slope", "Slope_X", 1000, -0.25, 0.25 );
     TH1F* hx_const = new TH1F ( "hx_const", "Constant_X", 1000, 0, 50 );
     TH2F* h_XfvsZ = new TH2F ( "h_XfvsZ", "h_XfvsZ;X of track fit X_{f} [mm]; Z [mm]", 200, 150, 350,7,-10,600 );
+   // TH2F* h_Dr_vs_dr = new TH2F ("h_Dr_vs_dr", "h_Dr_vs_dr;Drift radius [mm];dr [mm]",60,0,6,100,-1,1 );
+    TH2F* Dt_vs_dr = new TH2F ("Dt_vs_dr", "Dt_vs_dr;Drift time [ns];dr [mm]",200,0,200,100,-1,1 );
+    
     
     TH1F* h_dx[18];
     TH1F* h_res_plane[18];
     TH2F* h_Dr_vs_dr[18];
     TH1F* h_plane_str_no[18];
+    TH2F* h_dt_vs_dr[18];
     //int plane_no[8] = {0,1,6,7,8,9,14,15};
     
     for ( int mc = 0; mc < 18; mc++ ) 
@@ -114,6 +122,8 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
         h_Dr_vs_dr[mc] = new TH2F ( Form("h_Dr_vs_dr_%i",mc+1), Form("h_Dr_vs_dr_%i;Drift radius [mm];dr [mm]",mc+1),60, 0,6,100,-1,1 );
         
         h_plane_str_no[mc] = new TH1F (Form("h_plane_str_no%i",mc+1),Form("h_plane_str_no%i;Straw No.",mc+1),60, 0, 60);
+        
+        h_dt_vs_dr[mc] = new TH2F ( Form("h_dt_vs_dr%i",mc+1), Form("h_dt_vs_dr%i;Drift time [ns];dr [mm]",mc+1),200, 0,200,100,-1,1 );
 
     }
     
@@ -266,6 +276,7 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
             }*/
             h_dr->Fill(vec_dphits[k]->DriftRadius * 10);
             h_XfvsZ->Fill(track_x[k]*10,vec_dphits[k]->z*10); 
+            Dt_vs_dr->Fill(vec_dphits[k]->drifttime,residue);
             
             h_res_plane[vec_dphits[k]->plane]->Fill( residue );  
          //   if (vec_dphits[k]->driftposition > vec_dphits[k]->x)
@@ -279,9 +290,32 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
          //   h_dx[vec_dphits[k]->plane]->Fill((track_x[k] - vec_dphits[k]->driftposition)*10); 
             h_Dr_vs_dr[vec_dphits[k]->plane]->Fill(dradius*10,residue);
             h_plane_str_no[vec_dphits[k]->plane]->Fill(vec_dphits[k]->straw);
+            //cout<<vec_dphits[k]->plane<<"\t"<<vec_dphits[k]->drifttime<<"\t"<<residue<<endl;
+            h_dt_vs_dr[vec_dphits[k]->plane]->Fill(vec_dphits[k]->drifttime,residue);
         }
                         
     }
+    
+    TH1F * projhDT;
+    TF1* ft = new TF1("fh", "gaus");
+    double dt_time[200];
+    double dt_correted[200];
+    double crr_mean =0;
+    cout<<"DT200 "<<gDR->Eval(200)<<endl;
+    for(int t=0; t<200; t++)
+    {
+        projhDT = (TH1F*) Dt_vs_dr->ProjectionY(Form("timeBin%i",t),t,t+1);
+        projhDT->Fit(ft, "q");
+        dt_time[t]= t;
+        double crr_mean = (t<30 || t>170) ? 0 : ft->GetParameter(1);
+        dt_correted[t]= gDR->Eval(t) + (crr_mean/10);   
+        cout<<t<<"\t"<<crr_mean<<"\t"<<dt_correted[t]<<endl;
+    }
+    delete ft;
+    
+    TGraph* gDriftRadius = new TGraph ( 200, dt_time, dt_correted );
+    gDriftRadius->SetName ( "Dt_Correction" );
+    gDriftRadius->Write();
     
     TF1* fh = new TF1("fh", "gaus",  -2.5, 2.5);
     hx->Fit(fh,"R");
@@ -290,7 +324,7 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     gStyle->SetOptFit(1101);
     hx->GetXaxis()->SetTitle("Residuals dr[mm]");
     hx->Draw();   
-    c1->SaveAs(s_a,"png");
+    //c1->SaveAs(s_a,"png");
     hx->Write();
     
     hdx->Fit(fh,"R");
@@ -304,6 +338,8 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     hx_theeta->Write();
     h_dr->GetXaxis()->SetTitle("Drift radius [mm]");
     h_dr->Write();
+    Dt_vs_dr->Write();
+    gDR->Write();
     
     TH1F * projh2X;
     Int_t  z_bins_arr[4]={0,2,4,6};
@@ -356,7 +392,8 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
         plane_res_array[dx]= h_res_plane[dx]->GetXaxis()->GetBinCenter(h_res_plane[dx]->GetMaximumBin());
         
         h_Dr_vs_dr[dx]->Write();
-        h_plane_str_no[dx]->Write();        
+        h_plane_str_no[dx]->Write();   
+        h_dt_vs_dr[dx]->Write();
     }
     
     TGraph* gPlaneRes = new TGraph ( 8, plane_indx_array, plane_res_array );
