@@ -71,11 +71,17 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     TH1F* h_Cal_drifttime = new TH1F ( "h_Cal_drifttime", "h_Cal_drifttime;Drift Time [ns]", 800, -100,700 );
     TH1F* h_Cal_Ch_Dt[256];
     TH1F* h_Dt[256];
+    
+    TH1F* h_LayerDT[8];
 
     for ( int ch=0; ch<256; ch++ ) {
         h_Cal_Ch_Dt[ch] = new TH1F ( Form ( "Cal_Ch_%d_Dt", ch+1 ) , Form ( "Cal_Ch_%d_Dt", ch+1 ),  800, -100,700 );
         h_Dt[ch] = new TH1F ( Form ( "h_%d_Dt", ch+1 ) , Form ( "h_%d_Dt", ch+1 ),  800, -100,700 );
-
+    }
+        
+    for(int a=0; a<8; a++)
+    {
+        h_LayerDT[a]= new TH1F (Form("Layer%iDT",a+1),Form("Layer%iDT",a+1),800,-100,700);
     }
 
     h_drifttime = ( TH1F* ) inFile.Get ( "h_drifttime" );
@@ -117,7 +123,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             break;
         }
         if ( i % 1000 == 0 ) {
-            cout << i << endl;
+            cout<<i<<endl;
+
         }
 
         for ( int n = 0; n < STT_TRACK->stt_track_can.total_track_NTDCHits; n++ ) {
@@ -132,7 +139,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             for ( int t = 0; t < vec_track_can.size(); t++ ) {
                 sq_ch = ( ( vec_track_can[t].layer-1 ) * 32 ) +vec_track_can[t].straw-1;
                 dt_crr = vec_track_can[t].drifttime + vec_DT_start[sq_ch];
-                if ( dt_crr>0.0 && dt_crr<=200.0 ) {
+                if ( dt_crr>0.0 && dt_crr<=160.0 ) {
                     a = vec_track_can[t];
                     a.drifttime = dt_crr;
                     vec_tracks.push_back ( a );
@@ -148,6 +155,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_straw.push_back ( vec_track_can[t].straw );
                     vec_plane.push_back (vec_track_can[t].plane);
                     vec_tot.push_back(vec_track_can[t].tot);
+                    h_LayerDT[vec_track_can[t].layer-1]->Fill(a.drifttime);
                 }
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
@@ -175,6 +183,37 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     // h_Ch_Dta->Draw();
     h_drifttime->Write();
     h_Cal_drifttime->Write();
+    
+    for(int a=0; a<8; a++)
+    {
+        h_LayerDT[a]->Write();
+    }
+    
+    for(int s=0; s<8; s++)
+    {
+        double C =0;
+        int xmin=0;
+        int xmax=0;
+        std::vector<double> vec_drift_radius;
+        double a1[201];
+        double b1[201];
+
+        C = ( h_LayerDT[s]->GetEntries() ) /0.505;
+
+        for ( int x=0; x<=200; x++ ) {
+            TAxis *axis = h_LayerDT[s]->GetXaxis();
+            int bmin = axis->FindBin ( 0.0 );
+            int bmax = axis->FindBin ( x );
+            double drift_radius = ( h_LayerDT[s]->Integral ( bmin,bmax ) ) /C;
+            cout<<x<<"\t"<<drift_radius<<endl;
+            a1[x]=x;
+            b1[x]=drift_radius;
+        }
+
+        TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
+        gDriftRadius->SetName ( Form("PDAQ_DR%i",s+1) );
+        gDriftRadius->Write();
+    }
 
     double C =0;
     int xmin=0;
@@ -190,7 +229,6 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         int bmin = axis->FindBin ( 0.0 );
         int bmax = axis->FindBin ( x );
         double drift_radius = ( h_Cal_drifttime->Integral ( bmin,bmax ) ) /C;
-        //vec_drift_radius.push_back ( drift_radius );
         cout<<x<<"\t"<<drift_radius<<endl;
         a1[x]=x;
         b1[x]=drift_radius;
@@ -198,17 +236,13 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
     TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
     gDriftRadius->SetName ( "PDAQ_DR" );
-
     gDriftRadius->Write();
 
-
-
     for ( int chh=0; chh<256; chh++ ) {
-
         h_Cal_Ch_Dt[chh]->Write();
         h_Dt[chh]->Write();
-
     }
+    
     PDAQ_tree->Write();
     Ttree->Close();
 
@@ -228,7 +262,7 @@ int main ( int argc, char** argv )
                      "file name.\n" );
             // atoi(argv[3]) == 1000;
             sleep ( 2 );
-            -         PDAQ_Drift_Cal ( argv[1], argv[2], 100000000 );
+            PDAQ_Drift_Cal ( argv[1], argv[2], 100000000 );
         } else {
             PDAQ_Drift_Cal ( argv[1], argv[2], atoi ( argv[3] ) );
         }
