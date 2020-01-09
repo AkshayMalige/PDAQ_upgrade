@@ -52,8 +52,10 @@ std::vector<SttHit*> filter_drift_position (std::vector<SttHit*> vec_hits , TGra
     return vec_dphits;    
 }
 
-bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * v,TTree* tree)
+bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * v,TTree* tree, bool write_file)
 {
+    ofstream myfile;
+    myfile.open ("a.txt");
     std::vector<SttHit*> vec_hits;
     std::vector<std::vector<SttHit*>> vec_layerhits;
     
@@ -155,8 +157,15 @@ bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * 
         h->hx_theeta->Fill(theta_X);
         
         double track_x[vec_dphits.size()];
-        if(f1->GetChisquare()>0.02) continue;
+       // if(f1->GetChisquare()>0.02) continue;
         h->hx_chi->Fill(f1->GetChisquare());
+        double calc_chi[16];
+        
+        for(int a=0; a<16; a++)
+        {
+            calc_chi[a]=0;
+        }
+        
         for ( int k = 0; k < vec_dphits.size(); k++ ) 
         {                        
             double centerTotrack = fabs((trck_slope * vec_dphits[k]->z) - vec_dphits[k]->x + trck_constant) / ( sqrt ( 1 + ( trck_slope * trck_slope ) ) ) ; //((m * Px) - Py + C)/(sqrt(1+(m*m))) distance b/w a point and line. reference in the downloaded pdf.
@@ -173,13 +182,34 @@ bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * 
             h->h_Dr_vs_dr[vec_dphits[k]->plane]->Fill(dradius*10,residue);
             h->h_plane_str_no[vec_dphits[k]->plane]->Fill(vec_dphits[k]->straw);
             h->h_dt_vs_dr[vec_dphits[k]->plane]->Fill(vec_dphits[k]->drifttime,residue);
-            if(residue < 0.6 && residue > -0.6){ h->h_Dt_vs_dr_Lay[vec_dphits[k]->layer-1]->Fill(vec_dphits[k]->drifttime,residue);
+            if(residue < 0.6 && residue > -0.6){ h->h_Dt_vs_dr_Lay[vec_dphits[k]->layer-1]->Fill(vec_dphits[k]->drifttime,residue);          
             }
+            
+            double ini_sig = 0.015;
+            for(int a=0; a<16; a++)
+            {
+                calc_chi[a]+=pow((centerTotrack-dradius),2)/(pow((ini_sig),2));
+            //  calc_chi[a]+=pow((centerTotrack-dradius),2)/pow(0.022,2);
+            //  cout<<"\t"<<ini_sig<<"\t"<<ini_sig<<endl;
+                ini_sig=ini_sig+0.001;
+            
+            }
+            ini_sig = 0.015;
+
+           
         }
+        for (int a=0; a<16; a++)
+        {
+            myfile<<calc_chi[a]<<"\t";
+        }
+        myfile<<endl;
+
+        
         delete f1;
         delete track;
+        h->h_cal_chi->Fill(calc_chi[6]);
     }
-    
+    myfile.close();    
     return true;
 }
 
@@ -194,6 +224,7 @@ bool reset_hist(histograms* h,TH2F* h_Dt_vs_dr_Lay_copy[8])
     h->h_XfvsZ->Reset("ICESM");
     h->Dt_vs_dr->Reset("ICESM");
     h->hx_chi->Reset("ICESM");
+    h->h_cal_chi->Reset("ICESM");
     
     for (int hd =0; hd<18; hd++)
     {
@@ -279,7 +310,7 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     int iev = ( int ) tree->GetEntries();
     printf("\n Number of entries in the tree : %d \n",iev);
 
-    int no_of_it =6;
+    int no_of_it =7;
     
     TGraph* Dt_vs_drCrr[no_of_it];
      TH2F* h_Dt_vs_dr_Lay_copy[8];
@@ -292,10 +323,10 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
         }
 //     }
 
-    
     for (int it=0; it<no_of_it; it++)
-    {    
-        track_recon (iev ,  h,  gDR , maxEvents, v, tree );    
+    {
+        bool write_file = (it == no_of_it -1) ? true : false;
+        track_recon (iev ,  h,  gDR , maxEvents, v, tree, write_file );    
         
         for (int s=0; s<8; s++)
         {
@@ -332,14 +363,6 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
 
     }
     
-//     for(int a=0; a<no_of_it; a++)
-//     {
-//         for(int b=0; b<8; b++)
-//         {
-//             h_Dt_vs_dr_Lay_copy[a][b]->SetName(Form("h_Dt_vs_dr_Lay_copy_%i_%i",a,b));
-//             h_Dt_vs_dr_Lay_copy[a][b]->Write(); 
-//         }
-//     }
     
     for(int a=0; a< no_of_it; a++)
     {
@@ -353,6 +376,18 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     }
     
     
+    TF1* chi2_6dofF = new TF1("chi2_6dofF","ROOT::Math::chisquared_pdf(x,6,0)",0,50);
+    
+    h->h_cal_chi->Scale(1/h->h_cal_chi->Integral(0,50));  
+    
+    double chiResult = h->h_cal_chi->Chisquare(chi2_6dofF);
+    cout<<"Chi fit "<<chiResult<<endl;
+    
+    //h->h_cal_chi->Fit(chi2_6dofF,"R");
+    
+    h->h_cal_chi->Write();    
+    chi2_6dofF->Write();
+    
     TF1* fh = new TF1("fh", "gaus",  -2.5, 2.5);
     h->hx->Fit(fh,"R");
     int a_size = sizeof(outtree)/sizeof(char);
@@ -362,6 +397,7 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     h->hx->Draw();   
     //c1->SaveAs(s_a,"png");
     h->hx->Write();
+    
     
     h->hdx->Fit(fh,"R");
     h->hdx->GetXaxis()->SetTitle("dx [mm]");
@@ -376,6 +412,9 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     h->h_dr->Write();
     h->Dt_vs_dr->Write();
     h->hx_chi->Write();
+    
+   // 
+
     //gDR->Write();
     
     TH1F * projh2X;

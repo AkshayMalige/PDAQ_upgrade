@@ -52,6 +52,8 @@ struct histograms{
     TH1F* h_plane_str_no[18];
     TH2F* h_dt_vs_dr[18];
     TH2F* h_Dt_vs_dr_Lay[8];
+    TH1F* h_ch_sq_od6;
+    TH1F* h_cal_chi = new TH1F ( "h_cal_chi", "h_cal_chi", 50, 0, 50 );;
 };
 
 
