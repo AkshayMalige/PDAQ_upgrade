@@ -108,7 +108,7 @@ std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
         delete cor;
 
         int mult = 0;
-    /*    int layer_eff_count =0;
+        int layer_eff_count =0;
         int layer_eff_count2 =0;
 
         for ( int kb=0; kb<8; kb++ ) {
@@ -125,7 +125,7 @@ std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
             }
         }
         h->h_Layer_effPlane->Fill ( layer_eff_count -4 );
-        h->h_Layer_effStraw->Fill ( layer_eff_count2 -4 );*/
+        h->h_Layer_effStraw->Fill ( layer_eff_count2 -4 );
 
     }
 
@@ -447,7 +447,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_Cross_DTvTOT[mc] = new TH2F ( Form ( "Cross_%d_DTvsTOT",mc+1 ),Form ( "Cross_%d_DTvsTOT;Drift Time [ns];Time Over Threshold [ns]",mc+1 ), 500, 0, 500,4000,0,4000 );
     }
 
-    for ( int kc =0; kc<2 ; kc++ ) {
+    for ( int kc =0; kc<3 ; kc++ ) {
         h->h_CrossTalkCase[kc]=new TH1F ( Form ( "Cross_TlkCase%d", kc+1 ) , Form ( "Cross_TlkCase%d", kc+1 ), 3, 0,3 );
         h->h_CrossTalkDT_TOT[kc]=new TH2F ( Form ( "h_CrossTalkDT_TOT%d",kc+1 ),Form ( "h_CrossTalkDT_TOT%d;Drift Time [ns];Time Over Threshold [ns]",kc+1 ), 500, 0,500,4000,0,4000 );
         h->h_CrossTalkDT_DT[kc]= new TH2F ( Form ( "h_CrossTalkDT_DT%d",kc+1 ),Form ( "h_CrossTalkDT_DT%d;Drift Time [ns];Drift Time [ns]",kc+1 ), 500, 0, 500,500,0,500 );
@@ -1258,6 +1258,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         from_corridor[r]= h->h_Layer_effPlane->GetBinContent ( r );
         index[r] =r-1;
+        cout<<r<<"\t"<<from_corridor[r]<<"\t"<<index[r]<<endl;
     }
 
     for ( int rr =0; rr< 30; rr++ ) {
@@ -1277,9 +1278,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         from_90index[jh] = jh;
     }
 
-
-
-
     Eff->cd();
 
     TGraph* gEffeciency2 = new TGraph ( 16, index , from_corridor );
@@ -1288,7 +1286,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     gEffeciency2->Draw ( "AB" );
     gEffeciency2->SetFillColor ( kOrange+1 );
-    gEffeciency2->SetTitle ( "Efficiency" );
+    gEffeciency2->SetTitle ( "Plane Efficiency" );
     gEffeciency2->GetXaxis()->SetTitle ( "Number of fired planes" );
     gEffeciency2->GetXaxis()->SetTitleSize ( 0.050 );
     gEffeciency2->GetXaxis()->SetLabelSize ( 0.055 );
@@ -1309,7 +1307,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     TGraph* gEffeciency = new TGraph ( 16, index2 , from_corridor_straw );
     gEffeciency->Draw ( "AB" );
     gEffeciency->SetFillColor ( kOrange+1 );
-    gEffeciency->SetTitle ( "Efficiency" );
+    gEffeciency->SetTitle ( "Straw Efficiency" );
     gEffeciency->GetXaxis()->SetTitle ( "Number of fired straws" );
     gEffeciency->GetXaxis()->SetTitleSize ( 0.050 );
     gEffeciency->GetXaxis()->SetLabelSize ( 0.055 );
@@ -1544,7 +1542,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_CrossMaxTOT->Draw ( "h,TEXT" );
     h->h_CrossMaxTOT->Write();
 
-
     double lay_ef[8];
     double lay_ef2[8];
     double lay_index[8];
@@ -1557,7 +1554,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         lay_ef[u]=pl2[u][2]/plane_eff_cont;
         lay_ef2[u]=pl2[u][2]/plane_eff_cont;
     }
-
 
     for ( int xc=0; xc<5; xc++ ) {
 
@@ -1572,7 +1568,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_Cross_DTvDT[xd]->Write();
         h->h_Cross_DTsum[xd]->Write();
     }
-
 
     Lay_ef->cd();
     TGraph* gLayerEff = new TGraph ( 8, lay_index, lay_ef );
@@ -1593,14 +1588,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     Lay_ef->Write();
     Lay_ef1->Write();
 
-
     h->h_Corr_Layer_Mult->Scale ( 1/h->h_Corr_Layer_Mult->GetEntries() );
     h->h_Corr_Layer_Mult->Write();
     h->h_Corr_Plane_Mult->Scale ( 1/h->h_Corr_Plane_Mult->GetEntries() );
     h->h_Corr_Plane_Mult->Write();
     h->h_Corr_Channel_Mult->Scale ( 1/h->h_Corr_Channel_Mult->GetEntries() );
     h->h_Corr_Channel_Mult->Write();
-
 
     for ( int y=0; y<2; y++ ) {
         h->h_CrossTalkCase[y]->Scale ( 1/final_counter );

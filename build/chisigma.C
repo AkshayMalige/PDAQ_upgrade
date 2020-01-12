@@ -115,7 +115,7 @@ for (int a=0; a<no_of_sigs; a++)
 {	
 	h_chi[a]->Scale(1/h_chi[a]->Integral(0,35));  
     
-    	double chiResult = h_chi[a]->Chisquare(chi2_6dofF);
+    	double chiResult = h_chi[a]->Chisquare(chi2_6dofF)/34;
     	cout<<"Sigma :"<<(a*10)+150<<"\tChi result :"<<chiResult<<endl;
 	sig_arr[a]=(a*10)+150;
 	chi_arr[a]=chiResult;

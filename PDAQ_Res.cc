@@ -188,7 +188,7 @@ bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * 
             double ini_sig = 0.015;
             for(int a=0; a<16; a++)
             {
-                calc_chi[a]+=pow((centerTotrack-dradius),2)/(pow((ini_sig),2));
+                calc_chi[a]+=pow((centerTotrack-dradius),2)/pow((ini_sig),2);
             //  calc_chi[a]+=pow((centerTotrack-dradius),2)/pow(0.022,2);
             //  cout<<"\t"<<ini_sig<<"\t"<<ini_sig<<endl;
                 ini_sig=ini_sig+0.001;
@@ -347,9 +347,9 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
               //  cout<<ft->GetParameter(1)<<"\t"<<projhDT->GetMean()<<endl;
 
                 dt_correted[t]= gDR[s]->Eval(t) + (crr_mean/10);
-                correction[t] = crr_mean;
-                
+                correction[t] = crr_mean;                
             }
+            
             delete ft;                
                     
             gDR[s] = new TGraph ( 200, dt_time, dt_correted );

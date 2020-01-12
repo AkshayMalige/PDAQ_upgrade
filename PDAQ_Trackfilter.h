@@ -153,9 +153,9 @@ struct histograms{
     TH1F* h_Corr_Plane_Mult = new TH1F ( "h_Corr_Plane_Mult", "h_Corr_Plane_Mult;Number of fired straws", 18, 0, 18 );
     TH1F* h_Corr_Channel_Mult = new TH1F ( "h_Corr_Channel_Mult", "h_Corr_Channel_Mult;Number of fired straws", 30, 0, 30 );
     
-    TH1F* h_CrossTalkCase[2];
-    TH2F* h_CrossTalkDT_TOT[2];
-    TH2F* h_CrossTalkDT_DT[2];
+    TH1F* h_CrossTalkCase[3];
+    TH2F* h_CrossTalkDT_TOT[3];
+    TH2F* h_CrossTalkDT_DT[3];
     TH1F* h_High_TOT_Layer = new TH1F ( "h_High_TOT_Layer", "h_High_TOT_Layer;Layer", 9, 0, 9 );
     TH1F* h_High_TOT_Ratio = new TH1F ( "h_High_TOT_Ratio", "h_High_TOT_Ratio;Layer", 2, 0, 2 );
    
