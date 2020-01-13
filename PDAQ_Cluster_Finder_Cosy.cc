@@ -1524,7 +1524,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
     Double_t norm3 = h->h_CrossCase->GetEntries();
-    h->h_CrossCase->Scale ( 1/norm3 );
+    //h->h_CrossCase->Scale ( 1/norm3 );
+    h->h_CrossCase->Scale ( 1/final_counter );
     h->h_CrossCase->SetLineWidth ( 3 );
     h->h_CrossCase->SetLineColor ( kOrange+1 );
     h->h_CrossCase->SetFillColor ( kOrange+1 );
@@ -1532,6 +1533,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_CrossCase->SetMarkerColor ( kOrange+1 );
     h->h_CrossCase->Draw ( "h,TEXT" );
     h->h_CrossCase->Write();
+    
     h->h_CrossMaxTOT->Scale ( 1/h->h_CrossMaxTOT->GetEntries() );
     h->h_CrossMaxTOT->SetLineWidth ( 3 );
     h->h_CrossMaxTOT->SetLineColor ( kTeal-8 );
