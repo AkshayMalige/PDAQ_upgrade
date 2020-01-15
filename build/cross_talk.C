@@ -17,7 +17,14 @@
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TMultiGraph.h"
+
+#include "TMVA/Factory.h"
+#include "TMVA/DataLoader.h"
+#include "TMVA/Tools.h"
+#include "TMVA/TMVAGui.h"
+
 using namespace std;
+
 
 int count_line(TString talysName) {
  ifstream f1;

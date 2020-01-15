@@ -59,6 +59,9 @@ target_link_libraries(pdaq_unpacker PDAQ ${ROOT_LIBRARIES})
 add_executable(pdaq_unpacker_HADES PDAQ_RawDecoder_HADES.cc)
 target_link_libraries(pdaq_unpacker_HADES PDAQ ${ROOT_LIBRARIES})
 
+add_executable(pdaq_unpacker_fullsys PDAQ_RawDecoder_FullSys.cc)
+target_link_libraries(pdaq_unpacker_fullsys PDAQ ${ROOT_LIBRARIES})
+
 add_executable(pdaq_calibrater pdaq_calibirator.cc PDAQ_Stt_Calibirator.C)
 target_link_libraries(pdaq_calibrater PDAQ ${ROOT_LIBRARIES})
 

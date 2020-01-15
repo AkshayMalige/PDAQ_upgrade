@@ -378,8 +378,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
     }
     if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
-        const std::vector<std::vector<VecSttHit>> vectors =
-            vec_cluster_layer;
+        const std::vector<std::vector<VecSttHit>> vectors = vec_cluster_layer;
 
         const auto tuples = make_tuples ( vectors );
         std::vector<VecSttHit> vec_All_X;

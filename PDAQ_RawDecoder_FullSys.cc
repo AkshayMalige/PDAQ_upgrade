@@ -124,8 +124,8 @@ UInt_t readWord ( std::ifstream* in_file )
 //===================================================================
 // Reading and decoding input file
 
-void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
-                             int maxEvents = 100 )
+void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
+                             int maxEvents = 1000 )
 {
     TH1F* h_tdc_ref = new TH1F ( "h_tdc_ref", "h_tdc_ref;Number of ref hits", 10, 0, 10 );
     TH1F* h_refTimeTRB1 = new TH1F ( "h_refTimeTRB1", "h_refTimeTRB1;Time diff [ns]", 500, -25, 25 );
@@ -530,9 +530,9 @@ int main ( int argc, char** argv )
                      "file name.\n" );
             // atoi(argv[3]) == 1000;
             sleep ( 2 );
-            PDAQ_RawDecoder_HADES ( argv[1], argv[2], 100000000 );
+            PDAQ_RawDecoder_FullSys ( argv[1], argv[2], 100000000 );
         } else {
-            PDAQ_RawDecoder_HADES ( argv[1], argv[2], atoi ( argv[3] ) );
+            PDAQ_RawDecoder_FullSys ( argv[1], argv[2], atoi ( argv[3] ) );
         }
 
     else {
