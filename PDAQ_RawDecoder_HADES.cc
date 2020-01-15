@@ -347,7 +347,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
                                         if ( lastRise-refTime <=100000 ) {
                                             h_currpt->Fill ( 1 );
-                                           // printf("Good %lf %lf %lf\n",lastRise,refTime,lastRise-refTime);
+                                          // printf("Good %lf %lf %lf\n",lastRise,refTime,lastRise-refTime);
                                         } else {
                                             h_currpt->Fill ( 2 );
                                            // printf("corrupt %lf  %lf %lf\n",lastRise,refTime,lastRise-refTime);

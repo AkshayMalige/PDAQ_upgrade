@@ -209,7 +209,7 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
     double doubleCntr = 0;
     double doubleCntr1 = 0;
     
-    int prev_time=0;
+    float prev_time=0;
 
     while ( !in_file.eof() ) {
 
@@ -257,7 +257,7 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
 
                 // loop over TDCs
                 while ( !in_file.eof() ) {
-                    
+                   // cout<<"file reading start"<<endl;
                     word = readWord ( &in_file ); // tdc headers
                     // printf("%x\n", word);
                     tdc_size = ( word >> 16 ) & 0xffff; // tdc size
@@ -269,6 +269,8 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
 
 
                     if ( tdc_id == 0x5555 ) { // skip control subsub
+                      //  cout<<"control subsub skipped"<<endl;
+
                         in_file.ignore ( 4 );
                         queue_words++;
                         if ( sub_size % 2 != 0 ) { // skip padding word
@@ -293,6 +295,7 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
                             tdc_words++;
                             queue_words++;
                             //printf("%x\n", word);
+                          //  cout<<"Reading data word"<<endl;
 
                             if ( ( ( word >> 28 ) & 0xf ) == 0x8 ) { // hit marker
                                 channel_nr = ( ( word >> 22 ) & 0x7f );
@@ -302,20 +305,21 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
 
                                 h_stt_tdc_channels->Fill ( channel_nr );
 
-                                double time =
-                                    ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
+                                double time = ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
                                 time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
                                  //printf ( "%lf %x\n", time, tdc_id );
 
                                 if ( channel_nr == 0 ) { // ref time
                                     refTime = time;
-                                    if ( tdc_id == 0x6400 ||tdc_id == 0x6410 ||tdc_id == 0x6411||tdc_id == 0x6420||tdc_id == 0x6430||tdc_id == 0x6431 ) {
+                                    //if ( tdc_id == 0x6400 ||tdc_id == 0x6410 ||tdc_id == 0x6411||tdc_id == 0x6420||tdc_id == 0x6430||tdc_id == 0x6431 ) {
+                                    if ( tdc_id == 0x6440 ||tdc_id == 0x6441 ||tdc_id == 0x6442||tdc_id == 0x6443||tdc_id == 0x6444||tdc_id == 0x6445 ||tdc_id == 0x6450 ||tdc_id == 0x6451 ||tdc_id == 0x6452||tdc_id == 0x6453||tdc_id == 0x6454||tdc_id == 0x6455 || tdc_id == 0x6460 ||tdc_id == 0x6461 ||tdc_id == 0x6462||tdc_id == 0x6463||tdc_id == 0x6464||tdc_id == 0x6465 || tdc_id == 0x6470 ||tdc_id == 0x6471 ||tdc_id == 0x6472||tdc_id == 0x6473) {
                                         SttRawHit* a = stt_event->AddHit ( channel_nr );
                                         a->tdcid = tdc_id;
                                         a->leadTime = time;
                                         a->trailTime = 0;
                                         a->isRef = true;
                                         RefTime[tdc_ptr-1] = refTime;
+                                     //   cout<<"Ref time from STS tdc's"<<endl;
                                     }
 
 
@@ -333,29 +337,30 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
 
                                         //h_tdc_ref->Fill ( 7 );
                                         //printf("\tRef R: %f on channel %d on %x on %x tdcptr: %d\n", s->leadTime, channel_nr,  tdc_id, sub_id, tdc_ptr - 1);
+                                      //  cout<<"Ref time from sint tdc"<<endl;
                                     
                                     }
                                     
                                 } else {
-                                    if ( edge == 1 && (fabs(time-refTime)<100000)) { // rising edge
-
-                                        lastRise = time;
+                                    if ((fabs(time-refTime)>100000)) 
+                                    {
+                                      //  cout<<"corrupt"<<(fabs(time-refTime))<<endl;
+                                        h_currpt->Fill(1);
+                                        //continue;
                                         
-                                         // if (prev_time- lastRise ==0){
+                                        
+                                    }
+                                    else if ( edge == 1) { // rising edge
+                                      //  cout<<"Hit channel"<<endl;
+                                       // cout<<"\t\t\t\t"<<(fabs(time-refTime))<<endl;
+                                        lastRise = time;
                                           
-                                          prev_time = time;
+                                        prev_time = time;
 
-                                        if ( lastRise-refTime <=100000 ) {
-                                            h_currpt->Fill ( 1 );
-                                           // printf("Good %lf %lf %lf\n",lastRise,refTime,lastRise-refTime);
-                                        } else {
-                                            h_currpt->Fill ( 2 );
-                                           // printf("corrupt %lf  %lf %lf\n",lastRise,refTime,lastRise-refTime);
-                                        }
-//                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
-
-                                        h_stt_tdc_leadTimes->Fill ( time -                                                     refTime );
+                                        h_stt_tdc_leadTimes->Fill ( time - refTime );
+                                        h_currpt->Fill(0);
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
+                                          //  cout<<"*** Scint time"<<endl;
                                             SciHit* s = sci_event->AddSciHit();
                                             s->tdcid = tdc_id;
                                             s->channel = channel_nr;
@@ -367,46 +372,13 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
                                     } else {
                                         // falling edge
   ///////////////////////(fabs(time-refTime)<100000) -> To reject the corrupted entries from the epoch counter/////////////
-                                        if ( lastRise != 0 && (fabs(time-refTime)<100000)) { // only in case
+                                        if ( lastRise != 0) { // only in case
                                             // there was a
                                             // rising to pair
                                             bool doubleHit = false;
-
-                                            /* for ( Int_t ui=0;
-                                             ui<stt_event->totalNTDCHits; ui++ )
-                                             {
-                                                 //cout<<"totalNTDCHits
-                                             "<<stt_event->totalNTDCHits<<"\t"<<endl;
-                                                 if ( ( ( SttRawHit* )
-                                             stt_event->tdc_hits->ConstructedAt
-                                             ( ui ) )->channel == channel_nr +
-                                             stt_channel_offsets[tdc_id] ) {
-                                                     //if ( ( ( SttRawHit* )
-                                             stt_event->tdc_hits->ConstructedAt
-                                             ( ui ) )->leadTime == lastRise ) {
-                                                         //cout<<"Double hit
-                                             :"<<endl;
-                                                         doubleHit = true;
-                                                         doubleCntr++;
-                                                     }
-                                                 //}
-
-                                                 doubleCntr1++;
-                                             }*/
-                                            /* if (tdc_id == 0x6500 &&
-                                             channel_nr ==1)
-                                             {
-                                               SciHit* s =
-                                             sci_event->AddSciHit();
-                                               s->tdcid = tdc_id;
-                                               s->channel = channel_nr;
-                                                                   s->leadTime =
-                                             lastRise;
-                                                                   s->trailTime
-                                             = ( refTime - time );
-                                               s->isRef = false;
-                                               //printf("0x6500");
-                                             }*/
+                                            
+                                           // cout<<"*** Straw time"<<endl;
+                                            
                                             
     for (Int_t ui = 0; ui < stt_event->totalNTDCHits; ui++) 
     {
@@ -416,9 +388,10 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
         {
             if (((SttRawHit * ) stt_event->tdc_hits->ConstructedAt(ui))->leadTime == lastRise) 
             {
-            //cout<<"Double hit :"<<endl;
+            cout<<"Double hit :"<<endl;
                 doubleHit = true;
                 doubleCntr++;
+                h_currpt->Fill(2);
             }
         }
         doubleCntr1++;
@@ -434,11 +407,12 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
 
                                             lastRise = 0;
 
-                                             //printf("\tHit: %f on channel %d // on %x on %x\n", a->leadTime,channel_nr,tdc_id, sub_id);
+                                           //  printf("\tHit: %f on channel %d // on %x on %x\n", a->leadTime,channel_nr,tdc_id, sub_id);
                                         }
                                     }
                                 }
-                            } else if ( ( ( word >> 28 ) & 0xf ) == 0x6 ) {
+                            } 
+                            else if ( ( ( word >> 28 ) & 0xf ) == 0x6 ) {
                                 // epoch counter
                                 epoch = word & 0xffffff;
                                 // printf("\tEpoch: %x on %x on %x\n", epoch,
@@ -505,6 +479,7 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
         h_tdc_ref->Write();
         h_refTimeTRB1->Write();
         h_refTimeTRB2->Write();
+        h_currpt->Scale(1/h_currpt->GetEntries());
         h_currpt->Write();
         for ( int h=0; h< 6; h++ ) {
             h_refTimeTDC[h]->Write();
