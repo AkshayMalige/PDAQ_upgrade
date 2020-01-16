@@ -391,6 +391,7 @@ if (tdc_size == 0) {
                                             // rising to pair
                                             bool doubleHit = false;
                                             missing_lt = false;
+                                            h_missingLT->Fill(0);
                                             
                                        //     cout<<"*** Straw time"<<endl;
 
@@ -427,12 +428,12 @@ if (tdc_size == 0) {
                                         }
                                         else 
                                         {
-                                            if(missing_lt == true)
-                                            {
+                                          //  if(missing_lt == true)
+                                          //  {
                                                 h_missingLT->Fill(1);
-                                                missing_lt = false;
-                                            }
-                                            else h_missingLT->Fill(0);
+                                             //   missing_lt = false;
+                                           // }
+                                           // else h_missingLT->Fill(0);
                                         }
                                     }
                                 }
