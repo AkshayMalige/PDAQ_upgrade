@@ -133,6 +133,7 @@ void PDAQ_RawDecoder_FullSys ( char* in_file_name, char* out_file_name = 0,
     TH1F* h_currpt = new TH1F ( "h_currpt", "h_currpt", 3, 0, 3 );
     TH1F* h_epoc = new TH1F ( "h_epoc", "h_epoc", 7000, -20, 50 );
     TH1F* h_missingLT = new TH1F ( "h_missingLT", "h_missingLT", 3, 0, 3 );
+    TH1F* h_DT = new TH1F ( "h_DT", "h_DT", 700000, -200, 500);
 
 
     TH1F* h_refTimeTDC[24];
@@ -350,13 +351,16 @@ if (tdc_size == 0) {
                                     }
                                     
                                 } else {
-                                    h_epoc->Fill(fabs((time/1000000000)-(refTime/1000000000)));
+                                    double epoc_dt = fabs((time/1000000000)-(refTime/1000000000)); //sec
+                                    h_epoc->Fill(epoc_dt);
+                                    h_DT->Fill(fabs((time/1000)-(refTime/1000)));
+                                 //   cout<<fabs((time/1000000000)-(refTime/1000000000)) <<"\t"<<fabs((time/1000)-(refTime/1000))<<endl;
                                     //if ((fabs(time-refTime)>100000))
                                     //if ((fabs(time-refTime)>10000000000)) // 10 sec
                                    /* if (fabs((time/1000000000)-(refTime/1000000000)) > 20) {
                                       printf("tdc: %x Ch : %i diff: %f \n",tdc_id,channel_nr,fabs((time/1000000000)-(refTime/1000000000)));  
                                     }*/
-                                    if (( fabs((time/1000000000)-(refTime/1000000000))  > 1)) // 10 sec
+                                    if (( fabs((time/1000000000)-(refTime/1000000000))  > 1)) // 1 sec
                                     {
                                         //cout<<"corrupt"<<(fabs(time-refTime))/1000000000<<endl;
                                         h_currpt->Fill(1);                                        //continue;
@@ -510,6 +514,7 @@ if (tdc_size == 0) {
         h_epoc->Write();
         h_missingLT->Scale(1/h_missingLT->GetEntries());
         h_missingLT->Write();
+        h_DT->Write();
         for ( int h=0; h< 6; h++ ) {
             h_refTimeTDC[h]->Write();
         }
