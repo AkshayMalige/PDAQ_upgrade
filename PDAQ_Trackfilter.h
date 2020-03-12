@@ -48,7 +48,7 @@ struct histograms{
     TCanvas *HitMultiplicity = new TCanvas ( "HitMultiplicity","HitMultiplicity" );
     TCanvas *TimeOverThreshold = new TCanvas ( "TimeOverThreshold","TimeOverThreshold" );
 	
-    TH1F* h_hitmultiplicity0 = new TH1F ( "h_hitmultiplicity0", "h_hitmultiplicity0;Number of hits", 110, -10, 100 );
+    TH1F* h_hitmultiplicity0 = new TH1F ( "h_hitmultiplicity0", "h_hitmultiplicity0;Number of hits", 1000, 0, 1000 );
     TH1F* h_hitmultiplicity1 = new TH1F ( "h_hitmultiplicity1", "h_hitmultiplicity1;Number of hits", 110, -10, 100 );
     TH1F* h_hitmultiplicity2 = new TH1F ( "h_hitmultiplicity2", "h_hitmultiplicity2;Number of hits", 110, -10, 100 );
     TH1F* h_hitmultiplicity3 = new TH1F ( "h_hitmultiplicity3", "h_hitmultiplicity3;Number of hits", 110, -10, 100 );

@@ -243,15 +243,19 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 // decode sub headers
                 word = readWord ( &in_file ); // sub_size
                 sub_size = word / 4;
+              //  printf("Decoding feild 1: %x\n",word);
                 // in_file.ignore(4);  // decoding
                 word = readWord ( &in_file );
                 decoding = word;
+             //   printf("Decoding feild 2: %x\n",word);
                 word = readWord ( &in_file ); // sub_id
                 sub_id = word & 0xffff;
                 // in_file.ignore(4);  // trigger nr
+            //    printf("Decoding feild 3: %x\n",word);
                 word = readWord ( &in_file );
                 trigger_nr = word;
-                //printf("Subevent: id: %x size: %d trg:%x\n", sub_id,sub_size, trigger_nr);
+                printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
+             //   printf("Decoding feild 2: %x\n",decoding);
 
                 queue_words += 4;
 
@@ -259,10 +263,10 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 while ( !in_file.eof() ) {
                     
                     word = readWord ( &in_file ); // tdc headers
-                    // printf("%x\n", word);
+                    //printf("%x\n", word);
                     tdc_size = ( word >> 16 ) & 0xffff; // tdc size
                     tdc_id = word & 0xffff;
-                   // printf("\tTDC: id: %x size: %d\n", tdc_id, tdc_size);
+                   // printf("\tTDC: id: %x size: %d header: %x\n", tdc_id, tdc_size,word);
 
                     queue_words++;
                     tdc_words = 0;
@@ -299,6 +303,8 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                 edge = ( ( word >> 11 ) & 0x1 );
                                 fine = ( ( word >> 12 ) & 0x3ff );
                                 coarse = ( word & 0x7ff );
+                                
+                                printf("%x  %x  %x\n", word, word >> 11, ( word >> 11 ) & 0x1);
 
                                 h_stt_tdc_channels->Fill ( channel_nr );
 

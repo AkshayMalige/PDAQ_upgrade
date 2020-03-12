@@ -593,7 +593,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
             h->h_scint_mult_a->Fill ( vec_scihits.size() );
-            //printf("\nSIZE : %i\n",vec_scihits.size());
+          //  printf("\nSIZE : %i\n",vec_scihits.size());
             scint_event+=vec_scihits.size();
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
 
@@ -607,18 +607,17 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 }
 //DT = straw - scint
 
-                h->h_hitmultiplicity1->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
+              //  h->h_hitmultiplicity1->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
                 //printf ( "\n SCINT : %lf\n",sh->leadTime );
 
                 for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                     SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
-                    //printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
+                 //   printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
                     All_hit_counter++;
                     h->h_scint_timediff->Fill ( cal_hit->leadTime - sh->leadTime );
                     h->h_LTvsLayer0->Fill ( cal_hit->layer, cal_hit->leadTime );
                     h->h_raw_leadtimes->Fill ( cal_hit->leadTime );
                     h->h_tot0->Fill ( cal_hit->tot );
-
 
                     // hit on reference channel
                     if ( cal_hit->isRef == true ) {
@@ -654,7 +653,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 h->h_0LMultiplicity->Fill ( layerCounter );
 //                cout<<"check6"<<endl;
 
-                if ( layerCounter >0/*== MAX_FT_TOTAL_LAYERS*/ ) {
+//                if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
+                if ( layerCounter >0 ) {
 
                     Layer_eq_4_counter++;
                     stt = true;
@@ -1113,7 +1113,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_cluster_size->Write();
     h->h_LTvsLayer0->Write();
     h->h_LTvsLayer1->Write();
-
+    h->h_hitmultiplicity0->Write();
+    
     h->HitMultiplicity->cd();
     h->h_hitmultiplicity0->Draw();
     h->h_hitmultiplicity1->Draw ( "same" );

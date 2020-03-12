@@ -221,6 +221,8 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
         //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",tdc0,tdc3,trb_diff );
 
+        bool layers_hit[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
+        
 //Loop over straw hits
         for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
             SttRawHit* hit = ( SttRawHit* ) STT->stt_raw.tdc_hits->ConstructedAt ( i ); // retrieve particular hit
@@ -273,6 +275,8 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                      // printf("Evnt : %i  , TDC: %x , lay : %i, str:%i, lt:%lf  hitLT:%lf\n",e, cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime, hit->leadTime);
                       //exit;
                     //}
+                    
+                    layers_hit[tc->lay - 1] = true;
 
                     if ( tc->lay ==1 ||tc->lay ==3||tc->lay ==5||tc->lay ==7 ) {
                         if ( tc->straw%2 ==0 ) {
@@ -329,6 +333,10 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 }
             }
         }
+        
+        printf("%d: ", e);
+        for (int ll =0 ;ll < 8; ll++)        printf("%d", layers_hit[ll]);
+        printf("\n");
         // cout<<"***********\n\n"<<endl;
 
     } // over events
