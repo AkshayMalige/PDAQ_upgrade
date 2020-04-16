@@ -221,7 +221,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
         //printf ( "ref 1:%lf  ref2: %lf  diff: %lf \n",tdc0,tdc3,trb_diff );
 
-        bool layers_hit[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
+        int layers_hit[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
         
 //Loop over straw hits
         for ( int i = 0; i < STT->stt_raw.totalNTDCHits; i++ ) {
@@ -272,11 +272,11 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     //cout<<e<<endl;
                     //if (cal_hit->tdcid==0x6411 && cal_hit->layer==4 && cal_hit->straw==11 && cal_hit->leadTime > -6230 && cal_hit->leadTime < -6218){
                     
-                     // printf("Evnt : %i  , TDC: %x , lay : %i, str:%i, lt:%lf  hitLT:%lf\n",e, cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime, hit->leadTime);
+                 //     printf("Evnt : %li  , TDC: %x , lay : %i, ch : %i,str:%i, lt:%lf \n",e, cal_hit->tdcid,cal_hit->layer,hit->channel,cal_hit->straw,cal_hit->leadTime);
                       //exit;
                     //}
                     
-                    layers_hit[tc->lay - 1] = true;
+                    layers_hit[tc->lay - 1]++;
 
                     if ( tc->lay ==1 ||tc->lay ==3||tc->lay ==5||tc->lay ==7 ) {
                         if ( tc->straw%2 ==0 ) {
@@ -335,7 +335,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         }
         
         printf("%d: ", e);
-        for (int ll =0 ;ll < 8; ll++)        printf("%d", layers_hit[ll]);
+        for (int ll =0 ;ll < 8; ll++)        printf("%d\t", layers_hit[ll]);
         printf("\n");
         // cout<<"***********\n\n"<<endl;
 

@@ -570,7 +570,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             }
         }
 
-        if ( SCI_CAL->sci_raw.totalNTDCHits ==1 ) {
+        if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
 
 
             vec_scihits =  ex_Scint_pileup ( SCI_CAL ) ;
@@ -683,10 +683,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 ////////////////////////////////////////////////////////// Multiple entry rejection ///////////////////
                     if ( vec_leadTime.size() >1 ) {
                         for ( Int_t je = 0; je < vec_leadTime.size()-1; je++ ) {
+                           // cout<<vec_leadTime[je].layer<<"\t"<<vec_leadTime[je].channel<<"\t"<<vec_leadTime[je].leadTime<<endl;
                             if ( ( vec_leadTime[je + 1].layer ) == ( vec_leadTime[je].layer ) && ( vec_leadTime[je + 1].channel == vec_leadTime[je].channel ) && ( vec_leadTime[je + 1].leadTime == vec_leadTime[je].leadTime ) ) {
 
                                 vec_leadTime.erase ( vec_leadTime.begin() +je+1 );
                                 --je;
+                              //  cout<<"REPEATED"<<endl;
 
                             }
                         }
