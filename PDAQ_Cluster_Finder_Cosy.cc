@@ -595,6 +595,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             h->h_scint_mult_a->Fill ( vec_scihits.size() );
           //  printf("\nSIZE : %i\n",vec_scihits.size());
             scint_event+=vec_scihits.size();
+           // cout<<"**********"<<endl;
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
 
                 SciHit* sh = vec_scihits[sn];
@@ -609,6 +610,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
               //  h->h_hitmultiplicity1->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
                 //printf ( "\n SCINT : %lf\n",sh->leadTime );
+//cout<<  vec_scihits.size()<<"\t"<< STT_CAL->stt_cal.total_cal_NTDCHits<<endl;
 
                 for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                     SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
@@ -634,24 +636,22 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     }
                 }
 
-//cout<<"\n\n"<<endl;
 
-                bool good_layers = true;
-                for ( int c = 0; c < MAX_FT_TOTAL_LAYERS; c++ ) {
-                    if ( hitMultOnLayer[c] != 1 ) {
-                        good_layers = false;
-                        break;
-                    }
-                }
+//                 bool good_layers = true;
+//                 for ( int c = 0; c < MAX_FT_TOTAL_LAYERS; c++ ) {
+//                     if ( hitMultOnLayer[c] != 1 ) {
+//                         good_layers = false;
+//                         break;
+//                     }
+//                 }
                 int layerCounter = 0;
-// cout<<"check5"<<endl;
+
                 for ( int m = 0; m < MAX_FT_TOTAL_LAYERS; m++ ) {
                     if ( hitMultOnLayer[m] > 0 ) {
                         layerCounter++;
                     }
                 }
                 h->h_0LMultiplicity->Fill ( layerCounter );
-//                cout<<"check6"<<endl;
 
 //                if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
                 if ( layerCounter >0 ) {
@@ -676,7 +676,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                         }
                     }
-
+cout<<vec_leadTime.size()<<"\t";
                     std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
                     double doublehitdiff = 0;
 
@@ -693,7 +693,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             }
                         }
                     }
-
+cout<<vec_leadTime.size()<<endl;
 ////////////////////////////////////////////////////////// DT 500 ns window /////////////////////////////////////////
                     std::vector<SttHit> vec_leadTime_e;
                     int MultLayer[8];

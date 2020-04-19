@@ -298,10 +298,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                     }
                 }
                 if (trig_valid ==  false)trig_bck =0;
-//                if (trig_bck == trigger_nr) 
-//                     {
-//                         printf("%x %x\n", trig_bck,  trigger_nr);}
-//                else {printf("@@@@@@@@@@@ %x %x\n", trig_bck,  trigger_nr);}
+
             
                 queue_words += 4;                    
                 while ( !in_file.eof()) {
@@ -360,6 +357,7 @@ if (trig_bck == trigger_nr) {
                                     if ( tdc_id == 0x6400 ||tdc_id == 0x6410 ||tdc_id == 0x6411||tdc_id == 0x6420||tdc_id == 0x6430||tdc_id == 0x6431 ) {
                                         SttRawHit* a = stt_event->AddHit ( channel_nr );
                                         a->tdcid = tdc_id;
+                                        a->trigger_no = trigger_nr;
                                         a->leadTime = time;
                                         a->trailTime = 0;
                                         a->isRef = true;
@@ -373,11 +371,13 @@ if (trig_bck == trigger_nr) {
                                     else if ( tdc_id == 0x6500 ) {
                                         SciHit* s = sci_event->AddSciHit();
                                         s->tdcid = tdc_id;
+                                        //s->tdcid = trigger_nr;
                                         s->channel = channel_nr;
                                         s->leadTime = time;
                                         s->trailTime = ( time );
                                         s->isRef = true;
                                         RefTime[tdc_ptr-1] = refTime;
+                            
 
                                         //h_tdc_ref->Fill ( 7 );
                                         //printf("\tRef R: %f on channel %d on %x on %x tdcptr: %d\n", s->leadTime, channel_nr,  tdc_id, sub_id, tdc_ptr - 1);
@@ -406,6 +406,7 @@ if (trig_bck == trigger_nr) {
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
                                             SciHit* s = sci_event->AddSciHit();
                                             s->tdcid = tdc_id;
+                                           // s->tdcid = trigger_nr;
                                             s->channel = channel_nr;
                                             s->leadTime = lastRise;
                                             s->trailTime = ( time );
@@ -475,12 +476,17 @@ if (trig_bck == trigger_nr) {
                                             SttRawHit* a =
                                                 stt_event->AddHit ( channel_nr );
                                             a->tdcid = tdc_id;
+                                            a->trigger_no = trigger_nr;
                                             a->leadTime = lastRise;
                                             a->trailTime = ( time );
                                             a->tot = - ( a->leadTime - a->trailTime );
                                             a->isRef = false;
 
                                             lastRise = 0;
+                                            if (trigger_nr == 0x81077175)
+                                            {
+                                                printf("ch:%i\n",channel_nr );
+                                            }
 
                                             //printf("\tHit: %f on channel %d // on %x on %x\n", a->leadTime,channel_nr,tdc_id, sub_id);
                                         }

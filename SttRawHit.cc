@@ -9,6 +9,7 @@ ClassImp(SttRawHit)
 
     stt_tdc_event_sizes = 0;
     tdcid = 0;
+    trigger_no = 0;
     channel = 0;
     leadTime = 0;
     trailTime = 0;

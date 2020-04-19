@@ -133,6 +133,8 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
     TH1F* h_TRB_ref_diff =
         new TH1F ( "h_TRB_ref_diff", "h_TRB_ref_diff;Time diff [ns]", 600000,
                    -100000, 1000000 );
+    TH1F* h_LMult = new TH1F("h_LMult", "h_LMult;Multiplicity", 10, 0, 10);
+
 
     Long_t global_cnt = 0;
     // TH2F* h_TotVsChannel = new TH2F("TotVsChannel", "TotVsChannel", 1000,
@@ -254,8 +256,12 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     cal_hit->straw = tc->straw;
                     cal_hit->station = tc->mod;
 
-
-                    
+ //printf("Trig : %x\n",hit->trigger_no);
+// if (hit->trigger_no == 0x7c6c78ad)  81077175
+ if (hit->trigger_no == 0x81077175)
+{
+    printf("Evnt : %li  , TDC: %x , lay : %i, ch : %i,str:%i \n",e, cal_hit->tdcid,cal_hit->layer,hit->channel,cal_hit->straw);
+}
                     
 
                     if ( index < 3 ) {
@@ -335,12 +341,24 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         }
         
         printf("%d: ", e);
-        for (int ll =0 ;ll < 8; ll++)        printf("%d\t", layers_hit[ll]);
+        int mult =0;
+        for (int ll =0 ;ll < 8; ll++)
+        {
+            if (layers_hit[ll] > 0)
+            {
+                mult++;
+            }
+            printf("%d\t", layers_hit[ll]);
+        }
+        if (mult > 0){
+        h_LMult->Fill(mult);}
+//if (mult > 0 && mult < 8)cout<<e<<endl;       
         printf("\n");
         // cout<<"***********\n\n"<<endl;
 
     } // over events
     h_TRB_ref_diff->Write();
+    h_LMult->Write();
     PDAQ_tree->Write();
     Ttree->Close();
     cout << "Repeated entries  :" << repeat << "/" << All_repeat << endl;

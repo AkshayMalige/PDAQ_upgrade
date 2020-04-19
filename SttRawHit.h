@@ -10,6 +10,7 @@ class SttRawHit : public TObject
     int channel; // 0-49
     // int new_channel;
     UInt_t tdcid;
+    UInt_t trigger_no;
     int stt_tdc_event_sizes;
     double leadTime;
     double trailTime;
