@@ -527,7 +527,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             break;
         }
 
-        if ( i % 1000 == 0 ) {
+        if ( i % 10 == 0 ) {
             cout << "entry no. " << i << endl;
         }
         //cout<<"check0  "<<MAX_FT_TOTAL_LAYERS<<endl;
@@ -676,7 +676,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                         }
                     }
-cout<<vec_leadTime.size()<<"\t";
+//cout<<vec_leadTime.size()<<"\t";
                     std::sort ( vec_leadTime.begin(), vec_leadTime.end(), f_sttHitCompareLeadTime );
                     double doublehitdiff = 0;
 
@@ -693,7 +693,7 @@ cout<<vec_leadTime.size()<<"\t";
                             }
                         }
                     }
-cout<<vec_leadTime.size()<<endl;
+//cout<<vec_leadTime.size()<<endl;
 ////////////////////////////////////////////////////////// DT 500 ns window /////////////////////////////////////////
                     std::vector<SttHit> vec_leadTime_e;
                     int MultLayer[8];

@@ -92,6 +92,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     Int_t maximum = h_drifttime->GetBinContent ( h_drifttime->GetMaximumBin() );
     DTmin = h_drifttime->FindFirstBinAbove ( maximum/10,1 );
 
+    ofstream myfile;
+    myfile.open ("trk_trig.txt");
 
     cout<<"New  "<<maximum<<"\t"<<DTmin <<endl;
     std::vector<double> vec_DT_start;
@@ -157,6 +159,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_tot.push_back(vec_track_can[t].tot);
                     h_LayerDT[vec_track_can[t].layer-1]->Fill(a.drifttime);
                 }
+                myfile<< hex << vec_track_can[0].trigger_no<<endl;
+                printf("%x \n",vec_track_can[0].trigger_no);
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
 
@@ -205,7 +209,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             int bmin = axis->FindBin ( 0.0 );
             int bmax = axis->FindBin ( x );
             double drift_radius = ( h_LayerDT[s]->Integral ( bmin,bmax ) ) /C;
-            cout<<x<<"\t"<<drift_radius<<endl;
+           // cout<<x<<"\t"<<drift_radius<<endl;
             a1[x]=x;
             b1[x]=drift_radius;
         }
@@ -229,7 +233,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         int bmin = axis->FindBin ( 0.0 );
         int bmax = axis->FindBin ( x );
         double drift_radius = ( h_Cal_drifttime->Integral ( bmin,bmax ) ) /C;
-        cout<<x<<"\t"<<drift_radius<<endl;
+       // cout<<x<<"\t"<<drift_radius<<endl;
         a1[x]=x;
         b1[x]=drift_radius;
     }
@@ -242,7 +246,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         h_Cal_Ch_Dt[chh]->Write();
         h_Dt[chh]->Write();
     }
-    
+    myfile.close();
     PDAQ_tree->Write();
     Ttree->Close();
 

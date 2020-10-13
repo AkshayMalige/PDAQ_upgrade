@@ -216,7 +216,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 shit->isRef = scihit->isRef;
                 shit->leadTime = ( ( scihit->leadTime - tdc_ref[6] ) - scint_offset );
                 shit->trailTime = ( ( scihit->trailTime- tdc_ref[6] ) - scint_offset );
-
+//                 printf("%x , %lf \n",shit->tdcid,shit->leadTime );
             }
 
         }
@@ -255,6 +255,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     cal_hit->layer = tc->lay;
                     cal_hit->straw = tc->straw;
                     cal_hit->station = tc->mod;
+                    cal_hit->trigger_no = hit->trigger_no;
 
  //printf("Trig : %x\n",hit->trigger_no);
 // if (hit->trigger_no == 0x7c6c78ad)  81077175
@@ -340,7 +341,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
             }
         }
         
-        printf("%d: ", e);
+       // printf("%d: ", e);
         int mult =0;
         for (int ll =0 ;ll < 8; ll++)
         {
@@ -348,12 +349,12 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
             {
                 mult++;
             }
-            printf("%d\t", layers_hit[ll]);
+           // printf("%d\t", layers_hit[ll]);
         }
         if (mult > 0){
         h_LMult->Fill(mult);}
 //if (mult > 0 && mult < 8)cout<<e<<endl;       
-        printf("\n");
+//         printf("\n");
         // cout<<"***********\n\n"<<endl;
 
     } // over events
