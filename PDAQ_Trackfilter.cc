@@ -538,6 +538,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             sumLeadTime += vec_tracks.at ( d ).leadTime;
             //printf("tdc: %x ch: %i LT: %lf DT: %lf \n",vec_tracks[d]->tdcid,vec_tracks[d]->straw,vec_tracks[d]->leadTime,vec_tracks[d]->drifttime);
         }
+        printf("%x \n",vec_tracks.at(0).trigger_no);
         // printf("\n*********************\n");
 
         meanTime = sumLeadTime / vec_tracks.size();

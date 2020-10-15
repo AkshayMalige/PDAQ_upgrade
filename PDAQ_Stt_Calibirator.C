@@ -166,7 +166,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
         // percentage = (e*100)/nentries;
 
-        if ( e % 10000 == 0 ) {
+        if ( e % 2 == 0 ) {
             printf ( "%d\n", e );
         }
         if ( e == maxEvents ) {
@@ -256,13 +256,15 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     cal_hit->straw = tc->straw;
                     cal_hit->station = tc->mod;
                     cal_hit->trigger_no = hit->trigger_no;
-
- //printf("Trig : %x\n",hit->trigger_no);
+                    
+                    if(hit->trigger_no == 0x3ae8c9cc) printf("lay :%i str :%i\n",cal_hit->layer,cal_hit->straw);
+                    
+             //      if(hit->trigger_no == 0x3ae8a294) printf("Trig : %x\n",hit->trigger_no);
 // if (hit->trigger_no == 0x7c6c78ad)  81077175
- if (hit->trigger_no == 0x81077175)
-{
-    printf("Evnt : %li  , TDC: %x , lay : %i, ch : %i,str:%i \n",e, cal_hit->tdcid,cal_hit->layer,hit->channel,cal_hit->straw);
-}
+//  if (hit->trigger_no == 0x81077175)
+// {
+//     printf("Evnt : %li  , TDC: %x , lay : %i, ch : %i,str:%i \n",e, cal_hit->tdcid,cal_hit->layer,hit->channel,cal_hit->straw);
+// }
                     
 
                     if ( index < 3 ) {

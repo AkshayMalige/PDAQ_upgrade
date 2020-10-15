@@ -1,0 +1,101 @@
+#include <iostream>
+#include <fstream>
+#include <TGraph.h>
+#include <TCanvas.h>
+#include <TLegend.h>
+#include <vector>
+
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <vector>
+#include <TH1F.h>
+#include "TFile.h"
+#include <TGraph.h>
+#include <TLinearFitter.h>
+#include <TH2D.h>
+#include "TTree.h"
+#include <TNamed.h>
+#include <TObject.h>
+#include <math.h>
+#include <cmath>
+#include <algorithm>
+#include "TMultiGraph.h"
+
+using namespace std;
+
+
+bool check_tracks()
+{
+
+
+	TFile* outfile = new TFile ( "trigger.root", "RECREATE" );
+
+	TFile hard_file ( "tracking_out.root" );
+	TFile soft_file ( "Trig_f.root" );
+
+	TTree* hard_tree = ( TTree* ) hard_file.Get ( "t1" );
+	TTree* soft_tree = ( TTree* ) soft_file.Get ( "TRIG_tree" );
+	
+	hard_tree->Print();
+	soft_tree->Print();
+
+	std::vector<uint> vec_h_trigger;
+	std::vector<UInt_t> *vec_trigger =0;
+	UInt_t tr[1];
+	Float_t sp[1];
+	Float_t cs[1];
+
+	hard_tree->SetBranchAddress ( "tr", &tr );
+	hard_tree->SetBranchAddress ( "sp", &sp );
+	hard_tree->SetBranchAddress ( "cs", &cs );
+
+	soft_tree->SetBranchAddress("vec_trigger",&vec_trigger);
+
+	int hard_iev = (int)hard_tree->GetEntries() ;
+	int soft_iev = (int)soft_tree->GetEntries() ;
+	
+	cout << "number of hardware tracks:" << hard_iev << endl << endl;
+	cout << "number of software tracks:" << soft_iev << endl << endl;
+
+
+	TH1D * match	= new TH1D ("match","match",5,0,5);
+
+	bool fo=false;
+	bool fe=false;
+
+	for(int i=0; i< soft_iev; i++){
+		soft_tree->GetEntry(i);		
+		for(int j=0; j< hard_iev; j++){
+			hard_tree->GetEntry(j);
+			if(vec_trigger->at(0) == tr[0]){
+				//match->Fill(1);
+				fo = true;
+			}
+					
+		}
+		fo == true ? match->Fill(1) : match->Fill(2);
+		fo = false;
+	}
+
+	for(int i=0; i< hard_iev; i++){
+		hard_tree->GetEntry(i);	
+
+		printf("%x  %f  %f\n",tr[0],sp[0],cs[0]);	
+		for(int j=0; j< soft_iev; j++){
+			soft_tree->GetEntry(j);
+			if(vec_trigger->at(0) == tr[0]){
+				fe = true;
+
+			}		
+		}
+		fe == true ? fe = false : match->Fill(3);
+		fe = false;
+	}
+
+	outfile->cd();
+	match->Write();
+	outfile->Close();
+
+return true;
+}

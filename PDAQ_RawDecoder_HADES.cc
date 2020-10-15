@@ -406,7 +406,8 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         h_rise_fall->Fill(1);
                                         //                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
 
-                                        h_stt_tdc_leadTimes->Fill ( time -                                                     refTime );
+                                        if(trigger_nr == 0x3ae8c9cc) printf("ch :%i time :%lf\n",channel_nr,lastRise);
+                                        h_stt_tdc_leadTimes->Fill ( time - refTime );
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
                                             SciHit* s = sci_event->AddSciHit();
                                             s->tdcid = tdc_id;

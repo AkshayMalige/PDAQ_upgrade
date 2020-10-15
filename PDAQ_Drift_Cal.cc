@@ -26,6 +26,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     std::vector<double> vec_tdc_ch;
     std::vector<double> vec_plane;
 
+    std::vector<UInt_t> vec_trigger;
 
     TFile inFile ( intree );
     TTree* tree = ( TTree* ) inFile.Get ( "PDAQ_tree" );
@@ -54,6 +55,13 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     cout << "number of entries in tree:" << iev << endl << endl;
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
+    
+   // int trig_no;
+    UInt_t arr_trigger[1];
+    TFile* Trig_f = new TFile ( "Trig_f.root", "RECREATE" );
+    TTree* TRIG_tree = new TTree ( "TRIG_tree", "TRIG_tree" );
+   TRIG_tree->Branch ( "vec_trigger", "vec_trigger", &vec_trigger, 64000, 2);
+//     TRIG_tree->Branch ( "arr_trigger", "arr_trigger", arr_trigger, 64000, 2);
 
 
     PDAQ_tree->Branch ( "vec_Drifttime", &vec_o_test );
@@ -158,12 +166,17 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                     vec_plane.push_back (vec_track_can[t].plane);
                     vec_tot.push_back(vec_track_can[t].tot);
                     h_LayerDT[vec_track_can[t].layer-1]->Fill(a.drifttime);
+                   
                 }
-                myfile<< hex << vec_track_can[0].trigger_no<<endl;
-                printf("%x \n",vec_track_can[0].trigger_no);
+                
                 //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
-
+             vec_trigger.push_back( vec_track_can[0].trigger_no);
+                myfile<< hex << vec_track_can[0].trigger_no<<endl;
+                arr_trigger[0] = vec_track_can[0].trigger_no;
+                printf("%x \n",vec_track_can[0].trigger_no);
+                //trig_no = vec_track_can[0].trigger_no;
+            TRIG_tree->Fill();
 
             //cout<<vec_tracks.size()<<endl;
             SttTrackHit& b = stt_event->AddTrackHit();
@@ -179,18 +192,19 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             vec_straw.clear();
             vec_tot.clear();
             vec_plane.clear();
+            vec_trigger.clear();
 
         }
     }
 
     //h_Ch_Dt[1]->Draw();
     // h_Ch_Dta->Draw();
-    h_drifttime->Write();
-    h_Cal_drifttime->Write();
+//     h_drifttime->Write();
+//     h_Cal_drifttime->Write();
     
     for(int a=0; a<8; a++)
     {
-        h_LayerDT[a]->Write();
+      //  h_LayerDT[a]->Write();
     }
     
     for(int s=0; s<8; s++)
@@ -216,7 +230,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
         TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
         gDriftRadius->SetName ( Form("PDAQ_DR%i",s+1) );
-        gDriftRadius->Write();
+       // gDriftRadius->Write();
     }
 
     double C =0;
@@ -240,16 +254,21 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
     TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
     gDriftRadius->SetName ( "PDAQ_DR" );
-    gDriftRadius->Write();
+  //  gDriftRadius->Write();
 
     for ( int chh=0; chh<256; chh++ ) {
-        h_Cal_Ch_Dt[chh]->Write();
-        h_Dt[chh]->Write();
+     //   h_Cal_Ch_Dt[chh]->Write();
+     //   h_Dt[chh]->Write();
     }
-    myfile.close();
-    PDAQ_tree->Write();
-    Ttree->Close();
-
+//     myfile.close();
+//     PDAQ_tree->Write();
+//     Ttree->Close();
+    
+    Trig_f->cd();
+    TRIG_tree->Write();
+    Trig_f->Close();
+    
+    //TRIG_tree->Write();
     return kTRUE;
 
     ////////////////////

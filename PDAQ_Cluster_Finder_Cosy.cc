@@ -705,6 +705,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
                     bool high_tot=false;
+                    printf("Trig : %x \n",vec_leadTime.at(0).trigger_no);
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
 
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
@@ -718,12 +719,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             vec_leadTime_e.push_back ( vec_leadTime[jx] );
                             h->h_hitBlock->Fill ( 2 );
                             h->h_p_drifttimevstot->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
-                            if ( vec_leadTime[jx].tot>800 ) {
-                                high_tot=true;
-                            }
-                            // printf ( "STRAW: %x  %i  %i  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime );
+                            if ( vec_leadTime[jx].tot>800 ) high_tot=true;
+                            printf ( "IN: %x  %i  %i  %lf  %lf  %lf\n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime);
                         } else {
-
+                                printf ( "OUT: %x  %i  %i  %lf  %lf  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime );
                         }
                     }
                     //   if ( high_tot==true ) {
