@@ -705,7 +705,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
                     bool high_tot=false;
-                    printf("Trig : %x \n",vec_leadTime.at(0).trigger_no);
+                  //  printf("Trig : %x \n",vec_leadTime.at(0).trigger_no);
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
 
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
@@ -720,9 +720,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_hitBlock->Fill ( 2 );
                             h->h_p_drifttimevstot->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
                             if ( vec_leadTime[jx].tot>800 ) high_tot=true;
-                            printf ( "IN: %x  %i  %i  %lf  %lf  %lf\n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime);
+                         //   printf ( "IN: %x  %i  %i  %lf  %lf  %lf\n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime);
                         } else {
-                                printf ( "OUT: %x  %i  %i  %lf  %lf  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime );
+                               // printf ( "OUT: %x  %i  %i  %lf  %lf  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime );
                         }
                     }
                     //   if ( high_tot==true ) {
@@ -1085,12 +1085,24 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     if ( CSmult3>0 ) {
                         h->h_Corr_Channel_Mult->Fill ( CSmult3 );
                     }
-
+                  if ( vec_corridor.size() >= min_track_hits && CLmult3==8 ) {
+                        printf("trig: %x, size : %i \n",vec_corridor[0].trigger_no,vec_corridor.size());
+                        if(vec_corridor[0].trigger_no==0x3ae91e74){
+                            for(int ut =0; ut<vec_corridor.size(); ut++){
+                                cout<<vec_corridor[ut].layer<<"\t"<<vec_corridor[ut].straw<<"\t"<<vec_corridor[ut].leadTime<<endl;
+                                
+                            }
+                            cout<<"\n\n"<<endl;
+                        }
+                    }
                     //cout<<"SIZE  : "<<vec_stthits.size()<<endl;
                     if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
                         PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                         final_counter++;
                     }
+                    
+  
+                    
                     // }
                 }
             }

@@ -156,6 +156,8 @@ bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * 
         h->hx_const->Fill(trck_constant);
         h->hx_theeta->Fill(theta_X);
         
+        cout<< vec_dphits[0]->trigger_no <<"\t"<<trck_slope<<"\t"<<trck_constant<<endl;
+        
         double track_x[vec_dphits.size()];
        // if(f1->GetChisquare()>0.02) continue;
         h->hx_chi->Fill(f1->GetChisquare());
@@ -182,7 +184,9 @@ bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * 
             h->h_Dr_vs_dr[vec_dphits[k]->plane]->Fill(dradius*10,residue);
             h->h_plane_str_no[vec_dphits[k]->plane]->Fill(vec_dphits[k]->straw);
             h->h_dt_vs_dr[vec_dphits[k]->plane]->Fill(vec_dphits[k]->drifttime,residue);
-            if(residue < 0.6 && residue > -0.6){ h->h_Dt_vs_dr_Lay[vec_dphits[k]->layer-1]->Fill(vec_dphits[k]->drifttime,residue);          
+
+            if(residue < 0.6 && residue > -0.6){ 
+                h->h_Dt_vs_dr_Lay[vec_dphits[k]->layer-1]->Fill(vec_dphits[k]->drifttime,residue);          
             }
             
             double ini_sig = 0.015;
@@ -198,6 +202,7 @@ bool track_recon (int iev , histograms* h, TGraph* gDR[8] , int maxEvents,vec * 
 
            
         }
+        
         for (int a=0; a<16; a++)
         {
             myfile<<calc_chi[a]<<"\t";
@@ -310,10 +315,10 @@ Bool_t PDAQ_Res ( char* intree, char* outtree, int maxEvents )
     int iev = ( int ) tree->GetEntries();
     printf("\n Number of entries in the tree : %d \n",iev);
 
-    int no_of_it =7;
+    int no_of_it =1;
     
     TGraph* Dt_vs_drCrr[no_of_it];
-     TH2F* h_Dt_vs_dr_Lay_copy[8];
+    TH2F* h_Dt_vs_dr_Lay_copy[8];
 //     
 //     for(int a=0; a<no_of_it; a++)
 //     {

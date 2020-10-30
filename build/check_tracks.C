@@ -31,8 +31,8 @@ bool check_tracks()
 
 	TFile* outfile = new TFile ( "trigger.root", "RECREATE" );
 
-	TFile hard_file ( "tracking_out.root" );
-	TFile soft_file ( "Trig_f.root" );
+	TFile hard_file ( "48tracking_out.root" );
+	TFile soft_file ( "48Trig_f.root" );
 
 	TTree* hard_tree = ( TTree* ) hard_file.Get ( "t1" );
 	TTree* soft_tree = ( TTree* ) soft_file.Get ( "TRIG_tree" );
@@ -63,6 +63,11 @@ bool check_tracks()
 
 	bool fo=false;
 	bool fe=false;
+	
+    //	ofstream myfile0;
+    //	myfile0.open ("soft_dump.txt");
+   	ofstream myfile1;
+    	myfile1.open ("48hard_dump.txt");
 
 	for(int i=0; i< soft_iev; i++){
 		soft_tree->GetEntry(i);		
@@ -74,28 +79,20 @@ bool check_tracks()
 			}
 					
 		}
-		fo == true ? match->Fill(1) : match->Fill(2);
+		fo == true ? match->Fill(1) : match->Fill(10);
 		fo = false;
 	}
 
-	for(int i=0; i< hard_iev; i++){
-		hard_tree->GetEntry(i);	
-
-		printf("%x  %f  %f\n",tr[0],sp[0],cs[0]);	
-		for(int j=0; j< soft_iev; j++){
-			soft_tree->GetEntry(j);
-			if(vec_trigger->at(0) == tr[0]){
-				fe = true;
-
-			}		
-		}
-		fe == true ? fe = false : match->Fill(3);
-		fe = false;
+	for(int i=0; i< hard_iev ; i++){
+		hard_tree->GetEntry(i);
+		myfile1 << hex << tr[0]<<endl;
+		//myfile1<<hex<<tr[0]<<"\t"<<"slope :"<<sp[0]<<"\t"<<cs[0]<<endl;
 	}
 
 	outfile->cd();
 	match->Write();
 	outfile->Close();
+	myfile1.close();
 
 return true;
 }

@@ -231,9 +231,11 @@ std::vector<VecSttHit> clusterfinder ( VecSttHit vec_flayer )
         clusterPointer.clear();
         clusterPointer.push_back ( vec_flayer[0] );
         vec_Cl.push_back ( clusterPointer );
+        cout<<vec_flayer[0].layer<<"\t"<<vec_flayer[0].straw<<endl;
         return vec_Cl;
     } else {
         for ( Int_t aa = 0; aa < vec_flayer.size(); aa++ ) {
+            cout<<vec_flayer[aa].layer<<"\t"<<vec_flayer[aa].straw<<endl;
             if ( aa < vec_flayer.size() - 1 ) {
                 if ( fabs ( vec_flayer[aa].straw - vec_flayer[aa + 1].straw ) < 2 ) {
                     clusterPointer.clear();
@@ -271,6 +273,45 @@ std::vector<VecSttHit> clusterfinder ( VecSttHit vec_flayer )
     }
 }
 
+
+
+// bool get_chi2_b(short track_straw[MAX_FT_TOTAL_LAYERS]){
+// //#pragma HLS latency min=500 max=2500
+// 	fit_info s;
+// 	float sums[4];
+// 	float XSqr =0,CriticalValue=0;
+// 	sums[0]= 0; //xsum
+// 	sums[1]= 0; //ysum
+// 	sums[2]= 0;	//m=0 x2sum
+// 	sums[3]= 0;	//c=0 xysum
+// 
+// 	short 	hit_index[MAX_FT_TOTAL_LAYERS]	=	{1,2,7,8,9,10,15,16};
+// 
+// 	for(short i=0; i < MAX_FT_TOTAL_LAYERS; i++){
+// 			sums[0]	+=	hit_index[i];
+// 			sums[1]	+=	track_straw[i];
+// 			sums[2]	+=	(hit_index[i]*hit_index[i]);
+// 			sums[3]	+=	(hit_index[i]*track_straw[i]);
+// //			std::cout<<sums[0]<<"\t"<<sums[1]<<"\t"<<sums[2]<<"\t"<<sums[3]<<"\t"<<std::endl;
+// 	}
+// 
+// 	s.slope = (MAX_FT_TOTAL_LAYERS * sums[3] - sums[0] * sums[1])/(MAX_FT_TOTAL_LAYERS * sums[2] - sums[0] * sums[0]);
+// 	s.constant = (sums[2] * sums[1] - sums[0] * sums[3])/(sums[2] * MAX_FT_TOTAL_LAYERS - sums[0] * sums[0]);
+// 
+// //	std::cout<<"xsum:"<<sums[0]<<"\t ysum :"<<sums[1]<<"\t x2sum:"<<sums[2]<<"\txysum:"<<sums[3]<<std::endl;
+// 
+// 	x_loop :for(short f=0; f<MAX_FT_TOTAL_LAYERS; f++){
+// #pragma HLS pipeline
+// 			XSqr = s.slope * track_straw[f] + s.constant - track_straw[f];    	//Observed[I] - Expected[I]
+// 			CriticalValue += ((XSqr * XSqr) / track_straw[f]);	//((XSqr * XSqr) / Expected[I])
+// 	}
+// 	s.chi2 = CriticalValue;
+// 
+// //	std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
+// 	return true;
+// }
+
+
 bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                          TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                          MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h )
@@ -281,6 +322,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     // vec_tracks[tq].leadTime ) ) ;
     for ( int ac=0; ac< vec_stthits.size(); ac++ ) {
         //h->h_tot3->Fill ( vec_stthits[ac].tot );
+// //         cout<<vec_stthits[ac].layer<<"\t"<<vec_stthits[ac].straw<<endl;
     }
     // 	printf("\n*********************\n");
     //}
@@ -309,6 +351,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         for ( int ss = 0; ss < vec_stthits.size(); ss++ ) {
             if ( vec_stthits[ss].layer == s ) {
                 vec_hitlayer.push_back ( vec_stthits[ss] );
+                cout<<"aa "<<s<<"-"<<ss<<"\t"<<vec_stthits[ss].layer<<"\t"<<vec_stthits[ss].straw<<endl;
             }
         }
         vec_layer.push_back ( vec_hitlayer );
@@ -349,7 +392,9 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             }
         } else if ( vec_layer[j].size() > 1 ) {
             vec_player = GetPairs ( vec_layer[j],h );
+            
         }
+        
         vec_pair_layer.push_back ( vec_player );
         vec_player.clear();
     }
@@ -360,6 +405,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     vec_clayer.clear();
 
     for ( int j = 0; j < vec_pair_layer.size(); j++ ) {
+        cout<<"No# pairs : "<<vec_pair_layer[j].size() <<endl;
         if ( vec_pair_layer[j].size() > 1 ) {
             VecSttHit vec_imi = vec_pair_layer[j];
             // cout<<"Layer "<< j+1<<endl;
@@ -466,7 +512,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 //             Double_t pp1 = f2->GetParameter ( 1 );
 //
 //             vec_PP0.push_back ( pp0 );
-//             vec_PP1.push_back ( pp1 );
+// //             vec_PP1.push_back ( pp1 );
 
             delete f1;
             // delete f2;
@@ -538,7 +584,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             sumLeadTime += vec_tracks.at ( d ).leadTime;
             //printf("tdc: %x ch: %i LT: %lf DT: %lf \n",vec_tracks[d]->tdcid,vec_tracks[d]->straw,vec_tracks[d]->leadTime,vec_tracks[d]->drifttime);
         }
-        printf("%x \n",vec_tracks.at(0).trigger_no);
+     //   printf("%x \n",vec_tracks.at(0).trigger_no);
         // printf("\n*********************\n");
 
         meanTime = sumLeadTime / vec_tracks.size();
@@ -555,10 +601,11 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         SttTrackHit& b = stt_event->AddTrackHit();
         b.vec_Track = vec_tracks;
         b.trackId = i;
-        b.trackSize = vec_tracks.size();
+        b.trackId = vec_tracks.size();
         b.Px0 = smallestP0;
         b.Px1 = smallestP1;
-
+        
+        cout<<b.trackId<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
 
         for ( Int_t tq = 0; tq < vec_tracks.size(); tq++ ) {
             h->h_tot4->Fill ( vec_tracks[tq].tot );

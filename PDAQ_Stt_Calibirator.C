@@ -257,7 +257,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     cal_hit->station = tc->mod;
                     cal_hit->trigger_no = hit->trigger_no;
                     
-                    if(hit->trigger_no == 0x3ae8c9cc) printf("lay :%i str :%i\n",cal_hit->layer,cal_hit->straw);
+                  //  if(hit->trigger_no == 0x3ae91e74) printf("lay :%i str :%i\n",cal_hit->layer,cal_hit->straw);
                     
              //      if(hit->trigger_no == 0x3ae8a294) printf("Trig : %x\n",hit->trigger_no);
 // if (hit->trigger_no == 0x7c6c78ad)  81077175
@@ -305,7 +305,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     if ( hit->tot > 0 ) {
                         good_counter++;
                     }
-                    // cout<<"check 1"<<endl;
+                  //  cout<<"check 1"<<endl;
 
                     if ( cal_hit->isRef == false && cal_hit->tdcid != 0xe103 ) {
 
