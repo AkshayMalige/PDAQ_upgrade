@@ -61,6 +61,9 @@ bool check_tracks()
 
 	TH1D * match	= new TH1D ("match","match",5,0,5);
 
+    TH1F* h_hard_slope = new TH1F ( "h_hard_slope", "h_hard_slope", 100, -5, 5 );
+    TH1F* h_hard_const = new TH1F ( "h_hard_const", "h_hard_const", 500, 0, 50 );
+
 	bool fo=false;
 	bool fe=false;
 	
@@ -86,11 +89,15 @@ bool check_tracks()
 	for(int i=0; i< hard_iev ; i++){
 		hard_tree->GetEntry(i);
 		myfile1 << hex << tr[0]<<endl;
+		h_hard_const->Fill(cs[0]);
+		h_hard_slope->Fill(sp[0]);
 		//myfile1<<hex<<tr[0]<<"\t"<<"slope :"<<sp[0]<<"\t"<<cs[0]<<endl;
 	}
 
 	outfile->cd();
 	match->Write();
+	h_hard_const->Write();
+	h_hard_slope->Write();
 	outfile->Close();
 	myfile1.close();
 

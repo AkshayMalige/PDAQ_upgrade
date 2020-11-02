@@ -8,6 +8,13 @@
 
 
 
+struct fit_info{
+	Double_t chi2;
+	Double_t slope;
+	Double_t constant;
+};
+//int MAX_FT_TOTAL_LAYERS =8;
+
 bool f_sttHitCompareLeadTime ( SttHit a, SttHit b )
 {
     return ( a.leadTime < b.leadTime );
@@ -275,41 +282,39 @@ std::vector<VecSttHit> clusterfinder ( VecSttHit vec_flayer )
 
 
 
-// bool get_chi2_b(short track_straw[MAX_FT_TOTAL_LAYERS]){
-// //#pragma HLS latency min=500 max=2500
-// 	fit_info s;
-// 	float sums[4];
-// 	float XSqr =0,CriticalValue=0;
-// 	sums[0]= 0; //xsum
-// 	sums[1]= 0; //ysum
-// 	sums[2]= 0;	//m=0 x2sum
-// 	sums[3]= 0;	//c=0 xysum
-// 
-// 	short 	hit_index[MAX_FT_TOTAL_LAYERS]	=	{1,2,7,8,9,10,15,16};
-// 
-// 	for(short i=0; i < MAX_FT_TOTAL_LAYERS; i++){
-// 			sums[0]	+=	hit_index[i];
-// 			sums[1]	+=	track_straw[i];
-// 			sums[2]	+=	(hit_index[i]*hit_index[i]);
-// 			sums[3]	+=	(hit_index[i]*track_straw[i]);
-// //			std::cout<<sums[0]<<"\t"<<sums[1]<<"\t"<<sums[2]<<"\t"<<sums[3]<<"\t"<<std::endl;
-// 	}
-// 
-// 	s.slope = (MAX_FT_TOTAL_LAYERS * sums[3] - sums[0] * sums[1])/(MAX_FT_TOTAL_LAYERS * sums[2] - sums[0] * sums[0]);
-// 	s.constant = (sums[2] * sums[1] - sums[0] * sums[3])/(sums[2] * MAX_FT_TOTAL_LAYERS - sums[0] * sums[0]);
-// 
-// //	std::cout<<"xsum:"<<sums[0]<<"\t ysum :"<<sums[1]<<"\t x2sum:"<<sums[2]<<"\txysum:"<<sums[3]<<std::endl;
-// 
-// 	x_loop :for(short f=0; f<MAX_FT_TOTAL_LAYERS; f++){
-// #pragma HLS pipeline
-// 			XSqr = s.slope * track_straw[f] + s.constant - track_straw[f];    	//Observed[I] - Expected[I]
-// 			CriticalValue += ((XSqr * XSqr) / track_straw[f]);	//((XSqr * XSqr) / Expected[I])
-// 	}
-// 	s.chi2 = CriticalValue;
-// 
-// //	std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
-// 	return true;
-// }
+fit_info get_chi2_b(short hls_straw[8]){
+	fit_info s;
+	double sums[4];
+	double XSqr =0,CriticalValue=0;
+	sums[0]= 0; //xsum
+	sums[1]= 0; //ysum
+	sums[2]= 0;	//m=0 x2sum
+	sums[3]= 0;	//c=0 xysum
+
+	short 	hit_index[8]	=	{1,2,7,8,9,10,15,16};
+
+	for(int i=0; i < 8; i++){
+			sums[0]	+=	hit_index[i];
+			sums[1]	+=	hls_straw[i];
+			sums[2]	+=	(hit_index[i]*hit_index[i]);
+			sums[3]	+=	(hit_index[i]*hls_straw[i]);
+//			std::cout<<sums[0]<<"\t"<<sums[1]<<"\t"<<sums[2]<<"\t"<<sums[3]<<"\t"<<std::endl;
+	}
+
+	s.slope = (8 * sums[3] - sums[0] * sums[1])/(8 * sums[2] - sums[0] * sums[0]);
+	s.constant = (sums[2] * sums[1] - sums[0] * sums[3])/(sums[2] * 8 - sums[0] * sums[0]);
+
+//	std::cout<<"xsum:"<<sums[0]<<"\t ysum :"<<sums[1]<<"\t x2sum:"<<sums[2]<<"\txysum:"<<sums[3]<<std::endl;
+
+	x_loop :for(int f=0; f<8; f++){
+			XSqr = s.slope * hls_straw[f] + s.constant - hls_straw[f];    	//Observed[I] - Expected[I]
+			CriticalValue += ((XSqr * XSqr) / hls_straw[f]);	//((XSqr * XSqr) / Expected[I])
+	}
+	s.chi2 = CriticalValue;
+
+	std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
+	return s;
+}
 
 
 bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
@@ -405,7 +410,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     vec_clayer.clear();
 
     for ( int j = 0; j < vec_pair_layer.size(); j++ ) {
-        cout<<"No# pairs : "<<vec_pair_layer[j].size() <<endl;
+      //  cout<<"No# pairs : "<<vec_pair_layer[j].size() <<endl;
         if ( vec_pair_layer[j].size() > 1 ) {
             VecSttHit vec_imi = vec_pair_layer[j];
             // cout<<"Layer "<< j+1<<endl;
@@ -472,15 +477,21 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 
             vec_All_X.push_back ( vec_ClustersX );
             vec_All_Y.push_back ( vec_ClustersY );
+            
+            cout<<"Sige:) : "<<vec_ClustersX.size()<<"\t"<<vec_ClustersX.size()<<endl;
 
             Double_t clusterArrayX[vec_ClustersX.size()];
             Double_t clusterArrayZx[vec_ClustersX.size()];
             Double_t clusterArrayY[vec_ClustersY.size()];
             Double_t clusterArrayZy[vec_ClustersY.size()];
+            
+            short hls_straw[8];
 
             for ( Int_t yb = 0; yb < vec_ClustersX.size(); yb++ ) {
                 clusterArrayX[yb] = vec_ClustersX[yb].x;
                 clusterArrayZx[yb] = vec_ClustersX[yb].z;
+                
+                hls_straw[yb] = vec_ClustersX[yb].straw;
                 // cout<<yb<<"\t"<<vec_ClustersX[yb]->x<<endl;
             }
 
@@ -491,14 +502,20 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             }
 
             TF1* f1 = new TF1 ( "f1", "pol1" );
-            // TF1* f2 = new TF1 ( "f2", "pol1" );
             TGraph* chiX = new TGraph ( vec_ClustersX.size(), clusterArrayX, clusterArrayZx );
             chiX->Fit ( f1, "q" );
-            chi_valueX = f1->GetChisquare();
+            
+/*            chi_valueX = f1->GetChisquare();
+            Double_t p0 = f1->GetParameter ( 0 );
+            Double_t p1 = f1->GetParameter ( 1 );*/   
+
+            chi_valueX  = get_chi2_b(hls_straw).chi2;
+            Double_t p0 = get_chi2_b(hls_straw).slope;
+            Double_t p1 = get_chi2_b(hls_straw).constant;
+                        
             vec_Chi2x.push_back ( chi_valueX );
 
-            Double_t p0 = f1->GetParameter ( 0 );
-            Double_t p1 = f1->GetParameter ( 1 );
+
 
             vec_P0.push_back ( p0 );
             vec_P1.push_back ( p1 );
@@ -605,7 +622,10 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         b.Px0 = smallestP0;
         b.Px1 = smallestP1;
         
-        cout<<b.trackId<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
+       // cout<<b.trackId<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
+        
+        h->h_soft_slope->Fill(smallestP0);
+        h->h_soft_const->Fill(smallestP1);
 
         for ( Int_t tq = 0; tq < vec_tracks.size(); tq++ ) {
             h->h_tot4->Fill ( vec_tracks[tq].tot );

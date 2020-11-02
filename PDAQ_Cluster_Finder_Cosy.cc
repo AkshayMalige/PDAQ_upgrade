@@ -1085,16 +1085,16 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     if ( CSmult3>0 ) {
                         h->h_Corr_Channel_Mult->Fill ( CSmult3 );
                     }
-                  if ( vec_corridor.size() >= min_track_hits && CLmult3==8 ) {
-                        printf("trig: %x, size : %i \n",vec_corridor[0].trigger_no,vec_corridor.size());
-                        if(vec_corridor[0].trigger_no==0x3ae91e74){
-                            for(int ut =0; ut<vec_corridor.size(); ut++){
-                                cout<<vec_corridor[ut].layer<<"\t"<<vec_corridor[ut].straw<<"\t"<<vec_corridor[ut].leadTime<<endl;
-                                
-                            }
-                            cout<<"\n\n"<<endl;
-                        }
-                    }
+//                   if ( vec_corridor.size() >= min_track_hits && CLmult3==8 ) {
+//                         printf("trig: %x, size : %i \n",vec_corridor[0].trigger_no,vec_corridor.size());
+//                         if(vec_corridor[0].trigger_no==0x3ae91e74){
+//                             for(int ut =0; ut<vec_corridor.size(); ut++){
+//                                 cout<<vec_corridor[ut].layer<<"\t"<<vec_corridor[ut].straw<<"\t"<<vec_corridor[ut].leadTime<<endl;
+//                                 
+//                             }
+//                             cout<<"\n\n"<<endl;
+//                         }
+//                     }
                     //cout<<"SIZE  : "<<vec_stthits.size()<<endl;
                     if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
                         PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
@@ -1110,7 +1110,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     } // End of loop over events
 
-    cout<<"CASE COUNT  "<<cases[0]<<endl;
+//    cout<<"CASE COUNT  "<<cases[0]<<endl;
     double maxbin =0;
     double DTmin =0;
     double dt_at_10=0;
@@ -1120,7 +1120,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 //     cout<< dt_at_10 - 100<<endl;
 //
-    cout<<"Plane Mult "<<pl2[0][0]<<"\t"<<pl2[0][1]<<"\t"<<pl2[7][0]<<"\t"<<pl2[7][1]<<endl;
+//    cout<<"Plane Mult "<<pl2[0][0]<<"\t"<<pl2[0][1]<<"\t"<<pl2[7][0]<<"\t"<<pl2[7][1]<<endl;
 
     h_STT_Hit_Diff->Write();
     h->h_cluster_size->Write();
@@ -1625,6 +1625,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 	h->h_High_TOT_Layer->SetLineColor(kOrange+1);
 	h->h_High_TOT_Layer->SetFillColor(kOrange+1);
     h->h_High_TOT_Layer->Write();
+    
+    
+    h->h_soft_slope->Write();
+    h->h_soft_const->Write();
 
     PDAQ_tree->Write();
     Ttree->Close();

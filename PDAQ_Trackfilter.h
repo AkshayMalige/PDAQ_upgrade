@@ -158,6 +158,9 @@ struct histograms{
     TH2F* h_CrossTalkDT_DT[3];
     TH1F* h_High_TOT_Layer = new TH1F ( "h_High_TOT_Layer", "h_High_TOT_Layer;Layer", 9, 0, 9 );
     TH1F* h_High_TOT_Ratio = new TH1F ( "h_High_TOT_Ratio", "h_High_TOT_Ratio;Layer", 2, 0, 2 );
+    
+    TH1F* h_soft_slope = new TH1F ( "h_soft_slope", "h_soft_slope", 100, -5, 5 );
+    TH1F* h_soft_const = new TH1F ( "h_soft_const", "h_soft_const", 500, 0, 50 );
    
     
 };
