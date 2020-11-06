@@ -507,7 +507,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     double repeat = 0;
     double All_repeat = 0;
     double scint_event =0;
-
+    
 
     SttHit* hitOnLayer[MAX_FT_TOTAL_LAYERS][5000];
 
@@ -1096,11 +1096,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //                         }
 //                     }
                     //cout<<"SIZE  : "<<vec_stthits.size()<<endl;
-                    if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
-                        PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+//                     if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
+//                         PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+//                         final_counter++;
+//                     }
+                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake) {
+                        PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                         final_counter++;
-                    }
-                    
+                    }                    
   
                     
                     // }
@@ -1626,9 +1629,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 	h->h_High_TOT_Layer->SetFillColor(kOrange+1);
     h->h_High_TOT_Layer->Write();
     
-    
-    h->h_soft_slope->Write();
-    h->h_soft_const->Write();
+
 
     PDAQ_tree->Write();
     Ttree->Close();

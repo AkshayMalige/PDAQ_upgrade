@@ -238,11 +238,13 @@ std::vector<VecSttHit> clusterfinder ( VecSttHit vec_flayer )
         clusterPointer.clear();
         clusterPointer.push_back ( vec_flayer[0] );
         vec_Cl.push_back ( clusterPointer );
-        cout<<vec_flayer[0].layer<<"\t"<<vec_flayer[0].straw<<endl;
+//         cout<<vec_flayer[0].layer<<"\t"<<vec_flayer[0].straw<<"\t"<<hex<<vec_flayer[0].trigger_no<<endl;
+        printf("trig: %x, lay : %i str : %i\n",vec_flayer[0].trigger_no,vec_flayer[0].layer,vec_flayer[0].straw);
         return vec_Cl;
     } else {
         for ( Int_t aa = 0; aa < vec_flayer.size(); aa++ ) {
-            cout<<vec_flayer[aa].layer<<"\t"<<vec_flayer[aa].straw<<endl;
+//             cout<<vec_flayer[aa].layer<<"\t"<<vec_flayer[aa].straw<<"\t"<<hex<<vec_flayer[0].trigger_no<<endl;
+            printf("trig: %x, lay : %i str : %i\n",vec_flayer[aa].trigger_no,vec_flayer[aa].layer,vec_flayer[aa].straw);
             if ( aa < vec_flayer.size() - 1 ) {
                 if ( fabs ( vec_flayer[aa].straw - vec_flayer[aa + 1].straw ) < 2 ) {
                     clusterPointer.clear();
@@ -312,14 +314,14 @@ fit_info get_chi2_b(short hls_straw[8]){
 	}
 	s.chi2 = CriticalValue;
 
-	std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
+//	std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
 	return s;
 }
 
 
 bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                          TTree* PDAQ_tree, Stt_Track_Event* stt_event,
-                         MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h )
+                         MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h)
 {
     //    printf("*** Event %d\n", i);
     // for ( Int_t tq=0; tq<vec_stthits.size(); tq++ ) {
@@ -356,7 +358,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         for ( int ss = 0; ss < vec_stthits.size(); ss++ ) {
             if ( vec_stthits[ss].layer == s ) {
                 vec_hitlayer.push_back ( vec_stthits[ss] );
-                cout<<"aa "<<s<<"-"<<ss<<"\t"<<vec_stthits[ss].layer<<"\t"<<vec_stthits[ss].straw<<endl;
+               // cout<<"aa "<<s<<"-"<<ss<<"\t"<<vec_stthits[ss].layer<<"\t"<<vec_stthits[ss].straw<<endl;
             }
         }
         vec_layer.push_back ( vec_hitlayer );
@@ -478,7 +480,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             vec_All_X.push_back ( vec_ClustersX );
             vec_All_Y.push_back ( vec_ClustersY );
             
-            cout<<"Sige:) : "<<vec_ClustersX.size()<<"\t"<<vec_ClustersX.size()<<endl;
+        //    cout<<"Sige:) : "<<vec_ClustersX.size()<<"\t"<<vec_ClustersX.size()<<endl;
 
             Double_t clusterArrayX[vec_ClustersX.size()];
             Double_t clusterArrayZx[vec_ClustersX.size()];
@@ -617,15 +619,15 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 
         SttTrackHit& b = stt_event->AddTrackHit();
         b.vec_Track = vec_tracks;
-        b.trackId = i;
-        b.trackId = vec_tracks.size();
+        b.trackSize = vec_tracks.size();
+        b.trackId = vec_tracks[0].trigger_no;
         b.Px0 = smallestP0;
         b.Px1 = smallestP1;
         
        // cout<<b.trackId<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
         
-        h->h_soft_slope->Fill(smallestP0);
-        h->h_soft_const->Fill(smallestP1);
+//         h->h_soft_slope->Fill(smallestP0);
+//         h->h_soft_const->Fill(smallestP1);
 
         for ( Int_t tq = 0; tq < vec_tracks.size(); tq++ ) {
             h->h_tot4->Fill ( vec_tracks[tq].tot );

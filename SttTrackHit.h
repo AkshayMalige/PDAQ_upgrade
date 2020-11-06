@@ -27,7 +27,7 @@ class SttTrackHit : public TObject
 
     std::vector<SttHit> vec_Track;
 
-    double trackId;
+    UInt_t trackId;
     double trackSize;
     double Px0;
     double Px1;
