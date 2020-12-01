@@ -56,12 +56,10 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
     
-   // int trig_no;
-//     UInt_t arr_trigger[1];
-  // TFile* Trig_f = new TFile ( "48Trig_f.root", "RECREATE" );
- //  TTree* TRIG_tree = new TTree ( "TRIG_tree", "TRIG_tree" );
- //  TRIG_tree->Branch ( "vec_trigger", "vec_trigger", &vec_trigger, 64000, 2);
- //  TRIG_tree->Branch ( "arr_trigger", "arr_trigger", arr_trigger, 64000, 2);
+   int trig_no;
+  TFile* Trig_f = new TFile ( "48Trig_f.root", "RECREATE" );
+  TTree* TRIG_tree = new TTree ( "TRIG_tree", "TRIG_tree" );
+  TRIG_tree->Branch ( "vec_trigger", "vec_trigger", &vec_trigger, 64000, 2);
 
 
     PDAQ_tree->Branch ( "vec_Drifttime", &vec_o_test );
@@ -181,8 +179,8 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                 myfile<< hex << track_hit.trackId<<"\t"<<track_hit.Px0<<"\t"<<track_hit.Px1<<endl;
                 h_soft_slope->Fill(track_hit.Px0);
                 h_soft_const->Fill(track_hit.Px1);
-                //trig_no = vec_track_can[0].trigger_no;
-                //TRIG_tree->Fill();
+                trig_no = vec_track_can[0].trigger_no;
+                TRIG_tree->Fill();
 
             //cout<<vec_tracks.size()<<endl;
             SttTrackHit& b = stt_event->AddTrackHit();
@@ -205,15 +203,15 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
   //  h_Ch_Dt[1]->Draw();
    // h_Ch_Dta->Draw();
-    h_drifttime->Write();
-    h_Cal_drifttime->Write();
-      
-    h_soft_slope->Write();
-    h_soft_const->Write();
+//     h_drifttime->Write();
+//     h_Cal_drifttime->Write();
+//       
+//     h_soft_slope->Write();
+//     h_soft_const->Write();
     
     for(int a=0; a<8; a++)
     {
-      h_LayerDT[a]->Write();
+   //   h_LayerDT[a]->Write();
     }
     
     for(int s=0; s<8; s++)
@@ -239,7 +237,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 
         TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
         gDriftRadius->SetName ( Form("PDAQ_DR%i",s+1) );
-        gDriftRadius->Write();
+      //  gDriftRadius->Write();
     }
 
     double C =0;
@@ -261,23 +259,22 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         b1[x]=drift_radius;
     }
 
-    TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
-    gDriftRadius->SetName ( "PDAQ_DR" );
-    gDriftRadius->Write();
+  //  TGraph* gDriftRadius = new TGraph ( 201, a1, b1 );
+  //  gDriftRadius->SetName ( "PDAQ_DR" );
+ //   gDriftRadius->Write();
 
-    for ( int chh=0; chh<256; chh++ ) {
-       h_Cal_Ch_Dt[chh]->Write();
-       h_Dt[chh]->Write();
-    }
+//     for ( int chh=0; chh<256; chh++ ) {
+//        h_Cal_Ch_Dt[chh]->Write();
+//        h_Dt[chh]->Write();
+//     }
 //     myfile.close();
-     PDAQ_tree->Write();
+//     PDAQ_tree->Write();
   //  Ttree->Close();
     
- //  Trig_f->cd();
-  // TRIG_tree->Write();
- //  Trig_f->Close();
-    
-    //TRIG_tree->Write();
+    Trig_f->cd();
+    TRIG_tree->Write();
+    Trig_f->Close();
+    TRIG_tree->Write();
     return kTRUE;
 
     ////////////////////

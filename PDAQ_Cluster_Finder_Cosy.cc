@@ -527,7 +527,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             break;
         }
 
-        if ( i % 10 == 0 ) {
+        if ( i % 1000 == 0 ) {
             cout << "entry no. " << i << endl;
         }
         //cout<<"check0  "<<MAX_FT_TOTAL_LAYERS<<endl;
@@ -569,6 +569,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 h->h_scint_timediffa->Fill ( B[a+1]->leadTime - B[a]->leadTime );
             }
         }
+        else if(B.size() ==1){h->h_scint_timediffa->Fill(0);}
 
         if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
 
@@ -606,15 +607,35 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 } else {
                     scint = false;
                 }
+                
+//                 cout<<"Bin : "<<int(fabs(sh->leadTime/2560))<<"\t"<<sh->leadTime<<endl;
+                if(int(fabs(sh->leadTime/2560))==0 || int(fabs(sh->leadTime/2560))==1){
+//                     cout<<"0\t"<<"0\t"<<endl;
+                    h->h_scint_bin->Fill(0);
+                    h->h_scint_bin->Fill(0);
+                    
+                }
+                else if(int(fabs(sh->leadTime/2560))==30 || int(fabs(sh->leadTime/2560))==31){
+//                     cout<<"14\t"<<"14\t"<<endl;
+                    h->h_scint_bin->Fill(14);
+                    h->h_scint_bin->Fill(14);
+                }
+                else{
+//                     cout<<int(fabs(sh->leadTime/2560)/2)<<"\t"<<int(fabs(sh->leadTime/2560)/2)-1<<endl;
+                    h->h_scint_bin->Fill(int(fabs(sh->leadTime/2560)/2));
+                    h->h_scint_bin->Fill(int(fabs(sh->leadTime/2560)/2)-1);
+                }
+                
+//                 
 //DT = straw - scint
 
               //  h->h_hitmultiplicity1->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
-                //printf ( "\n SCINT : %lf\n",sh->leadTime );
+               // printf ( "\n SCINT : %lf\t",sh->leadTime );
 //cout<<  vec_scihits.size()<<"\t"<< STT_CAL->stt_cal.total_cal_NTDCHits<<endl;
 
                 for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                     SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
-                 //   printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
+//                    printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
                     All_hit_counter++;
                     h->h_scint_timediff->Fill ( cal_hit->leadTime - sh->leadTime );
                     h->h_LTvsLayer0->Fill ( cal_hit->layer, cal_hit->leadTime );
@@ -1095,7 +1116,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //                             cout<<"\n\n"<<endl;
 //                         }
 //                     }
-                    //cout<<"SIZE  : "<<vec_stthits.size()<<endl;
+//                     cout<<"SIZE  : "<<vec_stthits.size()<<endl;
 //                     if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
 //                         PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
 //                         final_counter++;
@@ -1629,7 +1650,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 	h->h_High_TOT_Layer->SetFillColor(kOrange+1);
     h->h_High_TOT_Layer->Write();
     
-
+    h->h_scint_bin->Write();
+    h->h_pairs_in_lay->Write();
 
     PDAQ_tree->Write();
     Ttree->Close();

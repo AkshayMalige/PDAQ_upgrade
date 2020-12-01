@@ -88,8 +88,8 @@ struct histograms{
     TH2F* h_drifttimevsLayer = new TH2F("h_drifttimevsLayer", "h_drifttimevsLayer;Drift Time [ns];Layer", 360, -10, 350,20,0,10);
     
     TH1F* h_scint_timediff = new TH1F("h_scint_timediff", "h_scint_timediff;Number of hits", 100000, -50000, 50000);
-    TH1F* h_scint_timediffa = new TH1F("h_scint_timediffa", "h_scint_timediffa;Time Difference [ns]", 2000, 0, 2000);
-    TH1F* h_scint_timediffb = new TH1F("h_scint_timediffb", "h_scint_timediffb;Time Difference [ns]", 2000, 0, 2000);
+    TH1F* h_scint_timediffa = new TH1F("h_scint_timediffa", "h_scint_timediffa;Time Difference [ns]", 5000, 0, 50000);
+    TH1F* h_scint_timediffb = new TH1F("h_scint_timediffb", "h_scint_timediffb;Time Difference [ns]", 5000, 0, 50000);
 
     TH1F* h_raw_leadtimes = new TH1F("h_raw_leadtimes", "h_raw_leadtimes;", 100000, -100000, 0);
     
@@ -116,6 +116,8 @@ struct histograms{
     TH1F* h_PlaneMult = new TH1F("h_PlaneMult", "h_PlaneMult;Plane No.;Multiplicity", 18, 0, 18);
     
     TH1F* h_L_layerEff = new TH1F("h_L_layerEff", "h_L_layerEff;Layer No.;Probability", 10, 0, 10);
+    TH1F* h_scint_bin = new TH1F("h_scint_bin", "h_scint_bin;Bin No.", 32, 0, 32);
+    TH2F* h_pairs_in_lay = new TH2F("h_pairs_in_lay", "h_pairs_in_lay;Lay No.;#pairs", 8, 0, 8,50,0,50);
     
     TH2F* h_ppL_dtvstot[8];
     

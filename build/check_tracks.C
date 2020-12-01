@@ -31,7 +31,7 @@ bool check_tracks()
 
 	TFile* outfile = new TFile ( "compare_track.root", "RECREATE" );
 
-	TFile hard_file ( "48tracking_out.root" );
+	TFile hard_file ( "tracking_out.root" );
 	TFile soft_file ( "48Trig_f.root" );
 
 	TTree* hard_tree = ( TTree* ) hard_file.Get ( "t1" );
@@ -88,7 +88,7 @@ bool check_tracks()
 
 	for(int i=0; i< hard_iev ; i++){
 		hard_tree->GetEntry(i);
-		myfile1 << hex << tr[0]<<endl;
+		myfile1 << hex << tr[0]<<"\t"<<sp[0]<<"\t"<<cs[0]<<endl;
 		h_hard_const->Fill(cs[0]);
 		h_hard_slope->Fill(sp[0]);
 		//myfile1<<hex<<tr[0]<<"\t"<<"slope :"<<sp[0]<<"\t"<<cs[0]<<endl;

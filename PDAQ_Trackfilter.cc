@@ -239,12 +239,12 @@ std::vector<VecSttHit> clusterfinder ( VecSttHit vec_flayer )
         clusterPointer.push_back ( vec_flayer[0] );
         vec_Cl.push_back ( clusterPointer );
 //         cout<<vec_flayer[0].layer<<"\t"<<vec_flayer[0].straw<<"\t"<<hex<<vec_flayer[0].trigger_no<<endl;
-        printf("trig: %x, lay : %i str : %i\n",vec_flayer[0].trigger_no,vec_flayer[0].layer,vec_flayer[0].straw);
+    //    printf("trig: %x, lay : %i str : %i\n",vec_flayer[0].trigger_no,vec_flayer[0].layer,vec_flayer[0].straw);
         return vec_Cl;
     } else {
         for ( Int_t aa = 0; aa < vec_flayer.size(); aa++ ) {
 //             cout<<vec_flayer[aa].layer<<"\t"<<vec_flayer[aa].straw<<"\t"<<hex<<vec_flayer[0].trigger_no<<endl;
-            printf("trig: %x, lay : %i str : %i\n",vec_flayer[aa].trigger_no,vec_flayer[aa].layer,vec_flayer[aa].straw);
+         //   printf("trig: %x, lay : %i str : %i\n",vec_flayer[aa].trigger_no,vec_flayer[aa].layer,vec_flayer[aa].straw);
             if ( aa < vec_flayer.size() - 1 ) {
                 if ( fabs ( vec_flayer[aa].straw - vec_flayer[aa + 1].straw ) < 2 ) {
                     clusterPointer.clear();
@@ -427,9 +427,12 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     int track_sanity = 0;
     for ( int da = 0; da < vec_cluster_layer.size(); da++ ) {
         if ( vec_cluster_layer[da].size() > 0 ) {
+//             cout<<vec_cluster_layer.at(da).size()<<endl;
+            h->h_pairs_in_lay->Fill(da,vec_cluster_layer.at(da).size());
             track_sanity++;
         }
     }
+  //  cout<<"++++++++++++"<<endl;
     if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
         const std::vector<std::vector<VecSttHit>> vectors = vec_cluster_layer;
 

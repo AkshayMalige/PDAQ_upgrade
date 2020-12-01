@@ -287,7 +287,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 //    printf("Decoding feild 3: %x\n",word);
                 word = readWord ( &in_file );
                 trigger_nr = word;
-                printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
+             //   printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
 
 //                 bool trig_valid = false;
 //                 UInt_t trig_bck =0;
@@ -406,7 +406,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         h_rise_fall->Fill(1);
                                         //                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
 
-                                       if(trigger_nr == 0x3ae8c9cc) printf("ch :%i time :%lf\n",channel_nr,lastRise);
+                                   //    if(trigger_nr == 0x3ae8c9cc) printf("ch :%i time :%lf\n",channel_nr,lastRise);
                                         h_stt_tdc_leadTimes->Fill ( time - refTime );
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
                                             SciHit* s = sci_event->AddSciHit();

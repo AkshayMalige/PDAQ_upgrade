@@ -174,9 +174,6 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         }
 
        // printf("Event ::   %i\n",e);
-        PDAQ_tree->Fill();
-        stt_event->CalClear();
-        sci_event->Clear();
 
 ///Loop to get TDC Ref's
         for ( int s = 0; s < STT->stt_raw.totalNTDCHits; s++ ) {
@@ -342,7 +339,10 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 }
             }
         }
-        
+        PDAQ_tree->Fill();
+        stt_event->CalClear();
+        sci_event->Clear();
+
        // printf("%d: ", e);
         int mult =0;
         for (int ll =0 ;ll < 8; ll++)
