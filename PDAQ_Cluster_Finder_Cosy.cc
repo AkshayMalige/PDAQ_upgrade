@@ -4,162 +4,6 @@
 
 using namespace std;
 
-std::vector<SttHit> effeciency ( std::vector<SttHit> A, histograms* h )
-{
-    std::vector<SttHit> vec_corr;
-    int MultLayer[8];
-    int ChHitsMult[8][32];
-    for ( int lb = 0; lb < 8; lb++ ) {
-        MultLayer[lb] = 0;
-        for ( int mb =0; mb< 32; mb++ ) {
-            ChHitsMult[lb][mb] = 0;
-        }
-    }
-
-    std::vector<SttHit> L1;
-    std::vector<SttHit> L8;
-    double arrayX[4];
-    double arrayZ[4];
-    double arrayZcoo[6] = {7.02,13.03, 19.04,37.05,43.06,49.07};
-
-    bool valid = false;
-    for ( int cr=0; cr<A.size(); cr++ ) {
-        MultLayer[A[cr].layer-1]++;
-        ChHitsMult[A[cr].layer-1][A[cr].straw-1]++;
-        if ( A[cr].layer==1 ) {
-            L1.push_back ( A[cr] );
-        }
-        if ( A[cr].layer==8 ) {
-            L8.push_back ( A[cr] );
-        }
-    }
-    std::sort ( L1.begin(), L1.end(), f_sttHitCompareCell );
-    std::sort ( L8.begin(), L8.end(), f_sttHitCompareCell );
-    if ( L1.size() ==2 && L8.size() ==2 && ( fabs ( L1[0].straw - L1[1].straw ) ) ==1 && ( fabs ( L8[0].straw - L8[1].straw ) ) ==1 ) {
-        valid = true;
-        // printf ( "L1 : %i  %i  L8 : %i  %i\n",L1[0].straw,L1[1].straw,L8[0].straw,L8[1].straw );
-        // printf ( "L1 : %f  %f  L8 : %f  %f\n",L1[0].z,L1[1].z,L8[0].z,L8[1].z );
-        arrayX[0]= L1[0].straw;
-        arrayX[1]= L1[1].straw;
-        arrayX[2]= L8[0].straw;
-        arrayX[3]= L8[1].straw;
-        arrayZ[0]= L1[0].z;
-        arrayZ[1]= L1[1].z;
-        arrayZ[2]= L8[0].z;
-        arrayZ[3]= L8[1].z;
-    } else {
-        valid = false;
-    }
-
-    if ( valid == true ) {
-        TF1* f1 = new TF1 ( "f1", "pol1" );
-        TGraph* cor = new TGraph ( 4, arrayX, arrayZ );
-        cor->Fit ( f1, "q" );
-        Double_t cnst = f1->GetParameter ( 0 );
-        Double_t slope = f1->GetParameter ( 1 );
-
-        // printf ( "Cnst : %f  Slope : %f\n",cnst,slope );
-        int ex[8];
-        for ( int x=0; x<8; x++ ) {
-            ex[x]=0;
-        }
-        ex[0]= arrayX[0];
-        ex[7]= arrayX[3];
-        if ( ( ( arrayX[0] == arrayX[2] ) || ( arrayX[0] == arrayX[3] ) ) && ( ( arrayX[1] == arrayX[2] ) || ( arrayX[1] == arrayX[3] ) ) ) {
-            for ( int a=1; a<7; a++ ) {
-                ex[a] = arrayX[0];
-            }
-
-        } else {
-            for ( int a=1; a<7; a++ ) {
-
-                ex[a] = ( ( arrayZcoo[a-1]-cnst ) /slope );
-
-
-            }
-        }
-
-        ex[1]=ex[1]+3;
-        ex[2]=ex[2]-3;
-        ex[5]=ex[5]+3;
-        ex[6]=ex[6]-3;
-
-        vec_corr.clear();
-        //cout<<A.size()<<"\t";
-        int MultPlane[16];
-        int sq_plane =0;
-        for ( int q=0; q<16; q++ ) {
-            MultPlane[q]=0;
-        }
-        for ( int s=0; s<A.size(); s++ ) {
-            if ( ( A[s].straw <= ex[A[s].layer-1]+2 ) && ( A[s].straw >= ex[A[s].layer-1]-2 ) ) {
-                sq_plane = ( A[s].layer-1 ) *2 +A[s].plane;
-                MultPlane[sq_plane]++;
-                MultLayer[A[s].layer-1]++;
-                ChHitsMult[A[s].layer-1][A[s].straw-1]++;
-                vec_corr.push_back ( A[s] );
-//                 cout<<A[s].layer<<"\t"<<A[s].plane<<endl;
-            }
-        }
-
-        // cout<<vec_corr.size()<<endl;
-
-        delete f1;
-        delete cor;
-
-        int mult = 0;
-        int layer_eff_count =0;
-        int layer_eff_count2 =0;
-
-        for ( int kb=0; kb<8; kb++ ) {
-            for ( int bk=0; bk<32; bk++ ) {
-                if ( ChHitsMult[kb][bk] >0 ) {
-                    layer_eff_count2++;
-                }
-            }
-        }
-        for ( int kb=0; kb<16; kb++ ) {
-            //cout<<MultPlane[kb]<<endl;
-            if ( MultPlane[kb]>0 ) {
-                layer_eff_count++;
-            }
-        }
-        h->h_Layer_effPlane->Fill ( layer_eff_count -4 );
-        h->h_Layer_effStraw->Fill ( layer_eff_count2 -4 );
-
-    }
-
-    return vec_corr;
-}
-
-
-long fact ( int n )
-{
-    unsigned long long factorial = 1;
-    for ( int i = 1; i <=n; ++i ) {
-        factorial *= i;
-    }
-    return factorial;
-}
-
-std::vector<float> eff_job ( double ax )
-{
-
-    std::vector<float> A;
-    double probability =0;
-    double sum =0;
-    for ( int a=0; a<16; a++ ) {
-        probability = ( ( fact ( 12 )  / ( fact ( a ) * fact ( 12-a ) ) )    * pow ( ax,a ) * pow ( ( 1-ax ),12-a ) );
-        sum += probability;
-        // cout<<a<<"\t"<<probability*100<<endl;
-        A.push_back ( probability );
-
-
-    }
-
-    // cout<<"Sum "<<sum<<endl;
-    return A;
-}
 
 std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
 {
@@ -630,12 +474,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //DT = straw - scint
 
               //  h->h_hitmultiplicity1->Fill ( STT_CAL->stt_cal.total_cal_NTDCHits );
-               // printf ( "\n SCINT : %lf\t",sh->leadTime );
+              //  printf ( "\n SCINT : %lf\n",sh->leadTime );
 //cout<<  vec_scihits.size()<<"\t"<< STT_CAL->stt_cal.total_cal_NTDCHits<<endl;
 
                 for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                     SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
-//                    printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
+                //   printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
                     All_hit_counter++;
                     h->h_scint_timediff->Fill ( cal_hit->leadTime - sh->leadTime );
                     h->h_LTvsLayer0->Fill ( cal_hit->layer, cal_hit->leadTime );
@@ -726,8 +570,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
                     bool high_tot=false;
-                  //  printf("Trig : %x \n",vec_leadTime.at(0).trigger_no);
+                    
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
+                    printf("DT : %lf \n",vec_leadTime[jx].leadTime - sh->leadTime);
 
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
@@ -848,280 +693,29 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     std::vector<SttHit> vec_L5S9;
                     vec_stthits.clear();
                     int sq_ch=0;
-                    //cout<<vec_leadTime_e.size() <<"\t"<<vec_leadTime_f.size() <<endl;
+                    
+                    cout<<"SIZE  : "<<vec_stthits.size()<<endl;
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
-                        // printf ( "TWO : %i  %i  %lf\n",vec_leadTime_f[jc].layer,vec_leadTime_f[jc].channel,vec_leadTime_f[jc].leadTime );
-                        vec_leadTime_f[jc].drifttime = vec_leadTime_f[jc].leadTime - sh->leadTime;
-                        vec_stthits.push_back ( vec_leadTime_f[jc] );
-                        h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
-                        h->h_L_TOT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].tot );
-                        h->h_L_dtvstot[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime,vec_leadTime_f[jc].tot );
-                        h->h_drifttime->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
-                        h->h_tot->Fill ( vec_leadTime_f[jc].tot );
-                        h->h_hitBlock->Fill ( 3 );
+                        if(vec_leadTime_f[jc].layer == 1 ||vec_leadTime_f[jc].layer == 4||vec_leadTime_f[jc].layer == 5||vec_leadTime_f[jc].layer == 8){
+                            vec_leadTime_f[jc].drifttime = vec_leadTime_f[jc].leadTime - sh->leadTime;
+                            vec_stthits.push_back ( vec_leadTime_f[jc] );
+                            h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
+                            h->h_drifttime->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
+                            h->h_tot->Fill ( vec_leadTime_f[jc].tot );
+                            h->h_hitBlock->Fill ( 3 );
 
-                        sq_ch = ( ( vec_leadTime_f[jc].layer-1 ) * 32 ) +vec_leadTime_f[jc].straw-1;
-                        h->h_Ch_Dt[sq_ch]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
-
-                        MultLayer2[vec_leadTime_f[jc].layer-1]++;
-                        ChHitsMult2[vec_leadTime_f[jc].layer-1][vec_leadTime_f[jc].straw-1]++;
-                        if ( vec_leadTime_f[jc].layer == 5 && vec_leadTime_f[jc].straw==9 ) {
-                            vec_L5S9.push_back ( vec_leadTime_f[jc] );
-                        }
-                        h->h_sq_ch->Fill ( sq_ch );
-                        h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
-
-                    }
-                    int mult2 = 0;
-                    int layer_eff_count2 =0;
-                    for ( int ab=0; ab<8; ab++ ) {
-                        if ( MultLayer2[ab]> 0 ) {
-                            mult2++;
-                        }
-                        h->h_LayerMult->Fill ( ab,MultLayer2[ab] );
-                        //printf("dt multiplicity%i \n",MultLayer2[ab]);
-                        for ( int bb=0; bb<32; bb++ ) {
-                            if ( ChHitsMult2[ab][bb] >0 ) {
-                                h->h_L_channel_mult[ab]->Fill ( bb,ChHitsMult2[ab][bb] );
-                                layer_eff_count2++;
-                            }
-                        }
-                    }
-                    if ( MultLayer2[0]>0 && MultLayer2[7]>0 ) {
-                        h->h_Layer_eff->Fill ( layer_eff_count2 );
-                        //cout<<"ONE "<<layer_eff_count<<endl;
-                    }
-                    h->h_LMultiplicity->Fill ( mult2 );
-
-                    if ( vec_L5S9.size() >1 ) {
-                        for ( int L=0; L<vec_L5S9.size()-1; L++ ) {
-                            h->h_L5_S9LTdiff->Fill ( vec_L5S9[L+1].leadTime - vec_L5S9[L].leadTime );
-                            //cout<<vec_L5S9.size() <<"\t"<<vec_L5S9[L+1].leadTime<<"\t"<<vec_L5S9[L].leadTime<<endl;
-                        }
-                    }
-
-                    int plane =0;
-                    int cell =0;
-                    int planeMult[16];
-                    int planeCount=0;
-                    for ( int a=0; a<16; a++ ) {
-                        planeMult[a]=0;
-                    }
-                    for ( int sw=0; sw<vec_stthits.size(); sw++ ) {
-                        if ( vec_stthits[sw].layer ==1 ||vec_stthits[sw].layer ==3||vec_stthits[sw].layer ==5||vec_stthits[sw].layer ==7 ) {
-                            if ( vec_stthits[sw].straw%2 ==0 ) {
-                                cell =0;
-                            } else {
-                                cell =1;
-                            }
-                        } else if ( vec_stthits[sw].layer ==2 ||vec_stthits[sw].layer ==4||vec_stthits[sw].layer ==6||vec_stthits[sw].layer ==8 ) {
-                            if ( vec_stthits[sw].straw%2 ==0 ) {
-                                cell =1;
-                            } else {
-                                cell =0;
-                            }
-                        }
-
-                        plane = ( vec_stthits[sw].layer-1 ) *2 +cell;
-                        planeMult[plane]++;
-                        h->h_drifttimevstot->Fill ( vec_stthits[sw].drifttime,vec_stthits[sw].tot );
-                    }
-                    for ( int bbx=0; bbx<16; bbx++ ) {
-                        if ( planeMult[bbx]>0 ) {
-                            planeCount++;
-                        }
-                    }
-                    //cout<<planeCount<<endl;
-                    if ( vec_stthits.size() >0 ) {
-                        h->h_PlaneMult->Fill ( planeCount );
-                        for ( int j=0; j<vec_stthits.size(); j++ ) {
-                            h->h_PlaneMult_Straw[planeCount-1]->Fill ( vec_stthits[j].straw,vec_stthits[j].layer );
-                            h->h_PlaneMult_DT_TOT[planeCount-1]->Fill ( vec_stthits[j].drifttime,vec_stthits[j].tot );
-                            //cout<<planeCount<<"\t"<<vec_stthits[j].layer<<"\t"<<vec_stthits[j].straw<<endl;
-                        }
-                    }
-
-                    std::vector<SttHit> vec_corridor;
-                    vec_corridor = effeciency ( vec_stthits ,h );
-                    if ( vec_corridor.size() >0 ) {
-                        plane_eff_cont ++;
-                    }
-
-                    for ( int b=0; b<8; b++ ) {
-                        bool pl0=false;
-                        bool pl1=false;
-                        for ( int a=0; a<vec_corridor.size(); a++ ) {
-                            if ( vec_corridor[a].layer ==b+1 ) {
-                                if ( vec_corridor[a].plane ==0 ) {
-                                    pl2[b][0]++;
-                                    pl0 =true;
-                                }
-                                if ( vec_corridor[a].plane ==1 ) {
-                                    pl2[b][1]++;
-                                    pl1 =true;
-                                }
-                                if ( pl0==true && pl1==true ) {
-                                    pl2[b][2]++;
-                                }
-                            }
-
+                            sq_ch = ( ( vec_leadTime_f[jc].layer-1 ) * 32 ) +vec_leadTime_f[jc].straw-1;
+                            h->h_Ch_Dt[sq_ch]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
+                            h->h_sq_ch->Fill ( sq_ch );
+                            h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
+                            
+                            cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<endl;
                         }
 
                     }
 
-                    for ( int hc=0; hc<8; hc++ ) {
-                        int sqq_ch=0;
-                        bool ch_hi =false;
-                        bool diff_1=false;
-                        bool diff_2=false;
-                        bool ch_p1=false;
-                        bool ch_p2=false;
-                        bool ch_m1=false;
-                        bool ch_m2=false;
 
-                        for ( int fc=0; fc<vec_corridor.size(); fc++ ) {
-                            if ( vec_corridor[fc].layer-1 == hc ) {
-                                sqq_ch = ( ( ( vec_corridor[fc].layer-1 ) * 32 ) +vec_corridor[fc].straw-1 )-1;
-                                if ( sqq_ch == High_ch[hc] ) {
-                                    ch_hi = true;
-                                }
-                                if ( sqq_ch == High_ch[hc]+1 ) {
-                                    ch_p1 = true;
-                                }
-                                if ( sqq_ch == High_ch[hc]+2 ) {
-                                    ch_p2 = true;
-                                }
-                                if ( sqq_ch == High_ch[hc]-1 ) {
-                                    ch_m1 = true;
-                                }
-                                if ( sqq_ch == High_ch[hc]-2 ) {
-                                    ch_m2 = true;
-                                }
-                                if ( sqq_ch == High_ch[hc]+1 || sqq_ch == High_ch[hc]-1 ) {
-                                    diff_1 = true;
-                                }
-                                if ( sqq_ch == High_ch[hc]+2 || sqq_ch == High_ch[hc]-2 ) {
-                                    diff_2 = true;
-                                }
-                            }
-                        }
-                        //cout<<ch_hi<<"\t"<<diff_1<<"\t"<<diff_2<<endl;
-                        if ( ch_hi==true && diff_2==true && diff_1==true ) {
-                            h->h_pChDiff[hc]->Fill ( 4 );
-                        } else if ( ch_hi==true && diff_2==false && diff_1==true ) {
-                            h->h_pChDiff[hc]->Fill ( 2 );
-                        } else if ( ch_hi==true && diff_1==false && diff_2==true ) {
-                            h->h_pChDiff[hc]->Fill ( 3 );
-                        } else if ( ch_hi==true  && diff_1==false && diff_2==false ) {
-                            h->h_pChDiff[hc]->Fill ( 1 );
-                        }
-
-                        if ( ( ch_hi==true && ch_m1==true && ch_p2 == true && ch_m2==false && ch_p1==false ) || ( ch_hi==true && ch_m1==false && ch_p2 == false && ch_m2==true && ch_p1==true ) ) {
-                            h->h_ChDiff[hc]->Fill ( 5 );
-                            //h->h_Cross_TOT[5]->
-                        }
-                        if ( ch_hi==true && ch_m2==true && ch_p2==true && ch_m1==false && ch_p1==false ) {
-                            h->h_ChDiff[hc]->Fill ( 4 );
-                        }
-                        if ( ( ch_hi==true && ch_m2==true && ch_m1==false && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p2==true && ch_m1==false && ch_p1==false && ch_m2==false ) ) {
-                            h->h_ChDiff[hc]->Fill ( 3 );
-                        }
-                        if ( ( ch_hi==true && ch_m1==true && ch_m2==true && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p1==true && ch_p2==true && ch_m1==false && ch_m2==false ) ) {
-                            h->h_ChDiff[hc]->Fill ( 2 );
-                        }
-                        if ( ch_hi==true && ch_m1==true && ch_p1==true && ch_m2==false && ch_p2==false ) {
-                            h->h_ChDiff[hc]->Fill ( 2 );
-                        }
-                        if ( ( ch_hi==true && ch_m1==true && ch_m2==false && ch_p1==false && ch_p2==false ) || ( ch_hi==true && ch_p1==true && ch_p2==false && ch_m1==false && ch_m2==false ) ) {
-                            h->h_ChDiff[hc]->Fill ( 1 );
-                        }
-                        if ( ch_hi==true && ch_m1==false && ch_m2==false && ch_p1==false && ch_p2==false ) {
-                            h->h_ChDiff[hc]->Fill ( 0 );
-                        }
-
-
-
-                        ch_hi=false;
-                        diff_1 = false;
-                        diff_2 = false;
-                        ch_p1=false;
-                        ch_p2=false;
-                        ch_m1=false;
-                        ch_m2=false;
-
-
-                    }
-
-                    int MultLayer3[8];
-                    int MultPlane3[16];
-                    int MultChannel3[300];
-                    int str_channel=0;
-                    int str_plane=0;
-                    for ( int w=0; w<8; w++ ) {
-                        MultLayer3[w]=0;
-                    }
-                    for ( int ww=0; ww<16; ww++ ) {
-                        MultPlane3[ww]=0;
-                    }
-                    for ( int www=0; www<300; www++ ) {
-                        MultChannel3[www]=0;
-                    }
-
-                    for ( int jk=0; jk<vec_corridor.size(); jk++ ) {
-                        MultLayer3[vec_corridor[jk].layer-1]++;
-                        str_plane = ( vec_corridor[jk].layer-1 ) *2 +vec_corridor[jk].plane;
-                        str_channel = ( ( ( vec_corridor[jk].layer-1 ) * 32 ) +vec_corridor[jk].straw-1 )-1;
-                        MultPlane3[str_plane]++;
-                        MultChannel3[str_channel]++;
-                        if (vec_corridor[jk].tot>800){
-                          h->h_High_TOT_Layer->Fill(vec_corridor[jk].layer);
-                        }
-                    }
-
-                    int CLmult3 = 0;
-                    int CPmult3 = 0;
-                    int CSmult3 = 0;
-                    for ( int ab=0; ab<8; ab++ ) {
-                        if ( MultLayer3[ab]> 0 ) {
-                            CLmult3++;
-                        }
-                    }
-                    for ( int abb=0; abb<16; abb++ ) {
-                        if ( MultPlane3[abb]> 0 ) {
-                            CPmult3++;
-                        }
-                    }
-                    for ( int abd=0; abd<300; abd++ ) {
-                        if ( MultChannel3[abd]> 0 ) {
-                            CSmult3++;
-                        }
-                    }
-
-                    if ( CLmult3>0 ) {
-                        h->h_Corr_Layer_Mult->Fill ( CLmult3 );
-                    }
-                    if ( CPmult3>0 ) {
-                        h->h_Corr_Plane_Mult->Fill ( CPmult3 );
-                    }
-                    if ( CSmult3>0 ) {
-                        h->h_Corr_Channel_Mult->Fill ( CSmult3 );
-                    }
-//                   if ( vec_corridor.size() >= min_track_hits && CLmult3==8 ) {
-//                         printf("trig: %x, size : %i \n",vec_corridor[0].trigger_no,vec_corridor.size());
-//                         if(vec_corridor[0].trigger_no==0x3ae91e74){
-//                             for(int ut =0; ut<vec_corridor.size(); ut++){
-//                                 cout<<vec_corridor[ut].layer<<"\t"<<vec_corridor[ut].straw<<"\t"<<vec_corridor[ut].leadTime<<endl;
-//                                 
-//                             }
-//                             cout<<"\n\n"<<endl;
-//                         }
-//                     }
-//                     cout<<"SIZE  : "<<vec_stthits.size()<<endl;
-//                     if ( vec_corridor.size() >= min_track_hits && vec_corridor.size() <= max_cluster_intake && CLmult3==8 ) {
-//                         PDAQ_Event_Finder ( vec_corridor, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-//                         final_counter++;
-//                     }
-                    if ( vec_stthits.size() >= min_track_hits && vec_stthits.size() <= max_cluster_intake) {
+                    if ( vec_stthits.size() >= 8 && vec_stthits.size() <= max_cluster_intake) {
                         PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                         final_counter++;
                     }                    
@@ -1282,82 +876,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     h->h_pLayer_eff->Write();
     h->h_sq_ch->Write();
-
-    double from_corridor_straw[30];
-    double index2[30];
-    double from_corridor[16];
-    double index[16];
-    std::vector<float> B;
-    std::vector<float> C;
-    B = eff_job ( 0.95 );
-
-
-    for ( int r=0; r<16; r++ ) {
-
-        from_corridor[r]= h->h_Layer_effPlane->GetBinContent ( r );
-        index[r] =r-1;
-        cout<<r<<"\t"<<from_corridor[r]<<"\t"<<index[r]<<endl;
-    }
-
-    for ( int rr =0; rr< 30; rr++ ) {
-        from_corridor_straw[rr]= h->h_Layer_effStraw->GetBinContent ( rr );
-        index2[rr] =rr-1;
-    }
-
-
-    C = eff_job ( pow ( from_corridor[13],0.08333 ) );
-
-    float from_90per[B.size()];
-    float from_95per[C.size()];
-    float from_90index[B.size()];
-    for ( int jh=0; jh<B.size(); jh++ ) {
-        from_90per[jh] = B[jh];
-        from_95per[jh] = C[jh];
-        from_90index[jh] = jh;
-    }
-
-    Eff->cd();
-
-    TGraph* gEffeciency2 = new TGraph ( 16, index , from_corridor );
-    //TGraph* gFrom90Data = new TGraph ( B.size(), from_90index , from_90per );
-    TGraph* gFrom95Data = new TGraph ( C.size(), from_90index , from_95per );
-
-    gEffeciency2->Draw ( "AB" );
-    gEffeciency2->SetFillColor ( kOrange+1 );
-    gEffeciency2->SetTitle ( "Plane Efficiency" );
-    gEffeciency2->GetXaxis()->SetTitle ( "Number of fired planes" );
-    gEffeciency2->GetXaxis()->SetTitleSize ( 0.050 );
-    gEffeciency2->GetXaxis()->SetLabelSize ( 0.055 );
-    gEffeciency2->GetYaxis()->SetLabelSize ( 0.055 );
-    gEffeciency2->GetYaxis()->SetRangeUser ( 0,1 );
-
-    double eff_perC = pow ( from_corridor[13],0.08333 );
-
-    gFrom95Data->SetMarkerStyle ( 23 );
-    gFrom95Data->SetMarkerColor ( kTeal-8 );
-    gFrom95Data->SetMarkerSize ( 2.5 );
-    gFrom95Data->Draw ( "same,P" );
-    gFrom95Data->GetYaxis()->SetRangeUser ( 0,1 );
-    gFrom95Data->GetXaxis()->SetRangeUser ( 0,15 );
-    gFrom95Data->Write();
-
-    Eff2->cd();
-    TGraph* gEffeciency = new TGraph ( 16, index2 , from_corridor_straw );
-    gEffeciency->Draw ( "AB" );
-    gEffeciency->SetFillColor ( kOrange+1 );
-    gEffeciency->SetTitle ( "Straw Efficiency" );
-    gEffeciency->GetXaxis()->SetTitle ( "Number of fired straws" );
-    gEffeciency->GetXaxis()->SetTitleSize ( 0.050 );
-    gEffeciency->GetXaxis()->SetLabelSize ( 0.055 );
-    gEffeciency->GetYaxis()->SetLabelSize ( 0.055 );
-    gEffeciency->GetYaxis()->SetRangeUser ( 0,1 );
-
-    h->h_PlaneMult->Scale ( 1/scint_event );
-    h->h_PlaneMult->GetXaxis()->SetTitleSize ( 0.050 );
-    h->h_PlaneMult->GetXaxis()->SetTitleSize ( 0.050 );
-    h->h_PlaneMult->GetXaxis()->SetLabelSize ( 0.055 );
-    h->h_PlaneMult->GetYaxis()->SetLabelSize ( 0.055 );
-    h->h_PlaneMult->Write();
 
 
     for ( int hh = 0; hh < 8; hh++ ) {
@@ -1553,10 +1071,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     LtDiffLow->Write();
     ChTOT->Write();
     ChDiff->Write();
-    Eff->Write();
-    Eff2->Write();
-    gEffeciency->Write();
-    gEffeciency2->Write();
+
     PlaneVsStraw->Write();
     PlaneDTTOT->Write();
 

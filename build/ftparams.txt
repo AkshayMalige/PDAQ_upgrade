@@ -53,5 +53,5 @@ nleadtime_window: Float_t 250 \
 
 ncluster_limit: Int_t 50 \
 
-ndrift_time_offset: Float_t 448 \
+ndrift_time_offset: Float_t 0 \
 

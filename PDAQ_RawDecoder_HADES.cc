@@ -251,7 +251,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
         // skip queue headers
         in_file.read ( ( char* ) &word, 4 );
         queue_size = word / 4;
-        //printf("\t Queue: size: %d\n", queue_size);
+    //    printf("\t Queue: size: %d\n", queue_size);
 
         if ( queue_size < 20 ) { // skipping empty queues
             in_file.ignore ( ( queue_size - 1 ) * 4 );
@@ -276,18 +276,20 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 // decode sub headers
                 word = readWord ( &in_file ); // sub_size
                 sub_size = word / 4;
-                //  printf("Decoding feild 1: %x\n",word);
+            //      printf("Decoding feild 1: %x\n",word);
                 // in_file.ignore(4);  // decoding
                 word = readWord ( &in_file );
                 decoding = word;
-                //   printf("Decoding feild 2: %x\n",word);
+            //       printf("Decoding feild 2: %x\n",word);
                 word = readWord ( &in_file ); // sub_id
                 sub_id = word & 0xffff;
                 // in_file.ignore(4);  // trigger nr
-                //    printf("Decoding feild 3: %x\n",word);
+             //       printf("Decoding feild 3: %x\n",word);
                 word = readWord ( &in_file );
                 trigger_nr = word;
-             //   printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
+                printf ( "Trigger : %x\n", trigger_nr );
+
+            //    printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
 
 //                 bool trig_valid = false;
 //                 UInt_t trig_bck =0;
@@ -301,15 +303,19 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 //                 }
 //                 if (trig_valid ==  false)trig_bck =0;
 
-            
+           //  printf("check 1 \n");
+                
                 queue_words += 4;                    
                 while ( !in_file.eof()) {
+                    
+                //    printf("check 2 \n");
+                 //   printf("%x\n", word);
 
                     word = readWord ( &in_file ); // tdc headers
-                    //printf("%x\n", word);
+               //     printf("%x\n", word);
                     tdc_size = ( word >> 16 ) & 0xffff; // tdc size
                     tdc_id = word & 0xffff;
-//                     printf("\tTDC: id: %x size: %d header: %x\n", tdc_id, tdc_size,word);
+                 //   printf("\tTDC: id: %x size: %d header: %x\n", tdc_id, tdc_size,word);
     
                     queue_words++;
                     tdc_words = 0;
@@ -321,14 +327,15 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                             in_file.ignore ( 4 );
                             queue_words++;
                         }
-                        // printf("trailer: queue:%d queue_words:%d\n", queue_size, queue_words);
-                        if ( queue_size == queue_words) {
+                      //  printf("trailer: queue:%x queue_words:%x\n", queue_size, queue_words);
+                        if ( queue_size == queue_words ) {
                             end_of_queue = true;
                         }
                         break;
 
                     } else {
-
+                    //    printf("check 3 \n");
+                       // if( tdc_size == 0) continue;
                         if ( (tdc_id >> 8) != 0x8b) {
                             tdc_ptr++;
 //                             printf("%i\n", tdc_ptr);
@@ -339,7 +346,6 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                             word = readWord ( &in_file );
                             tdc_words++;
                             queue_words++;
-                            //printf("%x\n", word);
 //                             printf("%x\n", ( ( word >> 28 ) & 0xf ));
 // if (trig_bck == trigger_nr) {
                             if ( ( ( word >> 28 ) & 0xf ) == 0x8 ) { // hit marker
@@ -348,15 +354,16 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                 fine = ( ( word >> 12 ) & 0x3ff );
                                 coarse = ( word & 0x7ff );
 
-//                                  printf("%x  %x  %x\n", word, word >> 11, ( word >> 11 ) & 0x1);
+                            //    printf("%x  %x  %x\n", word, word >> 11, ( word >> 11 ) & 0x1);
 
                                 h_stt_tdc_channels->Fill ( channel_nr );
 
                                 double time = ( double ) ( ( ( ( unsigned ) epoch ) << 11 ) * 5.0 );
                                 time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
-//                                 printf ( "%x\n", trigger_nr );
                                 if ( channel_nr == 0 ) { // ref time
                                     refTime = time;
+                                    
+                                    printf("tdc: %x  , reftime : %lf\n",tdc_id,refTime);
                                     if ( tdc_id == 0x6400 ||tdc_id == 0x6410 ||tdc_id == 0x6411||tdc_id == 0x6420||tdc_id == 0x6430||tdc_id == 0x6431 ) {
                                         SttRawHit* a = stt_event->AddHit ( channel_nr );
                                         a->tdcid = tdc_id;
@@ -383,7 +390,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                             
 
                                         //h_tdc_ref->Fill ( 7 );
-                                        //printf("\tRef R: %f on channel %d on %x on %x tdcptr: %d\n", s->leadTime, channel_nr,  tdc_id, sub_id, tdc_ptr - 1);
+                                      //  printf("\tSCINT Ref R: %f on channel %d on %x on %x tdcptr: %d\n", s->leadTime, channel_nr,  tdc_id, sub_id, tdc_ptr - 1);
 
                                     }
 
@@ -406,7 +413,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         h_rise_fall->Fill(1);
                                         //                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
 
-                                   //    if(trigger_nr == 0x3ae8c9cc) printf("ch :%i time :%lf\n",channel_nr,lastRise);
+                                      //  if ( tdc_id == 0x6500) printf("SCINT ch :%i time :%lf\n",channel_nr,lastRise);
                                         h_stt_tdc_leadTimes->Fill ( time - refTime );
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
                                             SciHit* s = sci_event->AddSciHit();
@@ -416,7 +423,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             s->leadTime = lastRise;
                                             s->trailTime = ( time );
                                             s->isRef = false;
-                                            //printf("0x6500:  %i\n",channel_nr);
+                                        //    printf("0x6500:  %i\n",channel_nr);
                                         }
                                     } else {
                                         // falling edge
@@ -493,7 +500,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 //                                                 printf("ch:%i\n",channel_nr );
 //                                             }
                                             h_rise_fall->Fill(2);
-                                            //printf("\tHit: %f on channel %d // on %x on %x\n", a->leadTime,channel_nr,tdc_id, sub_id);
+                                          //  printf("\tHit: %f on channel %d  of %x \n", a->leadTime,channel_nr,tdc_id);
                                         }
                                     }
                                 }
@@ -504,9 +511,10 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                 // tdc_id, sub_id);
                             }
 // }
+                            //   printf("\t SIZES:::: %d , %d  \n", tdc_words, tdc_size);
 
                             if ( tdc_words == tdc_size ) {
-                                //printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
+                           //     printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
                                 break;
                             }
 
@@ -535,7 +543,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
 //                                 printf("0-1:%lf  0-2:%lf  4-5:%lf  4-6:%lf  4-7:%lf  0-4:%lf\n",RefTime[0] - RefTime[1],RefTime[0] - RefTime[2],RefTime[4] - RefTime[5],RefTime[4] - RefTime[6],RefTime[4] - RefTime[7],RefTime[0] - RefTime[4]);
 //                                h_refTimeTDC[6]->Fill ( RefTime[0] - RefTime[4] );
-
+cout<<queue_words<<endl;
 
                 if ( end_of_queue == true ) {
 

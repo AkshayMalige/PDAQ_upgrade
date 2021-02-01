@@ -358,7 +358,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         for ( int ss = 0; ss < vec_stthits.size(); ss++ ) {
             if ( vec_stthits[ss].layer == s ) {
                 vec_hitlayer.push_back ( vec_stthits[ss] );
-               // cout<<"aa "<<s<<"-"<<ss<<"\t"<<vec_stthits[ss].layer<<"\t"<<vec_stthits[ss].straw<<endl;
+              //  cout<<"aa "<<s<<"-"<<ss<<"\t"<<vec_stthits[ss].layer<<"\t"<<vec_stthits[ss].straw<<endl;
             }
         }
         vec_layer.push_back ( vec_hitlayer );
@@ -433,7 +433,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
     }
   //  cout<<"++++++++++++"<<endl;
-    if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
+    if ( track_sanity >= 4 ) {
         const std::vector<std::vector<VecSttHit>> vectors = vec_cluster_layer;
 
         const auto tuples = make_tuples ( vectors );
@@ -474,8 +474,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                 } else {
                     vec_ClustersX.push_back ( vec_Clusters[ya] );
                     loneCounterX++;
-                    // printf("X : TDC :%x , Layer : %d , Straw : %d , X :
-                    // %lf\n",vec_Clusters[ya]->tdcid,vec_Clusters[ya]->layer,vec_Clusters[ya]->straw,vec_Clusters[ya]->x);
+                    // printf("X : TDC :%x , Layer : %d , Straw : %d , X : %lf\n",vec_Clusters[ya]->tdcid,vec_Clusters[ya]->layer,vec_Clusters[ya]->straw,vec_Clusters[ya]->x);
                 }
                 // printf("*****************\n\n");
             }
@@ -565,7 +564,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                 smallestP1 = vec_P1[ci];
             }
         }
-        // printf("smallest chix :%2.3f\n", smallestX);
+         printf("smallest chix :%2.3f\n", smallestX);
 
 //         Float_t smallestY = vec_Chi2y[0];
 //         Float_t smallestPP0 = vec_PP0[0];
@@ -589,10 +588,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 
         for ( Int_t ck = 0; ck < vec_All_X.at ( chi_indexX ).size(); ck++ ) {
             vec_tracks.push_back ( vec_All_X.at ( chi_indexX ).at ( ck ) );
-            // printf("Chi best : TDC :%x , Layer -%d , Straw -%d
-            // \n",vec_All_X.at ( chi_indexX ).at ( ck )->tdcid, vec_All_X.at (
-            // chi_indexX ).at ( ck )->layer,vec_All_X.at ( chi_indexX ).at ( ck
-            // )->straw);
+           //  printf("Chi best : TDC :%x , Layer -%d , Straw -%d\n",vec_All_X.at ( chi_indexX ).at ( ck )->tdcid, vec_All_X.at (chi_indexX ).at ( ck )->layer,vec_All_X.at ( chi_indexX ).at ( ck)->straw);
         }
         // printf("\n$$$$$$$$$$$$$$$$$$$$$$$$$\n");
 

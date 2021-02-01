@@ -119,6 +119,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         }
 
     }
+    cout<<"*****"<<endl;
 
 //     for ( int as=0; as<vec_DT_start.size(); as++ ) {
 //
@@ -133,7 +134,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         if ( i == maxEvents ) {
             break;
         }
-        if ( i % 1000 == 0 ) {
+        if ( i % 250 == 0 ) {
             cout<<i<<endl;
 
         }
