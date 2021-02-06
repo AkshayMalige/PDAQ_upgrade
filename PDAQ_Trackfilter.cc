@@ -433,6 +433,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
     }
   //  cout<<"++++++++++++"<<endl;
+    if (track_sanity >= 4 )  h->h_tracker_check->Fill(4);
     if ( track_sanity >= 4 ) {
         const std::vector<std::vector<VecSttHit>> vectors = vec_cluster_layer;
 
@@ -564,7 +565,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
                 smallestP1 = vec_P1[ci];
             }
         }
-         printf("smallest chix :%2.3f\n", smallestX);
+      //   printf("smallest chix :%2.3f\n", smallestX);
 
 //         Float_t smallestY = vec_Chi2y[0];
 //         Float_t smallestPP0 = vec_PP0[0];

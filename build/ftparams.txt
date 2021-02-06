@@ -51,7 +51,7 @@ nTrack_min_size: Int_t 16 \
 
 nleadtime_window: Float_t 250 \
 
-ncluster_limit: Int_t 50 \
+ncluster_limit: Int_t 60 \
 
-ndrift_time_offset: Float_t 0 \
+ndrift_time_offset: Float_t 40 \
 

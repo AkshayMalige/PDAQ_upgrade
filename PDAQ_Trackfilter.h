@@ -119,6 +119,8 @@ struct histograms{
     TH1F* h_scint_bin = new TH1F("h_scint_bin", "h_scint_bin;Bin No.", 32, 0, 32);
     TH2F* h_pairs_in_lay = new TH2F("h_pairs_in_lay", "h_pairs_in_lay;Lay No.;#pairs", 8, 0, 8,50,0,50);
     
+    TH1F* h_tracker_check = new TH1F("h_tracker_check", "h_tracker_check", 5, 0,5);
+    
     TH2F* h_ppL_dtvstot[8];
     
     TH1F* h_pL_layerDT[8];

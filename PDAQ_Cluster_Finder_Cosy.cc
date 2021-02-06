@@ -389,6 +389,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
         std::vector<SciHit*> vec_scihits;
 
+        
+        (SCI_CAL->sci_raw.totalNTDCHits ==0) ? h->h_tracker_check->Fill(0) : h->h_tracker_check->Fill(1);
+        if (SCI_CAL->sci_raw.totalNTDCHits >0 && STT_CAL->stt_cal.total_cal_NTDCHits >7 )  h->h_tracker_check->Fill(2);
+        
         if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
             h->h_scint_mult_b->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
         }
@@ -404,7 +408,6 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
             B.push_back ( b );
             h->h_scnt_plup_cnts->Fill ( 1 );
             h->h_ShitBlock->Fill ( 0 );
-
         }
 
         /////////////////////////////// scint diff ///////////////////////////////////////////////
@@ -479,7 +482,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
                 for ( int n = 0; n < STT_CAL->stt_cal.total_cal_NTDCHits; n++ ) {
                     SttHit* cal_hit = ( SttHit* ) STT_CAL->stt_cal.tdc_cal_hits->ConstructedAt ( n ); // retrieve particular hit
-                //   printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
+                  // printf ( "XXXXXX:TDC: %x  , Layer : %i, Straw : %i, LT: %lf\n",cal_hit->tdcid,cal_hit->layer,cal_hit->straw,cal_hit->leadTime );
                     All_hit_counter++;
                     h->h_scint_timediff->Fill ( cal_hit->leadTime - sh->leadTime );
                     h->h_LTvsLayer0->Fill ( cal_hit->layer, cal_hit->leadTime );
@@ -570,11 +573,12 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                         }
                     }
                     bool high_tot=false;
+                    int dt_cnt =0;
                     
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
-                    printf("DT : %lf \n",vec_leadTime[jx].leadTime - sh->leadTime);
+                   // printf("DT : %lf \n",vec_leadTime[jx].leadTime - sh->leadTime);
 
-                        if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
+                        if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <600 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
                             h->h_pL_dtvstot[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
@@ -586,11 +590,13 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_hitBlock->Fill ( 2 );
                             h->h_p_drifttimevstot->Fill ( vec_leadTime[jx].leadTime - sh->leadTime,vec_leadTime[jx].tot );
                             if ( vec_leadTime[jx].tot>800 ) high_tot=true;
+                            dt_cnt++;
                          //   printf ( "IN: %x  %i  %i  %lf  %lf  %lf\n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime);
                         } else {
                                // printf ( "OUT: %x  %i  %i  %lf  %lf  %lf \n",vec_leadTime[jx].tdcid,vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime , sh->leadTime,vec_leadTime[jx].leadTime - sh->leadTime );
                         }
                     }
+                    if (dt_cnt >7 )  h->h_tracker_check->Fill(3);
                     //   if ( high_tot==true ) {
 //                       cout<<"SIZE  : "<<vec_leadTime.size()<<endl;
 //                       for (int t=0; t<vec_leadTime.size(); t++){
@@ -694,7 +700,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     vec_stthits.clear();
                     int sq_ch=0;
                     
-                    cout<<"SIZE  : "<<vec_stthits.size()<<endl;
+                    //cout<<"SIZE  : "<<vec_stthits.size()<<endl;
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
                         if(vec_leadTime_f[jc].layer == 1 ||vec_leadTime_f[jc].layer == 4||vec_leadTime_f[jc].layer == 5||vec_leadTime_f[jc].layer == 8){
                             vec_leadTime_f[jc].drifttime = vec_leadTime_f[jc].leadTime - sh->leadTime;
@@ -709,14 +715,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_sq_ch->Fill ( sq_ch );
                             h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
                             
-                            cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<endl;
+                            //cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<endl;
                         }
 
                     }
 
 
                     if ( vec_stthits.size() >= 8 && vec_stthits.size() <= max_cluster_intake) {
-                        PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
+                            PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                         final_counter++;
                     }                    
   
@@ -1152,13 +1158,14 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
     for ( int y=0; y<2; y++ ) {
         h->h_CrossTalkCase[y]->Scale ( 1/final_counter );
-	h->h_CrossTalkCase[y]->SetLineWidth(3);
-	h->h_CrossTalkCase[y]->SetLineColor(kOrange+1);
-	h->h_CrossTalkCase[y]->SetFillColor(kOrange+1);
+        h->h_CrossTalkCase[y]->SetLineWidth(3);
+        h->h_CrossTalkCase[y]->SetLineColor(kOrange+1);
+        h->h_CrossTalkCase[y]->SetFillColor(kOrange+1);
         h->h_CrossTalkCase[y]->Write();
         h->h_CrossTalkDT_TOT[y]->Write();
         h->h_CrossTalkDT_DT[y]->Write();
     }
+    
     h->h_High_TOT_Layer->Scale(1/h->h_High_TOT_Layer->GetEntries());
 	h->h_High_TOT_Layer->SetLineWidth(3);
 	h->h_High_TOT_Layer->SetLineColor(kOrange+1);
@@ -1167,6 +1174,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     
     h->h_scint_bin->Write();
     h->h_pairs_in_lay->Write();
+    
+    //h->h_tracker_check->Scale(1/h->h_tracker_check->GetBinContent(1));
+    h->h_tracker_check->SetLineWidth(3);
+    h->h_tracker_check->Write();
 
     PDAQ_tree->Write();
     Ttree->Close();

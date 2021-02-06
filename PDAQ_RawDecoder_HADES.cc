@@ -113,9 +113,14 @@ void pd_init_hst()
 
 UInt_t readWord ( std::ifstream* in_file )
 {
-    UInt_t data4 = 0;
+	//printf("readWord\n");
+    UInt_t data4;
     UInt_t word = 0;
+    //printf("ptr: %p\n", in_file);
+    //printf("ptr: %x\n", in_file);
+//    printf("data ptr: %p\n", &data4);
     in_file->read ( ( char* ) &data4, 4 );
+    	//printf("word: %x\n", data4);
     word = ( ( data4 & 0xff ) << 24 ) | ( ( ( data4 >> 8 ) & 0xff ) << 16 ) |
            ( ( ( data4 >> 16 ) & 0xff ) << 8 ) | ( ( ( data4 >> 24 ) & 0xff ) );
     return word;
@@ -135,7 +140,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
     TH1F* h_rise_fall = new TH1F ( "h_rise_fall", "h_rise_fall", 3, 0, 3 );
 
     TH1F* h_refTimeTDC[6];
-    double RefTime[8];
+    double RefTime[16];
 
     for ( int r =0; r< 6; r++ ) {
         h_refTimeTDC[r] = new TH1F ( Form ( "ref_Time_TDC%d",r ), Form ( "ref_Time_TDC%d",r ),500,-2500,2500 );
@@ -276,15 +281,15 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 // decode sub headers
                 word = readWord ( &in_file ); // sub_size
                 sub_size = word / 4;
-            //      printf("Decoding feild 1: %x\n",word);
+                 // printf("Decoding feild 1: %x\n",word);
                 // in_file.ignore(4);  // decoding
                 word = readWord ( &in_file );
                 decoding = word;
-            //       printf("Decoding feild 2: %x\n",word);
+                   //printf("Decoding feild 2: %x\n",word);
                 word = readWord ( &in_file ); // sub_id
                 sub_id = word & 0xffff;
                 // in_file.ignore(4);  // trigger nr
-             //       printf("Decoding feild 3: %x\n",word);
+                    //printf("Decoding feild 3: %x\n",word);
                 word = readWord ( &in_file );
                 trigger_nr = word;
                 printf ( "Trigger : %x\n", trigger_nr );
@@ -307,15 +312,16 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 
                 queue_words += 4;                    
                 while ( !in_file.eof()) {
-                    
-                //    printf("check 2 \n");
+
+                    //printf("check 2 \n");
                  //   printf("%x\n", word);
 
                     word = readWord ( &in_file ); // tdc headers
+		    //printf("asdasdasd\n");
                //     printf("%x\n", word);
                     tdc_size = ( word >> 16 ) & 0xffff; // tdc size
                     tdc_id = word & 0xffff;
-                 //   printf("\tTDC: id: %x size: %d header: %x\n", tdc_id, tdc_size,word);
+                    //printf("\tTDC: id: %x size: %d header: %x\n", tdc_id, tdc_size,word);
     
                     queue_words++;
                     tdc_words = 0;
@@ -335,7 +341,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
                     } else {
                     //    printf("check 3 \n");
-                       // if( tdc_size == 0) continue;
+                        if( tdc_size == 0) continue;
                         if ( (tdc_id >> 8) != 0x8b) {
                             tdc_ptr++;
 //                             printf("%i\n", tdc_ptr);
@@ -343,7 +349,14 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
                         // loop over TDC data
                         while ( !in_file.eof() ) {
+
+
+
+
                             word = readWord ( &in_file );
+			//	printf("TELLG over tdc data: %d\n", in_file.tellg());
+
+
                             tdc_words++;
                             queue_words++;
 //                             printf("%x\n", ( ( word >> 28 ) & 0xf ));
@@ -363,7 +376,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                 if ( channel_nr == 0 ) { // ref time
                                     refTime = time;
                                     
-                                    printf("tdc: %x  , reftime : %lf\n",tdc_id,refTime);
+                         //           printf("tdc: %x  , reftime : %lf\n",tdc_id,refTime);
                                     if ( tdc_id == 0x6400 ||tdc_id == 0x6410 ||tdc_id == 0x6411||tdc_id == 0x6420||tdc_id == 0x6430||tdc_id == 0x6431 ) {
                                         SttRawHit* a = stt_event->AddHit ( channel_nr );
                                         a->tdcid = tdc_id;
@@ -371,7 +384,12 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         a->leadTime = time;
                                         a->trailTime = 0;
                                         a->isRef = true;
+			//		printf("TELLG before ref time: %d\n", in_file.tellg());
                                         RefTime[tdc_ptr-1] = refTime;
+				
+			//		printf("NEW REF TIME\n");
+			//		printf("TELLG after ref time: %d\n", in_file.tellg());
+
                                     }
 
 
@@ -388,7 +406,6 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         s->isRef = true;
                                         RefTime[tdc_ptr-1] = refTime;
                             
-
                                         //h_tdc_ref->Fill ( 7 );
                                       //  printf("\tSCINT Ref R: %f on channel %d on %x on %x tdcptr: %d\n", s->leadTime, channel_nr,  tdc_id, sub_id, tdc_ptr - 1);
 
@@ -413,7 +430,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         h_rise_fall->Fill(1);
                                         //                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
 
-                                      //  if ( tdc_id == 0x6500) printf("SCINT ch :%i time :%lf\n",channel_nr,lastRise);
+                                        //if ( tdc_id == 0x6500) printf("SCINT ch :%i time :%lf\n",channel_nr,lastRise);
                                         h_stt_tdc_leadTimes->Fill ( time - refTime );
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
                                             SciHit* s = sci_event->AddSciHit();
@@ -428,6 +445,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                     } else {
                                         // falling edge
                                         ///////////////////////(fabs(time-refTime)<100000) -> To reject the corrupted entries from the epoch counter/////////////
+                                        //if ( tdc_id == 0x6500) printf("SCINT ch :%i time :%lf\n",channel_nr,lastRise);
                                         if ( lastRise != 0 && (fabs(time-refTime)<100000)) { // only in case
                                             // there was a
                                             // rising to pair
@@ -484,6 +502,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             //         }
                                             //         doubleCntr1++;
                                             //     }
+			
 
                                             SttRawHit* a =
                                                 stt_event->AddHit ( channel_nr );
@@ -514,13 +533,20 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                             //   printf("\t SIZES:::: %d , %d  \n", tdc_words, tdc_size);
 
                             if ( tdc_words == tdc_size ) {
-                           //     printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
+
+                         //       printf("\t Sizes: queue: %d tdc:%d current queue:%d tdc:%d\n", queue_size, tdc_size, queue_words, tdc_words);
+			//	printf("TELLG over tdc data END AND BREAK: %d\n", in_file.tellg());
                                 break;
                             }
+
+
+			//	printf("TELLG over tdc data END: %d\n", in_file.tellg());
 
                         } // end of tdc data loop
                     }     // tdc select if
 
+
+			//printf("end of tdc\n");
                 } // end of loop over tdcs
 
                 //dummy comment
