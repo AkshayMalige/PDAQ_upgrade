@@ -120,6 +120,7 @@ struct histograms{
     TH2F* h_pairs_in_lay = new TH2F("h_pairs_in_lay", "h_pairs_in_lay;Lay No.;#pairs", 8, 0, 8,50,0,50);
     
     TH1F* h_tracker_check = new TH1F("h_tracker_check", "h_tracker_check", 5, 0,5);
+    TH1F* h_marker_check = new TH1F("h_marker_check", "h_marker_check", 6, 0,6);
     
     TH2F* h_ppL_dtvstot[8];
     

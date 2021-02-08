@@ -598,9 +598,28 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 //         }
         double sumLeadTime = 0;
         double meanTime = 0;
+        bool mark = true;
+        
+        for ( Int_t d = 0; d < vec_tracks.size(); d++ ) {
+            if (vec_tracks.at(d).marking == true ) {
+                mark = true;
+            }
+            else{
+                mark = false;
+                break;
+            } 
+        }
+        
+        if(mark == true) {
+            h->h_marker_check->Fill(1);
+        }
+        else{
+            h->h_marker_check->Fill(2);
+        }
 
         for ( Int_t d = 0; d < vec_tracks.size(); d++ ) {
             sumLeadTime += vec_tracks.at ( d ).leadTime;
+            
             //printf("tdc: %x ch: %i LT: %lf DT: %lf \n",vec_tracks[d]->tdcid,vec_tracks[d]->straw,vec_tracks[d]->leadTime,vec_tracks[d]->drifttime);
         }
      //   printf("%x \n",vec_tracks.at(0).trigger_no);

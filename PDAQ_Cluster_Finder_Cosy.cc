@@ -577,7 +577,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
                    // printf("DT : %lf \n",vec_leadTime[jx].leadTime - sh->leadTime);
-
+cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <600 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
@@ -715,10 +715,10 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_sq_ch->Fill ( sq_ch );
                             h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
                             
-                            //cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<endl;
+                           // cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
                         }
 
-                    }
+                    }cout<<"*******\n\n"<<endl;
 
 
                     if ( vec_stthits.size() >= 8 && vec_stthits.size() <= max_cluster_intake) {
@@ -1178,6 +1178,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     //h->h_tracker_check->Scale(1/h->h_tracker_check->GetBinContent(1));
     h->h_tracker_check->SetLineWidth(3);
     h->h_tracker_check->Write();
+    h->h_marker_check->Write();
 
     PDAQ_tree->Write();
     Ttree->Close();

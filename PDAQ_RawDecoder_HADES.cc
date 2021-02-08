@@ -273,6 +273,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
             int tdc_ptr=0;
 
             int trig_count =0;
+            bool marking = false;
 
             while ( !in_file.eof() ) {
                 double refTime = 0;
@@ -281,15 +282,17 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 // decode sub headers
                 word = readWord ( &in_file ); // sub_size
                 sub_size = word / 4;
-                 // printf("Decoding feild 1: %x\n",word);
+                printf("Decoding feild 1: %x\n",word);
                 // in_file.ignore(4);  // decoding
                 word = readWord ( &in_file );
                 decoding = word;
-                   //printf("Decoding feild 2: %x\n",word);
+                if(word == 0x20003) marking =true;// : false ; 
+                cout<<marking<<endl;
+                printf("Decoding feild 2: %x\n",word);
                 word = readWord ( &in_file ); // sub_id
                 sub_id = word & 0xffff;
                 // in_file.ignore(4);  // trigger nr
-                    //printf("Decoding feild 3: %x\n",word);
+                printf("Decoding feild 3: %x\n",word);
                 word = readWord ( &in_file );
                 trigger_nr = word;
                 printf ( "Trigger : %x\n", trigger_nr );
@@ -384,8 +387,10 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         a->leadTime = time;
                                         a->trailTime = 0;
                                         a->isRef = true;
-			//		printf("TELLG before ref time: %d\n", in_file.tellg());
+                                        a->marking = marking;
+                                        //printf("TELLG before ref time: %d\n", in_file.tellg());
                                         RefTime[tdc_ptr-1] = refTime;
+                                        cout<<a->marking<<endl;
 				
 			//		printf("NEW REF TIME\n");
 			//		printf("TELLG after ref time: %d\n", in_file.tellg());
@@ -512,6 +517,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             a->trailTime = ( time );
                                             a->tot = - ( a->leadTime - a->trailTime );
                                             a->isRef = false;
+                                            a->marking = marking;
 
                                             lastRise = 0;
 //                                             if (trigger_nr == 0x81077175)

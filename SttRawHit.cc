@@ -14,6 +14,7 @@ ClassImp(SttRawHit)
     leadTime = 0;
     trailTime = 0;
     tot = 0;
+    marking = false;
 
     isRef = false;
 }

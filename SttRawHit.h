@@ -15,6 +15,7 @@ class SttRawHit : public TObject
     double leadTime;
     double trailTime;
     double tot;
+    bool marking;
 
     bool isRef;
 
