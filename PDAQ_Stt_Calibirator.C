@@ -226,6 +226,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 shit->tdcid = scihit->tdcid;
                 shit->channel = scihit->channel;
                 shit->isRef = scihit->isRef;
+                shit->marking = scihit->marking;
                 //shit->leadTime = ( ( tdc_ref[0] -scihit->leadTime  ) - scint_offset );
                 //shit->trailTime = ( (tdc_ref[0] - scihit->trailTime ) - scint_offset );
                 shit->leadTime = ( ( scihit->leadTime - tdc_ref[6] ) - scint_offset );
@@ -272,6 +273,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                     cal_hit->straw = tc->straw;
                     cal_hit->station = tc->mod;
                     cal_hit->trigger_no = hit->trigger_no;
+                    cal_hit->marking = hit->marking;
                     
                   //  if(hit->trigger_no == 0x3ae91e74) printf("lay :%i str :%i\n",cal_hit->layer,cal_hit->straw);
                     

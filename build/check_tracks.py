@@ -11,12 +11,12 @@ import numpy as np
 import pandas as pd
 
 
-with open("48soft_dump.txt") as soft:
+with open("44854soft_dump.txt") as soft:
     soft_con = soft.read().splitlines()
 #print(len(soft_con))
 
 
-with open("48hard_dump.txt") as hard:
+with open("44854hard_dump.txt") as hard:
     hard_con = hard.read().splitlines()
 #print(len(hard_con))
 

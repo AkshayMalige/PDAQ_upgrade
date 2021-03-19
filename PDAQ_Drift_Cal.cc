@@ -50,16 +50,16 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     TFile* Ttree = new TFile ( outtree, "RECREATE" );
     TTree* PDAQ_tree = new TTree ( "PDAQ_tree", "PDAQ_tree" );
     PDAQ_tree->Branch ( "DT_TRACKS", "PandaSttTrack", &DT_TRACKS, 64000, 99 );
-    Ttree->cd();
+   // Ttree->cd();
     Int_t iev = ( Int_t ) tree->GetEntries();
     cout << "number of entries in tree:" << iev << endl << endl;
 
     cout << STT_TRACK->stt_track_can.total_track_NTDCHits << endl;
     
    int trig_no;
-  TFile* Trig_f = new TFile ( "48Trig_f.root", "RECREATE" );
-  TTree* TRIG_tree = new TTree ( "TRIG_tree", "TRIG_tree" );
-  TRIG_tree->Branch ( "vec_trigger", "vec_trigger", &vec_trigger, 64000, 2);
+ // TFile* Trig_f = new TFile ( "48Trig_f.root", "RECREATE" );
+ // TTree* TRIG_tree = new TTree ( "TRIG_tree", "TRIG_tree" );
+ // TRIG_tree->Branch ( "vec_trigger", "vec_trigger", &vec_trigger, 64000, 2);
 
 
     PDAQ_tree->Branch ( "vec_Drifttime", &vec_o_test );
@@ -171,7 +171,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                    
                 }
                 
-                //cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
+               // cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
              vec_trigger.push_back( track_hit.trackId);
                // myfile<< hex << vec_track_can[0].trigger_no<<endl;
@@ -181,12 +181,12 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                 h_soft_slope->Fill(track_hit.Px0);
                 h_soft_const->Fill(track_hit.Px1);
                 trig_no = vec_track_can[0].trigger_no;
-                TRIG_tree->Fill();
+//                 TRIG_tree->Fill();
 
             //cout<<vec_tracks.size()<<endl;
             SttTrackHit& b = stt_event->AddTrackHit();
             b.vec_Track = vec_tracks;
-            PDAQ_tree->Fill();
+             PDAQ_tree->Fill();
             stt_event->TrackClear();
             vec_tracks.clear();
             vec_o_test.clear();
@@ -210,10 +210,10 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 //     h_soft_slope->Write();
 //     h_soft_const->Write();
     
-    for(int a=0; a<8; a++)
-    {
+//     for(int a=0; a<8; a++)
+//     {
    //   h_LayerDT[a]->Write();
-    }
+//     }
     
     for(int s=0; s<8; s++)
     {
@@ -268,14 +268,13 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
 //        h_Cal_Ch_Dt[chh]->Write();
 //        h_Dt[chh]->Write();
 //     }
-//     myfile.close();
-//     PDAQ_tree->Write();
+   myfile.close();
+     PDAQ_tree->Write();
   //  Ttree->Close();
     
-    Trig_f->cd();
-    TRIG_tree->Write();
-    Trig_f->Close();
-    TRIG_tree->Write();
+ //   Trig_f->cd();
+ //   TRIG_tree->Write();
+ //   Trig_f->Close();
     return kTRUE;
 
     ////////////////////

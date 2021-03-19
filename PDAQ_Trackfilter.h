@@ -120,7 +120,7 @@ struct histograms{
     TH2F* h_pairs_in_lay = new TH2F("h_pairs_in_lay", "h_pairs_in_lay;Lay No.;#pairs", 8, 0, 8,50,0,50);
     
     TH1F* h_tracker_check = new TH1F("h_tracker_check", "h_tracker_check", 5, 0,5);
-    TH1F* h_marker_check = new TH1F("h_marker_check", "h_marker_check", 6, 0,6);
+    TH1F* h_marker_check = new TH1F("h_marker_check", "h_marker_check", 4, 0,4);
     
     TH2F* h_ppL_dtvstot[8];
     
@@ -164,8 +164,8 @@ struct histograms{
     TH1F* h_High_TOT_Layer = new TH1F ( "h_High_TOT_Layer", "h_High_TOT_Layer;Layer", 9, 0, 9 );
     TH1F* h_High_TOT_Ratio = new TH1F ( "h_High_TOT_Ratio", "h_High_TOT_Ratio;Layer", 2, 0, 2 );
     
-
-   
+    int track_mult=0;
+    TH1F* h_track_mult = new TH1F ( "h_track_mult", "h_track_mult;Mult", 5, 0, 5 );
     
 };
 
@@ -190,6 +190,8 @@ make_tuples(const std::vector<std::vector<VecSttHit>>& vectors);
 bool PDAQ_Event_Finder(VecSttHit vec_stthits, int i,
                        TTree* PDAQ_tree, Stt_Track_Event* stt_event,
                        MFTGeomPar* ftGeomPar, PandaSubsystemSCI* SCI_CAL,  histograms* h);
+
+bool check_marking(std::vector<SttHit> vec_stthits);
 
 #endif
 

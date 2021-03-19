@@ -10,6 +10,7 @@ ClassImp(SciHit)
     trailTime = 0;
     channel = 0;
     tdcid = 0;
+    marking = false;
 
     sci_tdc_event_sizes = 0;
 

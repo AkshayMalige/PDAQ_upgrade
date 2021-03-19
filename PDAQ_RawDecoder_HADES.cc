@@ -282,21 +282,22 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 // decode sub headers
                 word = readWord ( &in_file ); // sub_size
                 sub_size = word / 4;
-                printf("Decoding feild 1: %x\n",word);
+                //printf("Decoding feild 1: %x\t",word);
                 // in_file.ignore(4);  // decoding
                 word = readWord ( &in_file );
                 decoding = word;
-                if(word == 0x20003) marking =true;// : false ; 
-                cout<<marking<<endl;
-                printf("Decoding feild 2: %x\n",word);
+                if(word == 0x20003) marking =true;
+                //cout<<marking<<endl;
+                //printf("Decoding feild 2: %x\t",word);
                 word = readWord ( &in_file ); // sub_id
                 sub_id = word & 0xffff;
                 // in_file.ignore(4);  // trigger nr
-                printf("Decoding feild 3: %x\n",word);
+                //printf("Decoding feild 3: %x\n",word);
                 word = readWord ( &in_file );
                 trigger_nr = word;
-                printf ( "Trigger : %x\n", trigger_nr );
+//                 printf ( "Trigger : %x\n", trigger_nr );
 
+		//if(trigger_nr == 0x1174e2e4) break;//cout<<"*******************************************"<<endl;
             //    printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
 
 //                 bool trig_valid = false;
@@ -325,7 +326,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                     tdc_size = ( word >> 16 ) & 0xffff; // tdc size
                     tdc_id = word & 0xffff;
                     //printf("\tTDC: id: %x size: %d header: %x\n", tdc_id, tdc_size,word);
-    
+   			//printf("\t%x\n",tdc_id); 
                     queue_words++;
                     tdc_words = 0;
 
@@ -378,7 +379,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                 time += ( ( coarse * 5. ) - ( fine / 100.0 ) );
                                 if ( channel_nr == 0 ) { // ref time
                                     refTime = time;
-                                    
+                                    lastRise = 0;
                          //           printf("tdc: %x  , reftime : %lf\n",tdc_id,refTime);
                                     if ( tdc_id == 0x6400 ||tdc_id == 0x6410 ||tdc_id == 0x6411||tdc_id == 0x6420||tdc_id == 0x6430||tdc_id == 0x6431 ) {
                                         SttRawHit* a = stt_event->AddHit ( channel_nr );
@@ -390,7 +391,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                         a->marking = marking;
                                         //printf("TELLG before ref time: %d\n", in_file.tellg());
                                         RefTime[tdc_ptr-1] = refTime;
-                                        cout<<a->marking<<endl;
+                                        //cout<<a->marking<<endl;
 				
 			//		printf("NEW REF TIME\n");
 			//		printf("TELLG after ref time: %d\n", in_file.tellg());
@@ -433,8 +434,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             // printf("corrupt %lf  %lf %lf\n",lastRise,refTime,lastRise-refTime);
                                         }
                                         h_rise_fall->Fill(1);
-                                        //                                                                                 printf("%lf %lf %lf %x\n", time, refTime ,lastRise, tdc_id);
-
+                                        
                                         //if ( tdc_id == 0x6500) printf("SCINT ch :%i time :%lf\n",channel_nr,lastRise);
                                         h_stt_tdc_leadTimes->Fill ( time - refTime );
                                         if ( tdc_id == 0x6500 && channel_nr==1 ) {
@@ -445,16 +445,18 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             s->leadTime = lastRise;
                                             s->trailTime = ( time );
                                             s->isRef = false;
+                                            s->marking = marking;
                                         //    printf("0x6500:  %i\n",channel_nr);
                                         }
                                     } else {
                                         // falling edge
                                         ///////////////////////(fabs(time-refTime)<100000) -> To reject the corrupted entries from the epoch counter/////////////
-                                        //if ( tdc_id == 0x6500) printf("SCINT ch :%i time :%lf\n",channel_nr,lastRise);
+//                                         printf("LAST rise ch :%i time :%lf\n",channel_nr,lastRise);
                                         if ( lastRise != 0 && (fabs(time-refTime)<100000)) { // only in case
                                             // there was a
                                             // rising to pair
                                             bool doubleHit = false;
+                                       // printf("LAST rise ch :%i time :%lf\n",channel_nr,lastRise);
 
                                             /* for ( Int_t ui=0;
                                             ui<stt_event->totalNTDCHits; ui++ )
@@ -520,12 +522,14 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             a->marking = marking;
 
                                             lastRise = 0;
-//                                             if (trigger_nr == 0x81077175)
-//                                             {
-//                                                 printf("ch:%i\n",channel_nr );
-//                                             }
+                                             if (trigger_nr == 0x1174e2e4)
+                                             {
+                                                 printf("ch:%i\n",channel_nr );
+					          printf("\tHIT: %lf  %lf on channel %d  of %x marked %i\n", a->leadTime,a->trailTime,channel_nr,tdc_id,a->marking);
+
+                                             }
                                             h_rise_fall->Fill(2);
-                                          //  printf("\tHit: %f on channel %d  of %x \n", a->leadTime,channel_nr,tdc_id);
+                                           // printf("\tHIT: %lf  %lf on channel %d  of %x marked %i\n", a->leadTime,a->trailTime,channel_nr,tdc_id,a->marking);
                                         }
                                     }
                                 }
@@ -554,7 +558,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
 			//printf("end of tdc\n");
                 } // end of loop over tdcs
-
+//cout<<"****"<<endl;
                 //dummy comment
 
                 h_refTimeTRB1->Fill ( RefTime[0] - RefTime[1] );
@@ -575,7 +579,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
 //                                 printf("0-1:%lf  0-2:%lf  4-5:%lf  4-6:%lf  4-7:%lf  0-4:%lf\n",RefTime[0] - RefTime[1],RefTime[0] - RefTime[2],RefTime[4] - RefTime[5],RefTime[4] - RefTime[6],RefTime[4] - RefTime[7],RefTime[0] - RefTime[4]);
 //                                h_refTimeTDC[6]->Fill ( RefTime[0] - RefTime[4] );
-cout<<queue_words<<endl;
+//cout<<queue_words<<endl;
 
                 if ( end_of_queue == true ) {
 
@@ -588,9 +592,9 @@ cout<<queue_words<<endl;
 
                     N_events++;
 
-                    if ( N_events % 1000 == 0 ) {
+                   if ( N_events % 1000 == 0 ) {
                         printf ( "%d\n", N_events );
-                    }
+                   }
                     break;
                     //}
                 }

@@ -1,8 +1,13 @@
 #include "PDAQ_Cluster_Finder_Cosy.h"
 #include "math.h"
 #include <TPaveText.h>
+#include <cmath>
+
 
 using namespace std;
+
+
+
 
 
 std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
@@ -70,7 +75,7 @@ std::vector<SciHit*> ex_Scint_pileup ( PandaSubsystemSCI* SCI_CAL )
 
 std::vector<SttHit> ex_Stt_double ( std::vector<std::vector<SttHit>> vec_layer_channel_hit )
 {
-    int diff_limit = 500;
+    int diff_limit = 600;
     std::vector<SttHit> B;
     std::vector<SttHit> C;
 
@@ -367,12 +372,19 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         bool scint = false;
         bool stt = false;
 
-        if ( scint_event >= maxEvents ) {
-            break;
-        }
 
+
+        
         if ( i % 1000 == 0 ) {
-            cout << "entry no. " << i << endl;
+           cout << "entry no. " << i <<":\t"<<(i*100)/iev<<"%"<<endl;;
+            //std::cout << '.';
+            //std::flush(std::cout);
+
+          //  cout << i << " " << flush; 
+          //  this_thread::sleep_for(chrono::seconds(1)); 
+        }
+        if ( iev >= maxEvents ) {
+            break;
         }
         //cout<<"check0  "<<MAX_FT_TOTAL_LAYERS<<endl;
         memset ( hitOnLayer, 0, MAX_FT_TOTAL_LAYERS * 5000 * sizeof ( SttHit* ) );
@@ -392,6 +404,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         
         (SCI_CAL->sci_raw.totalNTDCHits ==0) ? h->h_tracker_check->Fill(0) : h->h_tracker_check->Fill(1);
         if (SCI_CAL->sci_raw.totalNTDCHits >0 && STT_CAL->stt_cal.total_cal_NTDCHits >7 )  h->h_tracker_check->Fill(2);
+        
         
         if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
             h->h_scint_mult_b->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
@@ -444,6 +457,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
           //  printf("\nSIZE : %i\n",vec_scihits.size());
             scint_event+=vec_scihits.size();
            // cout<<"**********"<<endl;
+            h->track_mult=0;
             for ( int sn = 0; sn < vec_scihits.size(); sn++ ) {
 
                 SciHit* sh = vec_scihits[sn];
@@ -576,8 +590,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     int dt_cnt =0;
                     
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
-                   // printf("DT : %lf \n",vec_leadTime[jx].leadTime - sh->leadTime);
-cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
+//                   	 if(vec_leadTime[jx].trigger_no == 0x1174e2e4) printf("Lay :%i  Str:%i  DT : %lf \n",vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime - sh->leadTime);
+//cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <600 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
                             h->h_pL_TOT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].tot );
@@ -715,21 +729,23 @@ cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
                             h->h_sq_ch->Fill ( sq_ch );
                             h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
                             
-                           // cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
+                             if(vec_leadTime_f[jc].trigger_no == 0x1174e2e4) cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
                         }
 
-                    }cout<<"*******\n\n"<<endl;
+                    }//cout<<"*******\n\n"<<endl;
 
 
                     if ( vec_stthits.size() >= 8 && vec_stthits.size() <= max_cluster_intake) {
                             PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
                         final_counter++;
+                        
+                        
                     }                    
   
                     
                     // }
                 }
-            }
+            }if(h->track_mult>0)h->h_track_mult->Fill(h->track_mult);
         }
 
     } // End of loop over events
@@ -1178,6 +1194,11 @@ cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
     //h->h_tracker_check->Scale(1/h->h_tracker_check->GetBinContent(1));
     h->h_tracker_check->SetLineWidth(3);
     h->h_tracker_check->Write();
+    
+    cout<<"tracks : "<<h->h_marker_check->GetBinContent(1)<<endl;
+    Float_t tot_events = (float)iev;
+    h->h_marker_check->Scale(1/tot_events);
+    h->h_track_mult->Write();
     h->h_marker_check->Write();
 
     PDAQ_tree->Write();

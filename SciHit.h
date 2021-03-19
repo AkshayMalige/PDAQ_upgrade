@@ -10,6 +10,7 @@ class SciHit : public TObject
     double trailTime;
     int channel;
     UInt_t tdcid;
+    bool marking;
 
     UInt_t sci_tdc_event_sizes;
 

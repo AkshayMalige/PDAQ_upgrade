@@ -25,6 +25,22 @@ bool f_sttHitCompareCell ( SttHit a, SttHit b )
     return ( a.straw < b.straw );
 }
 
+
+bool check_marking(std::vector<SttHit> vec_stthits)
+{
+    for(int a=0; a<vec_stthits.size(); a++){
+        if(vec_stthits.at(a).marking == false){
+            return false;
+            break;
+        }
+    }
+    return true;
+        
+}
+
+
+
+
 VecSttHit GetPairs ( VecSttHit vec_get_pairs ,histograms* h )
 {
     VecSttHit vec_fpair_clu;
@@ -545,7 +561,8 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         ////////////////////////////////////////////////////////////////////////////////////////
 
         std::vector<SttHit> vec_tracks;
-
+        vec_tracks.clear();
+        
         Float_t smallestX = vec_Chi2x[0];
         Float_t smallestP0 = vec_P0[0];
         Float_t smallestP1 = vec_P1[0];
@@ -600,23 +617,27 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         double meanTime = 0;
         bool mark = true;
         
-        for ( Int_t d = 0; d < vec_tracks.size(); d++ ) {
-            if (vec_tracks.at(d).marking == true ) {
-                mark = true;
+
+        if (vec_tracks.size()>0) {
+            h->h_marker_check->Fill(1);
+            
+            if( check_marking(vec_tracks) == true){
+                h->h_marker_check->Fill(2);
+                // printf("Trigger marked:%x\n",vec_tracks.at(0).trigger_no);
+                 for(int f=0; f<vec_tracks.size(); f++){
+                if(h->track_mult > 0)  cout<<vec_tracks.at(f).layer<<"\t"<<vec_tracks.at(f).straw<<"\t"<<vec_tracks.at(f).leadTime<<"\t"<<vec_tracks.at(f).marking<<"\t"<<vec_tracks.at(0).trigger_no<<endl;
+                 }
             }
             else{
-                mark = false;
-                break;
-            } 
+             //   printf("Trigger NOT marked:%x\n",vec_tracks.at(0).trigger_no);
+                 for(int f=0; f<vec_tracks.size(); f++){
+           if(h->track_mult > 0)           cout<<vec_tracks.at(f).layer<<"\t"<<vec_tracks.at(f).straw<<"\t"<<vec_tracks.at(f).leadTime<<"\t"<<vec_tracks.at(f).trailTime<<"\t"<<vec_tracks.at(f).marking<<"\t"<<vec_tracks.at(0).trigger_no<<endl;
+                 }
+            }
         }
-        
-        if(mark == true) {
-            h->h_marker_check->Fill(1);
-        }
-        else{
-            h->h_marker_check->Fill(2);
-        }
-
+          
+        if( check_marking(vec_tracks) == true && vec_tracks.size()<8) h->h_marker_check->Fill(3);
+            
         for ( Int_t d = 0; d < vec_tracks.size(); d++ ) {
             sumLeadTime += vec_tracks.at ( d ).leadTime;
             
@@ -629,7 +650,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         // printf("mean = %f\n", meanTime);
         // Write Tracks
         stt_event->TrackClear();
-
+        if(vec_tracks.size()>7){h->track_mult++;}
         //     b->Py0 = smallestPP0;
         //     b->Py1 = smallestPP1;
         //     b->Chix = smallestX;
