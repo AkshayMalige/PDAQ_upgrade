@@ -138,6 +138,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
     TH1F* h_currpt = new TH1F ( "h_currpt", "h_currpt", 3, 0, 3 );
     
     TH1F* h_rise_fall = new TH1F ( "h_rise_fall", "h_rise_fall", 3, 0, 3 );
+    TH1F* h_total_marking = new TH1F ( "h_total_marking", "h_total_marking;Mult", 5, 0, 5 );
 
     TH1F* h_refTimeTDC[6];
     double RefTime[16];
@@ -296,9 +297,11 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                 word = readWord ( &in_file );
                 trigger_nr = word;
 //                 printf ( "Trigger : %x\n", trigger_nr );
+                
 
-		//if(trigger_nr == 0x1174e2e4) break;//cout<<"*******************************************"<<endl;
-            //    printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
+//   		if(trigger_nr == 0x3ae8c5ac) break;//cout<<"*******************************************"<<endl;
+
+//                 printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
 
 //                 bool trig_valid = false;
 //                 UInt_t trig_bck =0;
@@ -522,12 +525,12 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
                                             a->marking = marking;
 
                                             lastRise = 0;
-                                             if (trigger_nr == 0x1174e2e4)
-                                             {
-                                                 printf("ch:%i\n",channel_nr );
-					          printf("\tHIT: %lf  %lf on channel %d  of %x marked %i\n", a->leadTime,a->trailTime,channel_nr,tdc_id,a->marking);
-
-                                             }
+//                                              if (trigger_nr == 0x3af7f844)
+//                                              {
+//                                                 printf("ch:%i\n",channel_nr );
+//                                                 printf("\tHIT: %lf  %lf on channel %d  of %x marked %i\n", a->leadTime,a->trailTime,channel_nr,tdc_id,a->marking);
+// 
+//                                              }
                                             h_rise_fall->Fill(2);
                                            // printf("\tHIT: %lf  %lf on channel %d  of %x marked %i\n", a->leadTime,a->trailTime,channel_nr,tdc_id,a->marking);
                                         }
@@ -592,7 +595,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
                     N_events++;
 
-                   if ( N_events % 1000 == 0 ) {
+                   if ( N_events % 2 == 0 ) {
                         printf ( "%d\n", N_events );
                    }
                     break;
@@ -601,6 +604,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 
 
             } // end of sub loop
+                (marking == true ) ? h_total_marking->Fill(2) : h_total_marking->Fill(1);
 
 
         } // end of queue size if
@@ -621,6 +625,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
         for ( int h=0; h< 6; h++ ) {
             h_refTimeTDC[h]->Write();
         }
+        h_total_marking->Write();
         tree->Write();
         ofile->Close();
     }

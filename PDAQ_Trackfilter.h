@@ -165,8 +165,15 @@ struct histograms{
     TH1F* h_High_TOT_Ratio = new TH1F ( "h_High_TOT_Ratio", "h_High_TOT_Ratio;Layer", 2, 0, 2 );
     
     int track_mult=0;
-    TH1F* h_track_mult = new TH1F ( "h_track_mult", "h_track_mult;Mult", 5, 0, 5 );
+    int track_marked=0;
+    int track_unmarked=0;
+    TH1F* h_track_mult = new TH1F ( "h_track_mult", "h_track_mult;Mult", 10, 0, 10 );
     
+    TH1F* h_mark_ana = new TH1F ( "h_mark_ana", "h_mark_ana;Mult", 10, 0, 10 );
+    
+    bool event_marked = false;
+    
+    double track_count =0;
 };
 
 typedef std::vector<SttHit> VecSttHit;

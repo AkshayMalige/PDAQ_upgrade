@@ -102,9 +102,9 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     DTmin = h_drifttime->FindFirstBinAbove ( maximum/10,1 );
 
     ofstream myfile;
-    myfile.open ("48soft_dump.txt");
+    myfile.open ("one_soft_dump.txt");
 
-    cout<<"New  "<<maximum<<"\t"<<DTmin <<endl;
+  //  cout<<"New  "<<maximum<<"\t"<<DTmin <<endl;
     std::vector<double> vec_DT_start;
 
     for ( int chh=0; chh<256; chh++ ) {
@@ -119,7 +119,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         }
 
     }
-    cout<<"*****"<<endl;
+//    cout<<"*****"<<endl;
 
 //     for ( int as=0; as<vec_DT_start.size(); as++ ) {
 //
@@ -134,7 +134,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
         if ( i == maxEvents ) {
             break;
         }
-        if ( i % 250 == 0 ) {
+        if ( i % 1000 == 0 ) {
             cout<<i<<endl;
 
         }
@@ -147,6 +147,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
             SttHit a;
             double dt_crr =0;
             int sq_ch=0;
+            bool marked = false;
             std::vector<SttHit> vec_tracks;
             for ( int t = 0; t < vec_track_can.size(); t++ ) {
                 sq_ch = ( ( vec_track_can[t].layer-1 ) * 32 ) +vec_track_can[t].straw-1;
@@ -173,11 +174,14 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                 
                // cout<<"Channel "<<sq_ch<<"\t"<<vec_track_can[t].drifttime<<"\t"<<a.drifttime<<endl;
             }
-             vec_trigger.push_back( track_hit.trackId);
+                marked = vec_track_can[0].marking ;
+                
+                vec_trigger.push_back( track_hit.trackId);
                // myfile<< hex << vec_track_can[0].trigger_no<<endl;
 //                 arr_trigger[0] = vec_track_can[0].trigger_no;
-                printf("%x %f %f\n",track_hit.trackId,track_hit.Px0,track_hit.Px1);
-                myfile<< hex << track_hit.trackId<<"\t"<<track_hit.Px0<<"\t"<<track_hit.Px1<<endl;
+             //   printf("%x %f %f\n",track_hit.trackId,track_hit.Px0,track_hit.Px1);
+                if (marked == true) myfile<< hex << track_hit.trackId<<"\t"<<track_hit.Px0<<"\t"<<track_hit.Px1<<endl;
+                
                 h_soft_slope->Fill(track_hit.Px0);
                 h_soft_const->Fill(track_hit.Px1);
                 trig_no = vec_track_can[0].trigger_no;

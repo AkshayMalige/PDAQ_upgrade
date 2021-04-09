@@ -448,9 +448,11 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             track_sanity++;
         }
     }
-  //  cout<<"++++++++++++"<<endl;
-    if (track_sanity >= 4 )  h->h_tracker_check->Fill(4);
-    if ( track_sanity >= 4 ) {
+   // cout<<"++++++++++++"<<endl;
+   // if (track_sanity >= 4 )  h->h_tracker_check->Fill(4);
+//     if ( track_sanity >= 4 ) {
+    if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
+
         const std::vector<std::vector<VecSttHit>> vectors = vec_cluster_layer;
 
         const auto tuples = make_tuples ( vectors );
@@ -519,7 +521,6 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             for ( Int_t yc = 0; yc < vec_ClustersY.size(); yc++ ) {
                 clusterArrayY[yc] = vec_ClustersY[yc].y;
                 clusterArrayZy[yc] = vec_ClustersY[yc].z;
-
             }
 
             TF1* f1 = new TF1 ( "f1", "pol1" );
@@ -617,40 +618,37 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         double meanTime = 0;
         bool mark = true;
         
-
-        if (vec_tracks.size()>0) {
+        if (vec_tracks.size()>7) {
             h->h_marker_check->Fill(1);
-            
-            if( check_marking(vec_tracks) == true){
+            h->track_count++;
+            h->track_mult++;
+//             if( check_marking(vec_tracks) == true){
+            if( vec_tracks.at(0).marking == true){
                 h->h_marker_check->Fill(2);
-                // printf("Trigger marked:%x\n",vec_tracks.at(0).trigger_no);
-                 for(int f=0; f<vec_tracks.size(); f++){
-                if(h->track_mult > 0)  cout<<vec_tracks.at(f).layer<<"\t"<<vec_tracks.at(f).straw<<"\t"<<vec_tracks.at(f).leadTime<<"\t"<<vec_tracks.at(f).marking<<"\t"<<vec_tracks.at(0).trigger_no<<endl;
-                 }
+                h->track_marked++;
             }
             else{
-             //   printf("Trigger NOT marked:%x\n",vec_tracks.at(0).trigger_no);
-                 for(int f=0; f<vec_tracks.size(); f++){
-           if(h->track_mult > 0)           cout<<vec_tracks.at(f).layer<<"\t"<<vec_tracks.at(f).straw<<"\t"<<vec_tracks.at(f).leadTime<<"\t"<<vec_tracks.at(f).trailTime<<"\t"<<vec_tracks.at(f).marking<<"\t"<<vec_tracks.at(0).trigger_no<<endl;
-                 }
+                h->h_marker_check->Fill(3);
+                h->track_unmarked++;
+//                 printf("not marked %i\n",h->track_unmarked);
             }
         }
-          
-        if( check_marking(vec_tracks) == true && vec_tracks.size()<8) h->h_marker_check->Fill(3);
+
+        
+     //   if( check_marking(vec_tracks) == true && vec_tracks.size()<8) h->h_marker_check->Fill(3);
             
         for ( Int_t d = 0; d < vec_tracks.size(); d++ ) {
             sumLeadTime += vec_tracks.at ( d ).leadTime;
             
             //printf("tdc: %x ch: %i LT: %lf DT: %lf \n",vec_tracks[d]->tdcid,vec_tracks[d]->straw,vec_tracks[d]->leadTime,vec_tracks[d]->drifttime);
         }
-     //   printf("%x \n",vec_tracks.at(0).trigger_no);
+      //  printf("\t\t\t\t**************%x \n",vec_tracks.at(0).trigger_no);
         // printf("\n*********************\n");
 
         meanTime = sumLeadTime / vec_tracks.size();
         // printf("mean = %f\n", meanTime);
         // Write Tracks
         stt_event->TrackClear();
-        if(vec_tracks.size()>7){h->track_mult++;}
         //     b->Py0 = smallestPP0;
         //     b->Py1 = smallestPP1;
         //     b->Chix = smallestX;
