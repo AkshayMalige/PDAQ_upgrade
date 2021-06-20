@@ -284,6 +284,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     TH1F* h_Ch_TOT[256];
     TH1F* h_PlaneMult_Straw[15];
 
+    TH1F* h_beam_on_scint = new TH1F("h_beam_on_scint","h_beam_on_scint",5000000,0,5000000);
+
     int cases[3] ;
     for ( int g=0; g<3; g++ ) {
         cases[g] =0;
@@ -365,6 +367,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     
     maxEvents = (maxEvents==100000000) ? iev :  maxEvents;
 
+    float hits_in_sec = 0;
+    int second =0;
+
 
     for ( Int_t i = 0; i < iev; i++ ) {
 //cout<<"check1"<<endl;
@@ -408,7 +413,16 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->h_hitmultiplicity1->Fill ( SCI_CAL->sci_raw.totalNTDCHits );
 
         std::vector<SciHit*> vec_scihits;
-
+        
+//         if( i % 20 == 0){            
+//            if(hits_in_sec>20) h_beam_on_scint->SetBinContent(second+1,hits_in_sec);
+//             second = second+1;
+//             hits_in_sec = 0;
+//         }
+//         else{
+//             hits_in_sec = hits_in_sec + SCI_CAL->sci_raw.totalNTDCHits;
+//         }
+        if(SCI_CAL->sci_raw.totalNTDCHits>0) h_beam_on_scint->SetBinContent(i+1,SCI_CAL->sci_raw.totalNTDCHits);
         
         (SCI_CAL->sci_raw.totalNTDCHits ==0) ? h->h_tracker_check->Fill(0) : h->h_tracker_check->Fill(1);
         if (SCI_CAL->sci_raw.totalNTDCHits >0 && STT_CAL->stt_cal.total_cal_NTDCHits >7 )  h->h_tracker_check->Fill(2);
@@ -462,7 +476,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->track_mult=0;
         h->track_marked = 0;
         h->track_unmarked = 0;
-        if ( SCI_CAL->sci_raw.totalNTDCHits >0 ) {
+        if ( SCI_CAL->sci_raw.totalNTDCHits ==1 ) {
 
 
             vec_scihits =  ex_Scint_pileup ( SCI_CAL ) ;
@@ -556,8 +570,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 }
                 h->h_0LMultiplicity->Fill ( layerCounter );
 
-                if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
-//                if ( layerCounter >0 ) {
+//                 if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
+               if ( layerCounter >0 ) {
 
                     Layer_eq_4_counter++;
                     stt = true;
@@ -1084,28 +1098,28 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 //     cout<<norm<<"\t"<<total_particles<<endl;
 //     float sc=1/total_particles;
 
-//     for ( int cha=0; cha<256; cha++ ) {
-//         h->h_Ch_Dt[cha]->Scale ( 1/total_particles );
-//         h->h_Ch_Dt[cha]->Write();
-//         h->h_Ch_Dt[cha]->GetXaxis()->SetLabelSize ( 0.045 );
-//         h->h_Ch_Dt[cha]->GetYaxis()->SetLabelSize ( 0.045 );
-// 
-//         h->h_pLT_Diff[cha]->Scale ( 1/total_particles );
-//         h->h_pLT_Diff[cha]->GetXaxis()->SetLabelSize ( 0.045 );
-//         h->h_pLT_Diff[cha]->GetYaxis()->SetLabelSize ( 0.045 );
-//         h->h_pLT_Diff[cha]->GetXaxis()->SetTitle ( "Time Diff [ns]" );
-//         h->h_pLT_Diff[cha]->GetXaxis()->SetTitleSize ( 0.045 );
-//         h->h_pLT_Diff[cha]->GetXaxis()->SetNdivisions ( 5 );
-//         h->h_pLT_Diff[cha]->Write();
-// 
-//         h->h_Ch_TOT[cha]->Scale ( 1/total_particles );
-//         h->h_Ch_TOT[cha]->GetXaxis()->SetLabelSize ( 0.045 );
-//         h->h_Ch_TOT[cha]->GetYaxis()->SetLabelSize ( 0.045 );
-//         h->h_Ch_TOT[cha]->GetXaxis()->SetTitle ( "Time Over Threshold [ns]" );
-//         h->h_Ch_TOT[cha]->GetXaxis()->SetTitleSize ( 0.045 );
-//         h->h_Ch_TOT[cha]->GetXaxis()->SetNdivisions ( 5 );
-//         h->h_Ch_TOT[cha]->Write();
-//     }
+    for ( int cha=0; cha<256; cha++ ) {
+        h->h_Ch_Dt[cha]->Scale ( 1/total_particles );
+        h->h_Ch_Dt[cha]->Write();
+        h->h_Ch_Dt[cha]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_Ch_Dt[cha]->GetYaxis()->SetLabelSize ( 0.045 );
+
+        h->h_pLT_Diff[cha]->Scale ( 1/total_particles );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_pLT_Diff[cha]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetTitle ( "Time Diff [ns]" );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_pLT_Diff[cha]->GetXaxis()->SetNdivisions ( 5 );
+        h->h_pLT_Diff[cha]->Write();
+
+        h->h_Ch_TOT[cha]->Scale ( 1/total_particles );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetLabelSize ( 0.045 );
+        h->h_Ch_TOT[cha]->GetYaxis()->SetLabelSize ( 0.045 );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetTitle ( "Time Over Threshold [ns]" );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetTitleSize ( 0.045 );
+        h->h_Ch_TOT[cha]->GetXaxis()->SetNdivisions ( 5 );
+        h->h_Ch_TOT[cha]->Write();
+    }
 
 //     for(int dot=0; dot<vec_DT_start.size(); dot++){
 //       printf("Channel : %i   DT_crr: %d \n",dot,vec_DT_start[dot]-dt_at_10);
@@ -1240,6 +1254,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     //h->h_tracker_check->Scale(1/h->h_tracker_check->GetBinContent(1));
     h->h_tracker_check->SetLineWidth(3);
     h->h_tracker_check->Write();
+    h_beam_on_scint->Write();
     
   //  cout<<"tracks : "<<h->h_marker_check->GetBinContent(1)<<endl;
  //       cout<<"Total no. events : "<<(float)maxEvents<<" total tracks : "<<h->track_count<<endl;

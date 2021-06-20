@@ -450,8 +450,8 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
     }
    // cout<<"++++++++++++"<<endl;
    // if (track_sanity >= 4 )  h->h_tracker_check->Fill(4);
-//     if ( track_sanity >= 4 ) {
-    if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
+    if ( track_sanity >= 4 ) {
+//     if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
 
         const std::vector<std::vector<VecSttHit>> vectors = vec_cluster_layer;
 

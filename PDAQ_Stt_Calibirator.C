@@ -157,17 +157,14 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
         double tdc5 = 0;
         double tdc6 = 0;
 
-/*        UInt_t tdc[7] = {   
-                            0x6500,0x6400, 0x6411, 0x6412,
-                            0x6430, 0x6431, 0x6420 
-                        }; */ 
 
-        UInt_t tdc[7] = {0x6400, 0x6410, 0x6411, 0x6420, 0x6430, 0x6431, 0x6500 }; //cosy setup 
 
-      /*  UInt_t tdc[7] = {  
+       // UInt_t tdc[7] = {0x6400, 0x6410, 0x6411, 0x6420, 0x6430, 0x6431, 0x6500 }; //cosy setup 
+
+        UInt_t tdc[7] = {  
                             0x6420,0x6430,0x6431,
                             0x6400,0x6411,0x6412,0x6500 
-                        };  */    
+                        };      
                         
         double tdc_ref[7];
         for ( int a = 0; a < 7; a++ ) {

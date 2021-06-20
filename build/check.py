@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 
 
-soft_df = pd.read_csv("44854soft_dump.txt",sep='\t')
-hard_df = pd.read_csv("44854hard_dump.txt",sep='\t')
+soft_df = pd.read_csv("20of256_lab_44584_soft_dump.txt",sep='\t')
+hard_df = pd.read_csv("lab_marking_track_20of256bin_44584_hard_dump.txt",sep='\t')
 soft_df.columns = ['trigger', 's_slope', 's_const']
 hard_df.columns = ['trigger', 'h_slope', 'h_const']
 
@@ -72,26 +72,34 @@ hardint_trigger = [int(x, 16) for x in hard_trigger]
 
 merge_df = pd.merge(soft_df,hard_df,how='inner',on='trigger')
 
-merge_df['slope_diff']= round(abs(merge_df['s_slope'] - merge_df['h_slope']),3)
-merge_df['const_diff']= round(abs(merge_df['s_const'] - merge_df['h_const']),3)
+merge_df['slope_diff']= round((merge_df['s_slope'] - merge_df['h_slope']),3)
+merge_df['const_diff']= round((merge_df['s_const'] - merge_df['h_const']),3)
 
+#merge_df['slope_diff']= round(merge_df['s_slope'] - merge_df['h_slope'])
+#merge_df['const_diff']= round(merge_df['s_const'] - merge_df['h_const'])
 
 merge_df = merge_df.sort_values(by='const_diff', ascending=False)
 merge_df = merge_df.drop_duplicates(subset='trigger', keep="last")
 
+merge_df.info()
+merge_df.isna().sum()
 print(merge_df)
+
+merge_df.to_csv(r'pandas.txt', header=None, index=None, sep='\t', mode='a')
 
 slope_diff = list(merge_df.slope_diff)
 const_diff = list(merge_df.const_diff)
 
 
-plt.hist(const_diff, bins=np.arange(min(const_diff), max(const_diff) + 0.1, 0.1),density=True)
+plt.hist(const_diff, bins=np.arange(-5, 5 + 0.5, 0.5),density = True) 
+#plt.hist(const_diff, bins=np.arange(min(const_diff),max(const_diff)+1,1))
 plt.title('const_diff')
 plt.xlabel('Const_diff [Cm]')
 plt.ylim(0,10)
 plt.show()
 
-plt.hist(slope_diff, bins=np.arange(min(slope_diff), max(slope_diff) + 0.1, 0.1),density=True)
+plt.hist(slope_diff, bins=np.arange(-5, 5+0.5, 0.5),density=True)
+plt.hist(slope_diff, bins=np.arange(min(slope_diff),max(slope_diff)+1,1))
 plt.title('slope_diff')
 plt.xlabel('Slope_diff [Cm]')
 plt.ylim(0,10)
@@ -109,12 +117,13 @@ plt.xlabel('soft_track_mult')
 plt.yscale('log')
 plt.show()
 
-
+'''
 ######## plot trigger no match ###########
 unique_soft = 0
 unique_hard = 0
 match0 =0
 match1 =0
+
 for i in softint_trigger:
 	#print("soft  :",i)
 	if i not in hardint_trigger:
@@ -132,8 +141,8 @@ print("#Software_Events :",unique_soft)
 print("#Hardware_Events :",unique_hard)
 print("#Match :",match0)
 #print(match1)
-venn2(subsets = (unique_hard, unique_soft,match0 ), set_labels = ('Hardware', 'Software'))
+#venn2(subsets = (unique_hard, unique_soft,match0 ), set_labels = ('Hardware', 'Software'))
 plt.title('Enents id of tracks')
-plt.show()
+plt.show() '''
 
 

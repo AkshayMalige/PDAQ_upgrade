@@ -102,7 +102,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     DTmin = h_drifttime->FindFirstBinAbove ( maximum/10,1 );
 
     ofstream myfile;
-    myfile.open ("one_soft_dump.txt");
+    myfile.open ("20of256_lab_44584_soft_dump.txt");
 
   //  cout<<"New  "<<maximum<<"\t"<<DTmin <<endl;
     std::vector<double> vec_DT_start;
@@ -180,7 +180,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
                // myfile<< hex << vec_track_can[0].trigger_no<<endl;
 //                 arr_trigger[0] = vec_track_can[0].trigger_no;
              //   printf("%x %f %f\n",track_hit.trackId,track_hit.Px0,track_hit.Px1);
-                if (marked == true) myfile<< hex << track_hit.trackId<<"\t"<<track_hit.Px0<<"\t"<<track_hit.Px1<<endl;
+                if (marked == true)  myfile<< hex << track_hit.trackId<<"\t"<<track_hit.Px0<<"\t"<<track_hit.Px1<<endl;
                 
                 h_soft_slope->Fill(track_hit.Px0);
                 h_soft_const->Fill(track_hit.Px1);
