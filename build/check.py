@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 
 
-soft_df = pd.read_csv("20of256_lab_44584_soft_dump.txt",sep='\t')
-hard_df = pd.read_csv("lab_marking_track_20of256bin_44584_hard_dump.txt",sep='\t')
+soft_df = pd.read_csv("lab_marking_track_16bin_44584_soft_dump.txt",sep='\t')
+hard_df = pd.read_csv("lab_marking_track_16bin_44584_hard_dump.txt",sep='\t')
 soft_df.columns = ['trigger', 's_slope', 's_const']
 hard_df.columns = ['trigger', 'h_slope', 'h_const']
 
@@ -27,10 +27,11 @@ for col in hard_df.columns:
  
  
 
-
-  
 soft_df=soft_df.drop_duplicates(subset =['trigger','s_slope','s_const'],keep = 'first').reset_index(drop = True)
 hard_df=hard_df.drop_duplicates(subset =['trigger','h_slope','h_const'],keep = 'first').reset_index(drop = True)
+  
+#soft_df=soft_df.drop_duplicates(subset =['trigger','s_slope','s_const'],keep = 'first')
+#hard_df=hard_df.drop_duplicates(subset =['trigger','h_slope','h_const'],keep = 'first')
 
 #print(soft_df.loc[[2059]])
 #print(soft_df.loc[[2060]])
@@ -99,7 +100,7 @@ plt.ylim(0,10)
 plt.show()
 
 plt.hist(slope_diff, bins=np.arange(-5, 5+0.5, 0.5),density=True)
-plt.hist(slope_diff, bins=np.arange(min(slope_diff),max(slope_diff)+1,1))
+#plt.hist(slope_diff, bins=np.arange(min(slope_diff),max(slope_diff)+1,1))
 plt.title('slope_diff')
 plt.xlabel('Slope_diff [Cm]')
 plt.ylim(0,10)
