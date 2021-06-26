@@ -116,6 +116,20 @@ std::vector<SttHit> ex_Stt_double ( std::vector<std::vector<SttHit>> vec_layer_c
     return C;
 }
 
+
+bool check_layer_mult(int mult[8]){
+    
+//     int mult[8]={0,0,0,0,0,0,0,0};
+//     for (int i = 0; i < v.size(); i++){
+//         mult[v[i].layer]++;
+//     }
+    for(int j=0; j<8; j++){
+        if (mult[j] > 3) return false;
+    }
+    return true;
+}
+
+
 int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 {
 
@@ -371,7 +385,9 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     int second =0;
 
 
-    for ( Int_t i = 0; i < iev; i++ ) {
+//    for ( Int_t i = 0; i < iev; i++ ) {
+    for ( Int_t i = 1117100; i < 1117115; i++ ) {
+        
 //cout<<"check1"<<endl;
         event_counter++;
 
@@ -476,7 +492,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->track_mult=0;
         h->track_marked = 0;
         h->track_unmarked = 0;
-        if ( SCI_CAL->sci_raw.totalNTDCHits ==1 ) {
+        if ( SCI_CAL->sci_raw.totalNTDCHits == 1 ) {
 
 
             vec_scihits =  ex_Scint_pileup ( SCI_CAL ) ;
@@ -571,7 +587,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 h->h_0LMultiplicity->Fill ( layerCounter );
 
 //                 if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
-               if ( layerCounter >0 ) {
+               if ( layerCounter >3 && check_layer_mult(hitMultOnLayer)==true ) {
 
                     Layer_eq_4_counter++;
                     stt = true;
@@ -625,7 +641,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     int dt_cnt =0;
                     
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
-//                   	 if(vec_leadTime[jx].trigger_no == 0x1174e2e4) printf("Lay :%i  Str:%i  DT : %lf \n",vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime - sh->leadTime);
+                   	 if(vec_leadTime[jx].trigger_no == 0x11035aa4) printf("Lay :%i  Str:%i  DT : %lf \n",vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime - sh->leadTime);
 //cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
@@ -751,7 +767,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     
                 //    cout<<"SIZE  : "<<vec_stthits.size()<<endl;
                     for ( Int_t jc = 0; jc < vec_leadTime_f.size(); jc++ ) {
-                     //   if(vec_leadTime_f[jc].layer == 1 ||vec_leadTime_f[jc].layer == 4||vec_leadTime_f[jc].layer == 5||vec_leadTime_f[jc].layer == 8){
+                        if(vec_leadTime_f[jc].layer == 1 ||vec_leadTime_f[jc].layer == 4||vec_leadTime_f[jc].layer == 5||vec_leadTime_f[jc].layer == 8){
                             vec_leadTime_f[jc].drifttime = vec_leadTime_f[jc].leadTime - sh->leadTime;
                             vec_stthits.push_back ( vec_leadTime_f[jc] );
                             h->h_L_layerDT[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].leadTime - sh->leadTime );
@@ -764,9 +780,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_sq_ch->Fill ( sq_ch );
                             h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
                             
-                             //if(vec_leadTime_f[jc].trigger_no == 0x1174e2e4)
-                            //cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
-                    //    }
+                            if(vec_leadTime_f[jc].trigger_no == 0x11035aa4)                          cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
+                        }
 
                     }//cout<<"*******\n\n"<<endl;
 

@@ -159,12 +159,12 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
 
 
 
-       // UInt_t tdc[7] = {0x6400, 0x6410, 0x6411, 0x6420, 0x6430, 0x6431, 0x6500 }; //cosy setup 
+//        UInt_t tdc[7] = {0x6400, 0x6410, 0x6411, 0x6420, 0x6430, 0x6431, 0x6500 }; //cosy setup 
 
         UInt_t tdc[7] = {  
                             0x6420,0x6430,0x6431,
                             0x6400,0x6411,0x6412,0x6500 
-                        };      
+                        };      //lab setup
                         
         double tdc_ref[7];
         for ( int a = 0; a < 7; a++ ) {
@@ -219,6 +219,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
        // trb_diff = tdc_ref[6]- tdc_ref[4];
        // h_TRB_ref_diff->Fill ( trb_diff );
 
+//        double DT =0;
         for ( int s = 0; s < SCI->sci_raw.totalNTDCHits; s++ ) {
             SciHit* scihit = ( SciHit* ) SCI->sci_raw.adc_hits->ConstructedAt ( s );
             if ( !scihit->channel==0 ) {
@@ -232,7 +233,7 @@ int PDAQ_Stt_Calibirator ( char* intree, char* outtree, int maxEvents )
                 
                 shit->leadTime = ( ( scihit->leadTime - tdc_ref[6] ) - scint_offset );
                 shit->trailTime = ( ( scihit->trailTime- tdc_ref[6] ) - scint_offset );
-                
+//                 DT = shit->leadTime;
               //  shit->leadTime = ( ( scihit->leadTime - tdc_ref[6] ) - scint_offset );
               //  shit->trailTime = ( ( scihit->trailTime- tdc_ref[6] ) - scint_offset );
               //  printf("\n\n\t\t\t\t SCINT:  %x , %i: %lf\n",shit->tdcid,shit->channel,shit->leadTime);

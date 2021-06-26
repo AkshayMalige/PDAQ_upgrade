@@ -299,7 +299,7 @@ void PDAQ_RawDecoder_HADES ( char* in_file_name, char* out_file_name = 0,
 //                 printf ( "Trigger : %x\n", trigger_nr );
                 
 
-//   		if(trigger_nr == 0x3ae8c5ac) break;//cout<<"*******************************************"<<endl;
+  		if(trigger_nr == 0x11035aa4) break;//cout<<"*******************************************"<<endl;
 
 //                 printf("%d   Subevent: id: %x size: %d trg:%x\n", N_events, sub_id,sub_size, trigger_nr);
 

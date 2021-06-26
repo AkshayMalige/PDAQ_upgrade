@@ -102,7 +102,7 @@ Bool_t PDAQ_Drift_Cal ( char* intree, char* outtree, int maxEvents )
     DTmin = h_drifttime->FindFirstBinAbove ( maximum/10,1 );
 
     ofstream myfile;
-    myfile.open ("20of256_lab_44584_soft_dump.txt");
+    myfile.open ("lab_marking_track_44584_soft_dump.txt");
 
   //  cout<<"New  "<<maximum<<"\t"<<DTmin <<endl;
     std::vector<double> vec_DT_start;

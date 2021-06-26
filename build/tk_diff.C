@@ -65,9 +65,9 @@ Int_t tk_diff()
 
 		tk_obj.trigger = trigger;
 		tk_obj.s_slope = s_slope;
-		tk_obj.s_const = s_const;
+		tk_obj.s_const = s_const*0.505;
 		tk_obj.h_slope = h_slope;
-		tk_obj.h_const = h_const;
+		tk_obj.h_const = h_const*0.505;
 		tk_obj.s_diff = s_diff;
 		tk_obj.c_diff = c_diff;
 
@@ -89,14 +89,15 @@ Int_t tk_diff()
 	    	    
 	    for(int i=0; i< vec_data.size(); i++){
 	    	s_diff->Fill(vec_data[i].s_diff);
-	    	c_diff->Fill(vec_data[i].c_diff - 1);
-	    	sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff - 1);
+	    	c_diff->Fill(vec_data[i].c_diff);
+	    	//sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff - 1);
+	    	sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff);
 	    //	printf("%f\n",vec_data.at(i).s_diff);
 	    
 	    	h_s_slope->Fill(vec_data[i].s_slope);
 	    	h_h_slope->Fill(vec_data[i].h_slope);
 	    	h_s_const->Fill(vec_data[i].s_const);
-	    	h_h_const->Fill(vec_data[i].h_const+1);
+	    	h_h_const->Fill(vec_data[i].h_const);
 	    	
 	    }
 	    
@@ -130,14 +131,15 @@ Int_t tk_diff()
 		
 		
 		/////////////////////////////
-		h_s_const->GetXaxis()->SetRangeUser(0,33);
-		h_h_const->GetXaxis()->SetRangeUser(0,33);
+		h_s_const->GetXaxis()->SetRangeUser(-2,18);
+		h_h_const->GetXaxis()->SetRangeUser(-2,18);
 		h_s_const->Scale(1/h_s_const->GetEntries());
 		h_h_const->Scale(1/h_h_const->GetEntries());
 		h_s_const->SetLineColor(kBlue);
 		h_h_const->SetLineColor(kRed);
 		h_s_const->SetLineWidth(3);
 		h_h_const->SetLineWidth(3);
+		
 		
 		
 		h_s_slope->GetXaxis()->SetRangeUser(-4,4);
