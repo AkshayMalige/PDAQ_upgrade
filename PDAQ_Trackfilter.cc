@@ -450,7 +450,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             track_sanity++;
         }
     }
-   // cout<<"++++++++++++"<<endl;
+//    cout<<"++++++++++++  "<<track_sanity<<endl;
    // if (track_sanity >= 4 )  h->h_tracker_check->Fill(4);
     if ( track_sanity >= 4 ) {
 //     if ( track_sanity >= MAX_FT_TOTAL_LAYERS ) {
@@ -503,7 +503,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             vec_All_X.push_back ( vec_ClustersX );
             vec_All_Y.push_back ( vec_ClustersY );
             
-        //    cout<<"Sige:) : "<<vec_ClustersX.size()<<"\t"<<vec_ClustersX.size()<<endl;
+//            cout<<"Sige:) : "<<vec_ClustersX.size()<<"\t"<<vec_ClustersX.size()<<endl;
 
             Double_t clusterArrayX[vec_ClustersX.size()];
             Double_t clusterArrayZx[vec_ClustersX.size()];
@@ -572,9 +572,10 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
 
         for ( Int_t ci = 0; ci < vec_Chi2x.size(); ci++ ) {
 
-            if ( smallestX > vec_Chi2x[ci] ) {
+            if ( smallestX > vec_Chi2x[ci] || smallestX==0) {
                 smallestX = vec_Chi2x[ci];
                 chi_indexX = ci;
+//                 cout<<ci<<"\t"<<smallestX<<"\t";
             }
 //             if ( smallestP0 > vec_P0[ci] ) {
 //                 smallestP0 = vec_P0[ci];
@@ -585,7 +586,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
         smallestP0 = vec_P0[chi_indexX];
         smallestP1 = vec_P1[chi_indexX];
-         printf("smallest chix :%2.3f, index : %i\n", smallestX, chi_indexX);
+        printf("\nsmallest chix :%2.3f, slope :%2.3f, const :%2.3f, index : %i\n", smallestX,smallestP0,smallestP1, chi_indexX);
 
 //         Float_t smallestY = vec_Chi2y[0];
 //         Float_t smallestPP0 = vec_PP0[0];
@@ -655,7 +656,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         //     b->Py1 = smallestPP1;
         //     b->Chix = smallestX;
         //     b->Chiy = smallestY;
-        // printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
+//         printf(" Mean time %f track size %d \n", meanTime,vec_tracks.size());
 
         SttTrackHit& b = stt_event->AddTrackHit();
         b.vec_Track = vec_tracks;
@@ -664,7 +665,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         b.Px0 = smallestP0;
         b.Px1 = smallestP1;
         
-       // cout<<b.trackId<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
+//        cout<<b.trackId<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
         
 //         h->h_soft_slope->Fill(smallestP0);
 //         h->h_soft_const->Fill(smallestP1);
@@ -681,9 +682,9 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             }
             h->h_hitBlock->Fill ( 4 );
             
-            if ( vec_tracks[0].trigger_no == 0x11035aa4) printf("Trig %x, Layer %i, Straw %i \n",vec_tracks[tq].trigger_no,vec_tracks[tq].layer,vec_tracks[tq].straw);
+            if ( vec_tracks[0].trigger_no == 0x73e3cffc) printf("Trig %x, Layer %i, Straw %i \n",vec_tracks[tq].trigger_no,vec_tracks[tq].layer,vec_tracks[tq].straw);
         }
-       if ( vec_tracks[0].trigger_no == 0x11035aa4)  cout<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
+       if ( vec_tracks[0].trigger_no == 0x73e3cffc)  cout<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
 
         vec_Chi2x.clear();
         vec_Chi2y.clear();

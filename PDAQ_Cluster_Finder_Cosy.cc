@@ -386,7 +386,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
 
 
 //    for ( Int_t i = 0; i < iev; i++ ) {
-    for ( Int_t i = 1117100; i < 1117115; i++ ) {
+    for ( Int_t i = 3729622; i < 3729625; i++ ) {
         
 //cout<<"check1"<<endl;
         event_counter++;
@@ -492,7 +492,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
         h->track_mult=0;
         h->track_marked = 0;
         h->track_unmarked = 0;
-        if ( SCI_CAL->sci_raw.totalNTDCHits == 1 ) {
+//         cout<<"scint size : "<<SCI_CAL->sci_raw.totalNTDCHits<<endl;
+        if ( SCI_CAL->sci_raw.totalNTDCHits ==1 ) {
 
 
             vec_scihits =  ex_Scint_pileup ( SCI_CAL ) ;
@@ -586,8 +587,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                 }
                 h->h_0LMultiplicity->Fill ( layerCounter );
 
-//                 if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
-               if ( layerCounter >3 && check_layer_mult(hitMultOnLayer)==true ) {
+                if ( layerCounter == MAX_FT_TOTAL_LAYERS ) {
+//                if ( layerCounter >3 && check_layer_mult(hitMultOnLayer)==true ) {
 
                     Layer_eq_4_counter++;
                     stt = true;
@@ -641,7 +642,7 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                     int dt_cnt =0;
                     
                     for ( int jx=0; jx < vec_leadTime.size() ; jx++ ) {
-                   	 if(vec_leadTime[jx].trigger_no == 0x11035aa4) printf("Lay :%i  Str:%i  DT : %lf \n",vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime - sh->leadTime);
+                   	 if(vec_leadTime[jx].trigger_no == 0x73e3cffc) printf("Lay :%i  Str:%i  DT : %lf \n",vec_leadTime[jx].layer,vec_leadTime[jx].straw,vec_leadTime[jx].leadTime - sh->leadTime);
 //cout<<"mark : "<<vec_leadTime[jx].marking<<endl;
                         if ( vec_leadTime[jx].leadTime - sh->leadTime >-1 && vec_leadTime[jx].leadTime - sh->leadTime <500 ) {
                             h->h_pL_layerDT[vec_leadTime[jx].layer-1]->Fill ( vec_leadTime[jx].leadTime - sh->leadTime );
@@ -780,14 +781,15 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
                             h->h_sq_ch->Fill ( sq_ch );
                             h->h_straw[vec_leadTime_f[jc].layer-1]->Fill ( vec_leadTime_f[jc].straw );
                             
-                            if(vec_leadTime_f[jc].trigger_no == 0x11035aa4)                          cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
+                            if(vec_leadTime_f[jc].trigger_no == 0x73e3cffc)                          cout<<vec_leadTime_f[jc].layer<<"\t"<<vec_leadTime_f[jc].straw<<"\t"<<vec_leadTime_f[jc].drifttime<<"\t"<<vec_leadTime_f[jc].marking<<endl;
                         }
 
                     }//cout<<"*******\n\n"<<endl;
-
+                        
                     if ( vec_stthits.size() >= 8 && vec_stthits.size() <= max_cluster_intake) {
                             PDAQ_Event_Finder ( vec_stthits, i, PDAQ_tree, stt_event, ftGeomPar, SCI_CAL, h );
-                            final_counter++;                       
+                            final_counter++;      
+//                             cout<<vec_stthits.size()<<"\t"<<i<<endl;
                         
                     }                    
   

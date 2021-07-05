@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 
 
-soft_df = pd.read_csv("lab_marking_track_44584_soft_dump.txt",sep='\t')
-hard_df = pd.read_csv("lab_marking_track_20of256bin_44584_hard_dump.txt",sep='\t')
+soft_df = pd.read_csv("beam_marking_track_45915_soft_dump.txt",sep='\t')
+hard_df = pd.read_csv("trig_file.txt",sep='\t')
 soft_df.columns = ['trigger', 's_slope', 's_const']
 hard_df.columns = ['trigger', 'h_slope', 'h_const']
 

@@ -101,6 +101,9 @@ Int_t tk_diff()
 	    	
 	    }
 	    
+	    for(int s=0; s<200; s++){
+	    	cout<<s<<": "<<h_s_slope->GetBinContent(s)<<"\t";
+	    }
 	    	s_diff->Scale(1/s_diff->GetEntries());
 	    	c_diff->Scale(1/c_diff->GetEntries());
 	    
