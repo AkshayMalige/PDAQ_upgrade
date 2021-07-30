@@ -24,6 +24,8 @@ class track {
 		double h_const;
 		double s_diff;
 		double c_diff;
+		double s_diff_r;
+		double c_diff_r;
 };
 //Int_t Fee_scan_analysis(const char *  	inputFile, const char* outputFile)
 
@@ -41,11 +43,11 @@ class track {
 Int_t tk_diff()
 {
 
-	TFile* scan_results = new TFile("tk_diff.root", "RECREATE");
+	TFile* scan_results = new TFile("lab_marking_track_44584_tk_diff.root", "RECREATE");
 
 
-    	ifstream iFile("pandas.txt");  
-
+    	//ifstream iFile("./ieee/beam_marking_track_45915_pandas.txt");  
+    	ifstream iFile("./lab_marking_track_44584_pandas.txt");  
     	track tk_obj;
 
     	vector<track> vec_data; 
@@ -60,8 +62,10 @@ Int_t tk_diff()
 		double h_const;
 		double s_diff;
 		double c_diff;
-
-		iFile >> trigger >>s_slope >> s_const >> h_slope >> h_const >> s_diff >> c_diff;
+		double s_diff_r;
+		double c_diff_r;
+		
+		iFile >> trigger >>s_slope >> s_const >> h_slope >> h_const >> s_diff >> c_diff >> s_diff_r >> c_diff_r;
 
 		tk_obj.trigger = trigger;
 		tk_obj.s_slope = s_slope;
@@ -70,6 +74,8 @@ Int_t tk_diff()
 		tk_obj.h_const = h_const*0.505;
 		tk_obj.s_diff = s_diff;
 		tk_obj.c_diff = c_diff;
+		tk_obj.s_diff_r = s_diff_r;
+		tk_obj.c_diff_r = c_diff_r;
 
 		vec_data.push_back(tk_obj);
 
@@ -88,8 +94,8 @@ Int_t tk_diff()
 	    	    
 	    	    
 	    for(int i=0; i< vec_data.size(); i++){
-	    	s_diff->Fill(vec_data[i].s_diff);
-	    	c_diff->Fill(vec_data[i].c_diff);
+	    	s_diff->Fill(vec_data[i].s_diff_r);
+	    	c_diff->Fill(vec_data[i].c_diff_r);
 	    	//sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff - 1);
 	    	sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff);
 	    //	printf("%f\n",vec_data.at(i).s_diff);
@@ -166,11 +172,14 @@ Int_t tk_diff()
    		pad2->SetTopMargin(0);
    		pad2->Draw();
    		pad2->cd();
-   		h_s_slope->Sumw2();
+   		/*h_s_slope->Sumw2();
    		h_s_slope->SetStats(0);
    		h_s_slope->Divide(h_h_slope);
    		h_s_slope->SetMarkerStyle(21);
-   		h_s_slope->Draw("ep");
+   		h_s_slope->Draw("ep");*/
+   		
+   		s_diff->SetMarkerStyle(21);
+   		s_diff->Draw("ep");
    		c2->cd(); 
 
 		TCanvas *c3 = new TCanvas("c3","c3",600,700);
@@ -185,11 +194,14 @@ Int_t tk_diff()
    		pad4->SetTopMargin(0);
    		pad4->Draw();
    		pad4->cd();
-   		h_s_const->Sumw2();
+   		/*h_s_const->Sumw2();
    		h_s_const->SetStats(0);
    		h_s_const->Divide(h_h_const);
    		h_s_const->SetMarkerStyle(21);
-   		h_s_const->Draw("ep");
+   		h_s_const->Draw("ep");*/
+   		
+   		c_diff->SetMarkerStyle(21);
+   		c_diff->Draw("ep");
    		c3->cd();  
    		
    		c2->Write();

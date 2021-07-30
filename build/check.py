@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 
 
-soft_df = pd.read_csv("beam_marking_track_45915_soft_dump.txt",sep='\t')
-hard_df = pd.read_csv("trig_file.txt",sep='\t')
+soft_df = pd.read_csv("lab_marking_track_44584_soft_dump.txt",sep='\t')
+hard_df = pd.read_csv("lab_marking_track_20of256bin_44584_hard_dump.txt",sep='\t')
 soft_df.columns = ['trigger', 's_slope', 's_const']
 hard_df.columns = ['trigger', 'h_slope', 'h_const']
 
@@ -41,9 +41,11 @@ merge_df = pd.merge(soft_df,hard_df,how='inner',on='trigger')
 merge_df['slope_diff']= round(abs(merge_df['s_slope'] - merge_df['h_slope']),3)
 merge_df['const_diff']= round(abs(merge_df['s_const'] - merge_df['h_const']),3)
 
-
 merge_df = merge_df.sort_values(by='const_diff', ascending=False)
 merge_df = merge_df.drop_duplicates(subset='trigger', keep="last")
+
+merge_df['slope_diff_r']= round((merge_df['s_slope'] - merge_df['h_slope']),3)
+merge_df['const_diff_r']= round((merge_df['s_const'] - merge_df['h_const']),3)
 
 merge_df.info()
 merge_df.isna().sum()

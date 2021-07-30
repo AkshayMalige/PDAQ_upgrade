@@ -385,8 +385,8 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     int second =0;
 
 
-//    for ( Int_t i = 0; i < iev; i++ ) {
-    for ( Int_t i = 3729622; i < 3729625; i++ ) {
+   for ( Int_t i = 0; i < iev; i++ ) {
+//     for ( Int_t i = 3729622; i < 3729625; i++ ) {
         
 //cout<<"check1"<<endl;
         event_counter++;
@@ -909,6 +909,11 @@ int PDAQ_Cluster_Finder_Cosy ( char* intree, char* outtree, int maxEvents )
     h->h_drifttime->GetXaxis()->SetTitleSize ( 0.050 );
     h->h_drifttime->GetYaxis()->SetNdivisions ( 310 );
     h->h_drifttime->Write();
+    h->h_drifttime_s->GetXaxis()->SetNdivisions ( 310 );
+    h->h_drifttime_s->GetYaxis()->SetLabelSize ( 0.055 );
+    h->h_drifttime_s->GetXaxis()->SetTitleSize ( 0.050 );
+    h->h_drifttime_s->GetYaxis()->SetNdivisions ( 310 );
+    h->h_drifttime_s->Write();
 
     h->h_tot->GetXaxis()->SetNdivisions ( 310 );
     h->h_tot->GetYaxis()->SetNdivisions ( 310 );

@@ -316,10 +316,10 @@ fit_info get_chi2_b(short hls_straw[8]){
 			sums[1]	+=	hls_straw[i];
 			sums[2]	+=	(hit_index[i]*hit_index[i]);
 			sums[3]	+=	(hit_index[i]*hls_straw[i]);
-           std::cout<<hls_straw[i]<<"\t";
+       //    std::cout<<hls_straw[i]<<"\t";
 // 			std::cout<<sums[0]<<"\t"<<sums[1]<<"\t"<<sums[2]<<"\t"<<sums[3]<<"\t"<<std::endl;
 	}
-	std::cout<<std::endl;
+	//std::cout<<std::endl;
 
 	s.slope = (8 * sums[3] - sums[0] * sums[1])/(8 * sums[2] - sums[0] * sums[0]);
 	s.constant = (sums[2] * sums[1] - sums[0] * sums[3])/(sums[2] * 8 - sums[0] * sums[0]);
@@ -332,7 +332,7 @@ fit_info get_chi2_b(short hls_straw[8]){
 	}
 	s.chi2 = CriticalValue;
 
-	std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
+	//std::cout<<"chi2:"<<s.chi2<<"\t slope :"<<s.slope<<"\t constant:"<<s.constant<<std::endl;
 	return s;
 }
 
@@ -586,7 +586,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         }
         smallestP0 = vec_P0[chi_indexX];
         smallestP1 = vec_P1[chi_indexX];
-        printf("\nsmallest chix :%2.3f, slope :%2.3f, const :%2.3f, index : %i\n", smallestX,smallestP0,smallestP1, chi_indexX);
+       // printf("\nsmallest chix :%2.3f, slope :%2.3f, const :%2.3f, index : %i\n", smallestX,smallestP0,smallestP1, chi_indexX);
 
 //         Float_t smallestY = vec_Chi2y[0];
 //         Float_t smallestPP0 = vec_PP0[0];
@@ -641,7 +641,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
      //   if( check_marking(vec_tracks) == true && vec_tracks.size()<8) h->h_marker_check->Fill(3);
             
         for ( Int_t d = 0; d < vec_tracks.size(); d++ ) {
-            sumLeadTime += vec_tracks.at ( d ).leadTime;
+            if(vec_tracks.at ( d ).layer!=5)sumLeadTime += vec_tracks.at ( d ).leadTime;
             
             //printf("tdc: %x ch: %i LT: %lf DT: %lf \n",vec_tracks[d]->tdcid,vec_tracks[d]->straw,vec_tracks[d]->leadTime,vec_tracks[d]->drifttime);
         }
@@ -673,8 +673,9 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
         for ( Int_t tq = 0; tq < vec_tracks.size(); tq++ ) {
             h->h_tot4->Fill ( vec_tracks[tq].tot );
             h->h_L_dtvstot[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
-            h->h_drifttimevsLayer->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer );
+            if(vec_tracks[tq].layer!=5)h->h_drifttimevsLayer->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer );
             h->h_drifttime->Fill ( vec_tracks[tq].drifttime );
+            h->h_drifttime_s->Fill ( 100 + vec_tracks[tq].leadTime - meanTime);
             if ( vec_tracks[tq].tdcid==0x6400||vec_tracks[tq].tdcid==0x6410||vec_tracks[tq].tdcid==0x6411 ) {
                 h->h_drifttimeTRB1->Fill ( vec_tracks[tq].drifttime );
             } else {
@@ -682,9 +683,9 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             }
             h->h_hitBlock->Fill ( 4 );
             
-            if ( vec_tracks[0].trigger_no == 0x73e3cffc) printf("Trig %x, Layer %i, Straw %i \n",vec_tracks[tq].trigger_no,vec_tracks[tq].layer,vec_tracks[tq].straw);
+           // if ( vec_tracks[0].trigger_no == 0x73e3cffc) printf("Trig %x, Layer %i, Straw %i \n",vec_tracks[tq].trigger_no,vec_tracks[tq].layer,vec_tracks[tq].straw);
         }
-       if ( vec_tracks[0].trigger_no == 0x73e3cffc)  cout<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
+     //  if ( vec_tracks[0].trigger_no == 0x73e3cffc)  cout<<"\t"<<b.trackId<<"\t"<<b.Px0<<"\t"<<b.Px1<<endl;
 
         vec_Chi2x.clear();
         vec_Chi2y.clear();

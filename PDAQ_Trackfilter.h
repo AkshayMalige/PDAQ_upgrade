@@ -80,6 +80,8 @@ struct histograms{
     
     TH1F* h_p_drifttime = new TH1F("h_p_drifttime", "h_p_drifttime;Drift Time [ns]", 700, -100,600);
     TH1F* h_drifttime = new TH1F("h_drifttime", "h_drifttime;Drift Time [ns]", 700, -100,600 );
+    TH1F* h_drifttime_s = new TH1F("h_drifttime_s", "h_drifttime_s;Drift Time [ns]", 700, -100,600 );
+
   
     TH1F* h_p_tot = new TH1F("h_p_tot", "h_p_tot;Time Over Threshold [ns]", 710, -10,700 );
     TH1F* h_tot = new TH1F("h_tot", "h_tot;Time Over Threshold [ns]", 710, -10,700 );
