@@ -564,6 +564,7 @@ bool PDAQ_Event_Finder ( VecSttHit vec_stthits, int i,
             h->h_L_dtvstot[vec_tracks[tq].layer-1]->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].tot );
             h->h_drifttimevsLayer->Fill ( vec_tracks[tq].drifttime,vec_tracks[tq].layer );
             h->h_drifttime->Fill ( vec_tracks[tq].drifttime );
+            h->h_drifttime_s->Fill(100+ vec_tracks[tq].leadTime -  meanTime);
             if ( vec_tracks[tq].tdcid==0x6400||vec_tracks[tq].tdcid==0x6410||vec_tracks[tq].tdcid==0x6411 ) {
                 h->h_drifttimeTRB1->Fill ( vec_tracks[tq].drifttime );
             } else {
