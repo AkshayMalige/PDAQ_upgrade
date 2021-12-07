@@ -43,16 +43,25 @@ class track {
 Int_t tk_diff()
 {
 
-	TFile* scan_results = new TFile("lab_marking_track_44584_tk_diff.root", "RECREATE");
+	TFile* scan_results = new TFile("beam_marking_track_45915_tk_diff.root", "RECREATE");
+	//TFile* scan_results = new TFile("lab_marking_track_44584_tk_diff.root", "RECREATE");
 
-
-    	//ifstream iFile("./ieee/beam_marking_track_45915_pandas.txt");  
-    	ifstream iFile("./lab_marking_track_44584_pandas.txt");  
+    	ifstream iFile("./ieee/beam_marking_track_45915_pandas.txt");  
+    	//ifstream iFile("./lab_marking_track_44584_pandas.txt");  
     	track tk_obj;
 
     	vector<track> vec_data; 
+    	
+	    TH1F *h_s_diff = new TH1F("s_diff","s_diff",300,-3,3);
+	    TH1F *h_c_diff = new TH1F("c_diff","c_diff",300,-3,3);
+	    TH2F *sc_diff = new TH2F("sc_diff","sc_diff",12,-3,3,12,-3,3);
+	    
+	    TH1F *h_s_slope = new TH1F("h_s_slope","h_s_slope",200,-50,50);
+	    TH1F *h_h_slope = new TH1F("h_h_slope","h_h_slope",200,-50,50);
+    	    TH1F *h_s_const = new TH1F("h_s_const","h_s_const",400,-100,100);
+    	    TH1F *h_h_const = new TH1F("h_h_const","h_h_const",400,-100,100);
  
-
+	  
 	    while (!iFile.eof())
 	    {
 	    	string trigger;
@@ -66,8 +75,9 @@ Int_t tk_diff()
 		double c_diff_r;
 		
 		iFile >> trigger >>s_slope >> s_const >> h_slope >> h_const >> s_diff >> c_diff >> s_diff_r >> c_diff_r;
+		
 
-		tk_obj.trigger = trigger;
+		/*tk_obj.trigger = trigger;
 		tk_obj.s_slope = s_slope;
 		tk_obj.s_const = s_const*0.505;
 		tk_obj.h_slope = h_slope;
@@ -75,43 +85,38 @@ Int_t tk_diff()
 		tk_obj.s_diff = s_diff;
 		tk_obj.c_diff = c_diff;
 		tk_obj.s_diff_r = s_diff_r;
-		tk_obj.c_diff_r = c_diff_r;
+		tk_obj.c_diff_r = c_diff_r;*/
 
-		vec_data.push_back(tk_obj);
+		//vec_data.push_back(tk_obj);
+		
+		
+	    	h_s_diff->Fill(s_diff_r);
+	    	h_c_diff->Fill(c_diff_r);
+	    	sc_diff->Fill(s_diff , c_diff);	    
+	    	h_s_slope->Fill(s_slope);
+	    	h_h_slope->Fill(h_slope);
+	    	h_s_const->Fill(s_const*0.505);
+	    	h_h_const->Fill(h_const*0.505);
 
-	    }
-	    
-	    
-	    TH1F * s_diff = new TH1F("s_diff","s_diff",300,-3,3);
-	    TH1F * c_diff = new TH1F("c_diff","c_diff",300,-3,3);
-	    TH2F * sc_diff = new TH2F("sc_diff","sc_diff",12,-3,3,12,-3,3);
-	    
-	    TH1F * h_s_slope = new TH1F("h_s_slope","h_s_slope",200,-50,50);
-	    TH1F * h_h_slope = new TH1F("h_h_slope","h_h_slope",200,-50,50);
-    	    TH1F * h_s_const = new TH1F("h_s_const","h_s_const",400,-100,100);
-    	    TH1F * h_h_const = new TH1F("h_h_const","h_h_const",400,-100,100);
+	    }    	    
 	    	    
 	    	    
-	    	    
-	    for(int i=0; i< vec_data.size(); i++){
+	   /* for(int i=0; i< vec_data.size(); i++){
 	    	s_diff->Fill(vec_data[i].s_diff_r);
 	    	c_diff->Fill(vec_data[i].c_diff_r);
-	    	//sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff - 1);
-	    	sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff);
-	    //	printf("%f\n",vec_data.at(i).s_diff);
-	    
+	    	sc_diff->Fill(vec_data[i].s_diff , vec_data[i].c_diff);	    
 	    	h_s_slope->Fill(vec_data[i].s_slope);
 	    	h_h_slope->Fill(vec_data[i].h_slope);
 	    	h_s_const->Fill(vec_data[i].s_const);
 	    	h_h_const->Fill(vec_data[i].h_const);
 	    	
-	    }
+	    }*/
 	    
 	    for(int s=0; s<200; s++){
 	    	cout<<s<<": "<<h_s_slope->GetBinContent(s)<<"\t";
 	    }
-	    	s_diff->Scale(1/s_diff->GetEntries());
-	    	c_diff->Scale(1/c_diff->GetEntries());
+	    	h_s_diff->Scale(1/h_s_diff->GetEntries());
+	    	h_c_diff->Scale(1/h_c_diff->GetEntries());
 	    
 	    	sc_diff->Scale(100/sc_diff->GetEntries());
 	    	sc_diff->GetXaxis()->CenterLabels();
@@ -121,14 +126,14 @@ Int_t tk_diff()
 	    	TCanvas * c1 = new TCanvas ("c1","c1");
 	    	c1->Divide(2,1);
 	    	c1->cd(1);
-	    	s_diff->Draw();
+	    	h_s_diff->Draw();
 	    	c1->cd(2);
-	    	c_diff->Draw();
+	    	h_c_diff->Draw();
 	    
 	    	c1->Write();
 
-		s_diff->Write();
-		c_diff->Write();
+		h_s_diff->Write();
+		h_c_diff->Write();
 		
 		
 		//normalize(h_s_const);
@@ -178,8 +183,8 @@ Int_t tk_diff()
    		h_s_slope->SetMarkerStyle(21);
    		h_s_slope->Draw("ep");*/
    		
-   		s_diff->SetMarkerStyle(21);
-   		s_diff->Draw("ep");
+   		h_s_diff->SetMarkerStyle(21);
+   		h_s_diff->Draw("ep");
    		c2->cd(); 
 
 		TCanvas *c3 = new TCanvas("c3","c3",600,700);
@@ -200,8 +205,8 @@ Int_t tk_diff()
    		h_s_const->SetMarkerStyle(21);
    		h_s_const->Draw("ep");*/
    		
-   		c_diff->SetMarkerStyle(21);
-   		c_diff->Draw("ep");
+   		h_c_diff->SetMarkerStyle(21);
+   		h_c_diff->Draw("ep");
    		c3->cd();  
    		
    		c2->Write();
